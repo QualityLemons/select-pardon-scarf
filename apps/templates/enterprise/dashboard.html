@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLC Training Workbench</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="workbench">
+        <h1>Virtual PLC Trainer</h1>
+        
+        <div class="panel inputs">
+            <h3>Inputs</h3>
+            <button id="btn-I0" onclick="toggleInput('I0')">Switch I0 (Start)</button>
+            <button id="btn-I1" onclick="toggleInput('I1')">Switch I1 (E-Stop)</button>
+        </div>
+
+        <div class="panel outputs">
+            <h3>Outputs</h3>
+            <div id="lamp-Q0" class="indicator">Motor Q0</div>
+        </div>
+    </div>
+<h2>Work Inbox</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Priority</th>
+            <th>Task Title</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+            <td>Level {{ task.difficulty }}</td>
+            <td>{{ task.title }}</td>
+            <td>{{ task.get_status_display }}</td>
+            <td>
+                <a href="{% url 'workbench' task.id %}">Open Work Order</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

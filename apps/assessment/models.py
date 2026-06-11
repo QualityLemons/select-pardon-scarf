@@ -10,3 +10,12 @@ class WorkOrder(models.Model):
 
     def __str__(self):
         return self.title
+    
+    class ElectricalFault(models.Model):
+    # e.g., 'BROKEN_WIRE', 'SHORT_CIRCUIT', 'FAULTY_RELAY'
+    fault_type = models.CharField(max_length=50)
+    target_component = models.CharField(max_length=50) # e.g., 'I0'
+    description = models.TextField()
+    
+    def __str__(self):
+        return self.fault_type

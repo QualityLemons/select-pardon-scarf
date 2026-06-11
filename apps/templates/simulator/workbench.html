@@ -1,0 +1,11 @@
+{{ initial_logic|json_script:"broken-logic-data" }}
+
+<script>
+    // Fetch the data from the hidden element
+    const brokenLogic = JSON.parse(document.getElementById('broken-logic-data').textContent);
+    
+    // Now you can load this into your engine:
+    // myPLC.loadProgram(brokenLogic);
+    
+    console.log("Work Order Loaded:", brokenLogic);
+</script>

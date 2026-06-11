@@ -44,5 +44,17 @@
         {% endfor %}
     </tbody>
 </table>
+{% if feedback %}
+<div class="feedback-card" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 20px; background: #f9f9f9;">
+    <h3>Recent Manager Feedback</h3>
+    <p><strong>Task:</strong> {{ feedback.work_order.title }}</p>
+    <p><strong>Status:</strong> {% if feedback.is_correct %}✅ Passed{% else %}⚠️ Needs Improvement{% endif %}</p>
+    <p><em>"{{ feedback.manager_feedback }}"</em></p>
+    <small>Reviewed on: {{ feedback.timestamp|date:"M d, Y" }}</small>
+</div>
+{% endif %}
+
+<h2>Work Inbox</h2>
+...
 </body>
 </html>

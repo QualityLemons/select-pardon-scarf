@@ -88,3 +88,40 @@ setInterval(() => {
     const lamp = document.getElementById('myLamp');
     lamp.style.backgroundColor = hardwareResult.lampStatus ? 'yellow' : 'gray';
 }, 50); // 50ms scan cycle
+
+class PLC {
+    constructor() {
+        this.inputs = { 'I0': false, 'I1': false }; // I0=Start, I1=Stop
+        this.outputs = { 'Q0': false };
+        this.memory = { 'M0': false };             // Internal Bit
+    }
+
+    readInputs(physicalSwitches) {
+        this.inputs['I0'] = physicalSwitches.startBtn;
+        this.inputs['I1'] = physicalSwitches.stopBtn;
+    }
+
+    executeLogic() {
+        // Latching Logic (Self-Holding Circuit)
+        // M0 turns ON if Start (I0) is pressed OR if M0 is already ON
+        // M0 turns OFF if Stop (I1) is pressed
+        
+        const startCondition = this.inputs['I0'] || this.memory['M0'];
+        const stopCondition = !this.inputs['I1']; // Assuming I1 is normally closed
+
+        this.memory['M0'] = (startCondition && stopCondition);
+        
+        // Output follows the internal memory
+        this.outputs['Q0'] = this.memory['M0'];
+    }
+
+    writeOutputs() {
+        return { lampStatus: this.outputs['Q0'] };
+    }
+
+    scan(physicalSwitches) {
+        this.readInputs(physicalSwitches);
+        this.executeLogic();
+        return this.writeOutputs();
+    }
+}

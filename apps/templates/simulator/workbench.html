@@ -9,3 +9,15 @@
     
     console.log("Work Order Loaded:", brokenLogic);
 </script>
+<svg id="workbench-svg" width="400" height="200" viewBox="0 0 400 200">
+    <line x1="50" y1="100" x2="350" y2="100" stroke="black" stroke-width="4" />
+    
+    <rect id="switch-I0" x="80" y="80" width="40" height="40" 
+          fill="#333" cursor="pointer" onclick="toggleSwitch('I0')" />
+    
+    <circle id="lamp-Q0" cx="300" cy="100" r="20" 
+            fill="#444" stroke="black" stroke-width="2" />
+    
+    <text x="85" y="70" font-family="Arial" font-size="12">Switch I0</text>
+    <text x="280" y="150" font-family="Arial" font-size="12">Lamp Q0</text>
+</svg>

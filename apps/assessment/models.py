@@ -19,3 +19,15 @@ class WorkOrder(models.Model):
     
     def __str__(self):
         return self.fault_type
+    
+    from django.db import models
+from django.contrib.auth.models import User
+from .models import WorkOrder # Assuming this exists
+
+class Assessment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    work_order = models.ForeignKey(WorkOrder, on_delete=models.CASCADE)
+    submitted_logic = models.JSONField()
+    is_correct = models.BooleanField(default=False)
+    manager_feedback = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)

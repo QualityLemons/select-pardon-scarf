@@ -125,3 +125,26 @@ class PLC {
         return this.writeOutputs();
     }
 }
+
+class PLCWithFaults extends PLC {
+    constructor() {
+        super();
+        this.activeFaults = []; // List of injected faults
+    }
+
+    readInputs(physicalSwitches) {
+        // Apply fault logic: If 'BROKEN_WIRE' is on I0, it always reads False
+        let I0_state = physicalSwitches.startBtn;
+        
+        if (this.activeFaults.includes('I0_BROKEN_WIRE')) {
+            I0_state = false; // The signal never reaches the PLC
+        }
+
+        this.inputs['I0'] = I0_state;
+        this.inputs['I1'] = physicalSwitches.stopBtn;
+    }
+    
+    injectFault(faultCode) {
+        this.activeFaults.push(faultCode);
+    }
+}

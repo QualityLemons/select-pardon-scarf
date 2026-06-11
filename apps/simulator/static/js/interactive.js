@@ -16,3 +16,19 @@ setInterval(() => {
     const lamp = document.getElementById('lamp-Q0');
     lamp.setAttribute('fill', outputs.lampStatus ? 'yellow' : '#444');
 }, 50);
+
+const hardware = { startBtn: false, stopBtn: true }; // stopBtn defaults to TRUE (Normally Closed)
+
+function toggleStart() {
+    hardware.startBtn = !hardware.startBtn;
+}
+
+function toggleStop() {
+    hardware.stopBtn = !hardware.stopBtn;
+}
+
+// Inside your scan interval:
+setInterval(() => {
+    const outputs = plc.scan(hardware);
+    document.getElementById('lamp-Q0').setAttribute('fill', outputs.lampStatus ? 'yellow' : '#444');
+}, 50);

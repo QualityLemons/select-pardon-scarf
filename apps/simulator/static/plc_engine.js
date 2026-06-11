@@ -71,3 +71,20 @@ class PLC {
         return this.writeOutputs();
     }
 }
+
+const myPLC = new PLC();
+const physicalHardware = { switchA: false };
+
+// UI Interaction
+document.getElementById('mySwitch').addEventListener('click', (e) => {
+    physicalHardware.switchA = !physicalHardware.switchA;
+});
+
+// The continuous Scan Cycle (mimicking the 10-50ms scan time of a real PLC)
+setInterval(() => {
+    const hardwareResult = myPLC.scan(physicalHardware);
+    
+    // Update the Lamp visualization
+    const lamp = document.getElementById('myLamp');
+    lamp.style.backgroundColor = hardwareResult.lampStatus ? 'yellow' : 'gray';
+}, 50); // 50ms scan cycle

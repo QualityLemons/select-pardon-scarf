@@ -32,3 +32,20 @@ setInterval(() => {
     const outputs = plc.scan(hardware);
     document.getElementById('lamp-Q0').setAttribute('fill', outputs.lampStatus ? 'yellow' : '#444');
 }, 50);
+
+function updateWiring(engineState) {
+    // If Switch I0 is ON, the wire segment after the switch becomes "Hot" (Red)
+    const wireL2 = document.getElementById('wire-L2');
+    const isEnergized = engineState.inputs['I0']; 
+    
+    wireL2.setAttribute('stroke', isEnergized ? 'red' : 'black');
+}
+
+// Inside the Scan Cycle
+setInterval(() => {
+    const outputs = plc.scan(hardware);
+    // 1. Update output visualization
+    updateLamp(outputs.lampStatus);
+    // 2. Update the "Live" wire visualization
+    updateWiring(plc); 
+}, 50);

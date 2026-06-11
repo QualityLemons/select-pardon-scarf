@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PLC Training Workbench</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="workbench">
+        <h1>Virtual PLC Trainer</h1>
+        
+        <div class="panel inputs">
+            <h3>Inputs</h3>
+            <button id="btn-I0" onclick="toggleInput('I0')">Switch I0 (Start)</button>
+            <button id="btn-I1" onclick="toggleInput('I1')">Switch I1 (E-Stop)</button>
+        </div>
+
+        <div class="panel outputs">
+            <h3>Outputs</h3>
+            <div id="lamp-Q0" class="indicator">Motor Q0</div>
+        </div>
+    </div>
+
+    <script src="plc_engine.js"></script>
+    <script>
+        const state = { switchA: false, switchB: false };
+        const plc = new PLCEngine();
+
+        // Update the state when buttons are clicked
+        function toggleInput(id) {
+            state[id === 'I0' ? 'switchA' : 'switchB'] = !state[id === 'I0' ? 'switchA' : 'switchB'];
+            document.getElementById(`btn-${id}`).classList.toggle('active');
+        }
+
+        // The Scan Cycle Loop (100ms)
+        setInterval(() => {
+            const outputs = plc.scan(state);
+            
+            // Visual feedback for the output
+            const lamp = document.getElementById('lamp-Q0');
+            lamp.style.backgroundColor = outputs.motorLight ? '#00ff00' : '#444';
+        }, 100);
+    </script>
+</body>
+</html>

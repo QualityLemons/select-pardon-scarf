@@ -11,3 +11,15 @@ def dashboard_view(request):
         'tasks': my_tasks,
         'feedback': latest_feedback
     })
+    
+    def submit_maintenance_log(request, work_order_id):
+    if request.method == 'POST':
+        MaintenanceLog.objects.create(
+            user=request.user,
+            work_order_id=work_order_id,
+            v_idle=request.POST.get('v_idle'),
+            v_active=request.POST.get('v_active'),
+            signal_registered=(request.POST.get('signal_reg') == 'yes'),
+            notes=request.POST.get('notes')
+        )
+        return redirect('dashboard')

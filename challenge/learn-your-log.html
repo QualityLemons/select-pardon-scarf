@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learn Your Log — PLeC</title>
+  <style>
+    :root {
+      --bg:      #080a0e;
+      --surface: #0e1118;
+      --card:    #111520;
+      --border:  #1e2438;
+      --border2: #252d45;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --green:   #22c55e;
+      --amber:   #f59e0b;
+      --amber2:  #fbbf24;
+      --red:     #ef4444;
+      --blue:    #3b82f6;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── Nav ── */
+    nav { display:flex; align-items:center; padding:10px 20px; background:rgba(8,10,14,.95); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; gap:12px; }
+    .nav-logo { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; flex-shrink:0; }
+    .logo-icon { width:28px; height:28px; background:linear-gradient(135deg,#d97706,#f59e0b); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:900; color:#fff; font-family:monospace; }
+    .nav-links { margin-left:auto; display:flex; gap:8px; }
+    .nav-links a { font-size:11px; color:#64748b; padding:4px 9px; border:1px solid #2e3350; border-radius:5px; font-weight:600; white-space:nowrap; }
+    .nav-links a.active { color:var(--amber2); border-color:var(--amber); }
+    .nav-links a:hover { color:var(--text); border-color:#4b5a72; }
+    #theme-toggle { background:transparent; border:1px solid var(--border); color:var(--muted); font-size:15px; padding:3px 8px; border-radius:5px; cursor:pointer; }
+
+    /* ── Layout ── */
+    .workspace { display:grid; grid-template-columns:1fr 260px; gap:0; height:calc(100vh - 49px); overflow:hidden; }
+    .main { overflow-y:auto; padding:0; display:flex; flex-direction:column; gap:0; }
+    .sidebar { background:var(--surface); border-left:1px solid var(--border); padding:18px 16px; overflow-y:auto; display:flex; flex-direction:column; gap:16px; }
+
+    /* ── Section cards ── */
+    .lesson-section { border-bottom:1px solid var(--border); padding:28px 32px; }
+    .lesson-section:last-child { border-bottom:none; }
+    .sec-eyebrow { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--amber); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .sec-num { width:20px; height:20px; border-radius:50%; background:var(--amber); color:#000; font-size:10px; font-weight:900; display:inline-flex; align-items:center; justify-content:center; }
+    .sec-title { font-size:18px; font-weight:800; margin-bottom:12px; }
+    .sec-body { font-size:13px; color:#94a3b8; line-height:1.8; max-width:680px; }
+    .sec-body p { margin-bottom:12px; }
+    .sec-body p:last-child { margin-bottom:0; }
+    .sec-body strong { color:var(--text); font-weight:700; }
+
+    /* ── Callout boxes ── */
+    .callout { border-radius:8px; padding:14px 16px; margin:16px 0; font-size:12.5px; line-height:1.7; }
+    .callout-amber { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); color:#fde68a; }
+    .callout-red   { background:rgba(239,68,68,.08);  border:1px solid rgba(239,68,68,.25);  color:#fca5a5; }
+    .callout-green { background:rgba(34,197,94,.08);  border:1px solid rgba(34,197,94,.25);  color:#86efac; }
+    .callout-title { font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
+
+    /* ── 8 Fields grid ── */
+    .fields-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin:16px 0; }
+    .field-card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+    .field-num { font-size:10px; font-weight:700; color:var(--amber); font-family:monospace; margin-bottom:4px; }
+    .field-name { font-size:12px; font-weight:700; color:var(--text); margin-bottom:4px; }
+    .field-why { font-size:11px; color:var(--muted); line-height:1.5; }
+
+    /* ── Bad log quiz ── */
+    .log-compare { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:16px 0; }
+    .log-panel { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:16px; }
+    .log-panel-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; margin-bottom:12px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+    .log-line { font-size:11px; font-family:monospace; padding:4px 6px; border-radius:4px; margin-bottom:4px; line-height:1.6; cursor:default; }
+    .log-line.clickable { cursor:pointer; border:1px solid transparent; transition:background .15s, border-color .15s; }
+    .log-line.clickable:hover { background:rgba(239,68,68,.15); border-color:rgba(239,68,68,.4); }
+    .log-line.found   { background:rgba(239,68,68,.18); border:1px solid #ef4444; color:#fca5a5; }
+    .log-line.correct { background:rgba(34,197,94,.12); border:1px solid #22c55e; color:#86efac; cursor:default; }
+    .log-field-label { font-size:10px; color:var(--muted); margin-bottom:2px; font-family:monospace; }
+    .quiz-hint { font-size:11px; color:var(--amber); margin-top:10px; }
+    .quiz-progress { font-size:11px; color:var(--muted); margin-top:6px; }
+
+    /* ── Practice form ── */
+    .practice-form { background:var(--card); border:1px solid var(--border); border-radius:10px; padding:20px; margin:16px 0; }
+    .pf-title { font-size:13px; font-weight:700; margin-bottom:4px; }
+    .pf-subtitle { font-size:11px; color:var(--muted); margin-bottom:16px; line-height:1.5; }
+    .pf-scenario { background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.2); border-radius:6px; padding:12px 14px; margin-bottom:18px; font-size:12px; color:#fde68a; line-height:1.7; }
+    .pf-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px; }
+    .pf-field { display:flex; flex-direction:column; gap:4px; }
+    .pf-field.full { grid-column:1/-1; }
+    .pf-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+    .pf-label .required { color:var(--red); }
+    .pf-input, .pf-textarea, .pf-select {
+      background:var(--surface); border:1px solid var(--border); border-radius:5px;
+      color:var(--text); font-size:12px; font-family:inherit; padding:7px 10px;
+      transition:border-color .15s;
+    }
+    .pf-input:focus, .pf-textarea:focus, .pf-select:focus { outline:none; border-color:var(--amber); }
+    .pf-textarea { resize:vertical; min-height:70px; line-height:1.6; }
+    .pf-checks { display:flex; flex-direction:column; gap:6px; }
+    .pf-check { display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; }
+    .pf-check input { accent-color:var(--amber); width:14px; height:14px; }
+    .pf-submit { margin-top:16px; padding:10px 24px; background:linear-gradient(135deg,#b45309,#d97706); border:none; border-radius:7px; color:#fff; font-size:13px; font-weight:700; cursor:pointer; transition:opacity .15s, transform .1s; }
+    .pf-submit:hover { opacity:.9; }
+    .pf-submit:active { transform:scale(.97); }
+    .pf-submit:disabled { opacity:.5; cursor:default; }
+    .pf-progress { font-size:11px; color:var(--muted); margin-top:8px; }
+
+    /* ── Mark-read button ── */
+    .mark-btn { display:inline-flex; align-items:center; gap:6px; margin-top:16px; padding:8px 18px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:6px; color:var(--amber2); font-size:12px; font-weight:700; cursor:pointer; transition:background .15s; }
+    .mark-btn:hover { background:rgba(245,158,11,.18); }
+    .mark-btn:disabled { opacity:.5; cursor:default; color:var(--green); border-color:var(--green); background:rgba(34,197,94,.08); }
+    .mark-btn:focus-visible { outline:2px solid var(--amber); outline-offset:3px; }
+
+    /* ── Complete banner ── */
+    .complete-banner { display:none; background:linear-gradient(135deg,#78350f,#92400e); border:1px solid var(--amber); border-radius:8px; padding:16px 20px; margin:28px 32px; }
+    .complete-banner.show { display:block; }
+    .cb-title { font-size:15px; font-weight:800; color:var(--amber2); margin-bottom:6px; }
+    .cb-body { font-size:12px; color:#fde68a; line-height:1.7; margin-bottom:12px; }
+    .cb-links { display:flex; gap:10px; flex-wrap:wrap; }
+    .cb-link { padding:8px 16px; border-radius:6px; font-size:12px; font-weight:700; display:inline-block; }
+    .cb-link-primary { background:var(--amber); color:#000; }
+    .cb-link-secondary { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); color:var(--text); }
+
+    /* ── Sidebar ── */
+    .progress-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:10px; }
+    .milestone { display:flex; align-items:flex-start; gap:8px; padding:5px 0; font-size:11px; color:var(--muted); transition:color .3s; line-height:1.4; }
+    .milestone.done { color:var(--green); }
+    .msdot { width:10px; height:10px; border-radius:50%; background:var(--border); flex-shrink:0; margin-top:2px; transition:background .3s, box-shadow .3s; }
+    .milestone.done .msdot { background:var(--green); box-shadow:0 0 6px var(--green); }
+    .sidebar-info { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+    .si-title { font-size:11px; font-weight:700; margin-bottom:8px; color:var(--text); }
+    .si-body { font-size:11px; color:var(--muted); line-height:1.6; }
+    .sidebar-stat { display:flex; flex-direction:column; align-items:center; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; }
+    .ss-num { font-size:24px; font-weight:800; color:var(--amber); font-family:monospace; }
+    .ss-lbl { font-size:10px; color:var(--muted); text-align:center; line-height:1.3; margin-top:3px; }
+    .sidebar-stats-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+
+    /* ── Accessibility ── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:#3b82f6;color:#fff;font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none}
+    .skip-link:focus{top:0}
+    :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:3px}
+
+    /* ── Light mode ── */
+    [data-theme="light"]{--bg:#f0f4f8;--surface:#f8fafc;--card:#fff;--border:#cbd5e1;--border2:#94a3b8;--text:#0f172a;--muted:#64748b}
+    [data-theme="light"] nav{background:rgba(240,244,248,.97)}
+    [data-theme="light"] .pf-input,[data-theme="light"] .pf-textarea,[data-theme="light"] .pf-select{background:#f8fafc;border-color:#cbd5e1;color:#0f172a}
+
+    @media(max-width:800px){.workspace{grid-template-columns:1fr}.sidebar{display:none}.log-compare{grid-template-columns:1fr}.fields-grid{grid-template-columns:1fr}.pf-grid{grid-template-columns:1fr}}
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<nav aria-label="Main navigation">
+  <div class="nav-logo">
+    <div class="logo-icon">📋</div>
+    <span>Learn Your Log</span>
+  </div>
+  <nav class="nav-links" aria-label="Challenge navigation">
+    <a href="index.html">⌂ Home</a>
+    <a href="level1.html">L1</a>
+    <a href="learn-your-log.html" class="active">Log</a>
+    <a href="level2.html">L2</a>
+    <a href="level3.html">L3</a>
+    <a href="level4.html">Safety</a>
+    <a href="level5.html">Timer</a>
+    <a href="level6.html">Batch</a>
+    <a href="maintenance-log.html" style="border-color:#d97706;color:#fbbf24;">📋 Template</a>
+  </nav>
+  <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" style="margin-left:8px;">☀️</button>
+</nav>
+
+<div id="a11y-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<div class="workspace">
+
+  <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+  <main id="main-content" class="main">
+
+    <!-- ─── Section 1: Why Logs Matter ─── -->
+    <section class="lesson-section" id="sec1" aria-labelledby="sec1-title">
+      <div class="sec-eyebrow"><span class="sec-num">1</span> Foundation</div>
+      <h2 class="sec-title" id="sec1-title">Why Maintenance Logs Are Not Optional</h2>
+      <div class="sec-body">
+        <p>Every time a technician fixes a machine without writing it down, they make life harder for everyone who comes after them — including themselves, six months later when the same fault returns.</p>
+        <p>In a regulated industrial environment, <strong>maintenance records are a legal requirement</strong>. Under PSSR 2000 (Pressure Systems Safety Regulations), LOLER, and the Machinery Directive, operators must demonstrate that equipment was maintained to the manufacturer's schedule and any faults were correctly rectified. Without records, you have no defence in an HSE inspection or an insurance claim.</p>
+        <div class="callout callout-amber">
+          <div class="callout-title">Real-World Consequence</div>
+          In 2019, a UK food manufacturer was fined £1.2 million after a conveyor drive failure injured two workers. The prosecution succeeded in part because maintenance records were incomplete — the company could not prove the drive had been inspected as required. A 15-minute log entry would have changed the outcome.
+        </div>
+        <p>Beyond compliance, good logs are how maintenance teams get smarter over time. <strong>Mean Time Between Failures (MTBF)</strong> calculations — used to predict when components will fail and plan proactive replacements — are only as accurate as the logs that feed them. Teams that log well can typically reduce unplanned downtime by 20–35% within two years.</p>
+        <p>Finally, logs protect <strong>you personally</strong>. If a machine you worked on fails catastrophically and hurts someone, your signed log entry showing exactly what you did and verified is the difference between "doing your job" and "negligence".</p>
+      </div>
+      <button class="mark-btn" id="mark-m1" aria-label="Mark section 1 as read">✓ Mark as Read</button>
+    </section>
+
+    <!-- ─── Section 2: The 8 Fields ─── -->
+    <section class="lesson-section" id="sec2" aria-labelledby="sec2-title">
+      <div class="sec-eyebrow"><span class="sec-num">2</span> Anatomy</div>
+      <h2 class="sec-title" id="sec2-title">The 8 Fields Every Maintenance Log Must Contain</h2>
+      <div class="sec-body">
+        <p>A maintenance log is not a diary — it is a <strong>structured technical record</strong>. The following eight fields are the minimum required by most industrial quality management systems (ISO 9001, IEC 62061 Annex C) and internal audit standards.</p>
+      </div>
+      <div class="fields-grid" role="list">
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 01</div>
+          <div class="field-name">Date &amp; Time (Start and End)</div>
+          <div class="field-why">Not just the date — the time the job started AND finished. Downtime duration is used to calculate the cost of the failure and justify capital replacements.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 02</div>
+          <div class="field-name">Work Order Number</div>
+          <div class="field-why">Links the log to the CMMS (Computerised Maintenance Management System) scheduling entry. Without this, the record is an orphan — invisible to planners and auditors.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 03</div>
+          <div class="field-name">Equipment Tag / Asset ID</div>
+          <div class="field-why">"The pump in Bay 3" is not an Asset ID. "P-101-B3" is. Every piece of plant has a unique tag. Use it — so the record attaches to the correct asset history.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 04</div>
+          <div class="field-name">Fault Description</div>
+          <div class="field-why">What failed, how was it reported (operator call, SCADA alarm, scheduled inspection), and what observable symptoms were present. Error codes included verbatim.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 05</div>
+          <div class="field-name">Root Cause Analysis</div>
+          <div class="field-why">The ACTUAL cause — not the symptom. "Motor tripped" is a symptom. "Bearing race worn due to lubrication interval missed at last scheduled PM" is a root cause.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 06</div>
+          <div class="field-name">Corrective Action Taken</div>
+          <div class="field-why">Step-by-step description of exactly what was done. Assume someone who was not there needs to verify your work or undo it. Be specific enough that they can.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 07</div>
+          <div class="field-name">Parts Replaced (with Part Numbers)</div>
+          <div class="field-why">Part number, description, quantity, and serial/batch number where traceable. This feeds procurement lead-time data and warranty claims. "New bearing" is not sufficient.</div>
+        </div>
+        <div class="field-card" role="listitem">
+          <div class="field-num">FIELD 08</div>
+          <div class="field-name">Test &amp; Verification Results</div>
+          <div class="field-why">What was done to confirm the fix worked? Functional test, current measurement, insulation resistance, pressure test — with pass/fail criteria and actual readings recorded.</div>
+        </div>
+      </div>
+      <button class="mark-btn" id="mark-m2" aria-label="Mark section 2 as complete">✓ I Understand All 8 Fields</button>
+    </section>
+
+    <!-- ─── Section 3: Bad vs Good ─── -->
+    <section class="lesson-section" id="sec3" aria-labelledby="sec3-title">
+      <div class="sec-eyebrow"><span class="sec-num">3</span> Spot the Mistakes</div>
+      <h2 class="sec-title" id="sec3-title">Click the Problems in the Bad Log</h2>
+      <div class="sec-body">
+        <p>Below are two log entries for the same fault — a conveyor motor that failed to start. The good log is on the right. <strong>Click the three lines in the bad log that would fail an audit.</strong> When you've found all three, this milestone unlocks.</p>
+      </div>
+      <div class="log-compare" role="region" aria-label="Log comparison exercise">
+        <!-- BAD LOG -->
+        <div class="log-panel">
+          <div class="log-panel-title" style="color:#f87171;">✗ Bad Log — Click the 3 Problems</div>
+          <div class="log-field-label">Date</div>
+          <div class="log-line">14/06/2026</div>
+          <div class="log-field-label">Equipment</div>
+          <div class="log-line">Conveyor</div>
+          <div class="log-field-label">Fault</div>
+          <div class="log-line">Motor wouldn't start</div>
+          <div class="log-field-label">Root Cause</div>
+          <div class="log-line clickable" data-err="1" id="bad-rc">Not sure, probably electrical</div>
+          <div class="log-field-label">Action Taken</div>
+          <div class="log-line">Checked wiring and reset PLC. Working now.</div>
+          <div class="log-field-label">Parts Used</div>
+          <div class="log-line clickable" data-err="2" id="bad-parts">None</div>
+          <div class="log-field-label">Test Results</div>
+          <div class="log-line clickable" data-err="3" id="bad-test">Looks OK</div>
+          <div class="log-field-label">Signed</div>
+          <div class="log-line">J. Smith</div>
+          <div class="quiz-hint" id="quiz-hint">👆 Click three lines that are problems</div>
+          <div class="quiz-progress" id="quiz-progress" aria-live="polite">Found: 0 / 3</div>
+        </div>
+        <!-- GOOD LOG -->
+        <div class="log-panel">
+          <div class="log-panel-title" style="color:#86efac;">✓ Good Log — Use This as Your Model</div>
+          <div class="log-field-label">Date</div>
+          <div class="log-line">14/06/2026 — Start: 08:42 / End: 09:55</div>
+          <div class="log-field-label">WO# / Equipment</div>
+          <div class="log-line">WO-4821 · CONV-01-BayA (Packing Line Infeed)</div>
+          <div class="log-field-label">Fault</div>
+          <div class="log-line">Motor failed to start on START_PB. SCADA alarm F-47 raised at 08:38. No motor movement observed.</div>
+          <div class="log-field-label">Root Cause</div>
+          <div class="log-line correct">Seal-in contact Q0 mapped to wrong output address (O:0/1 instead of O:0/2) following PLC firmware update on 12/06.</div>
+          <div class="log-field-label">Action Taken</div>
+          <div class="log-line">Re-mapped Q0 output address in RSLogix 5000 v32.02. Downloaded updated program. Verified I/O cross-reference against P&amp;ID-CONV-01 Rev.4.</div>
+          <div class="log-field-label">Parts Used</div>
+          <div class="log-line correct">No physical parts replaced. PLC program backup saved to \\SERVER\PLCBackups\CONV-01_20260614.ACD</div>
+          <div class="log-field-label">Test Results</div>
+          <div class="log-line correct">Ran 5 complete start-run-stop cycles. Motor current: 4.2 A (rated 4.5 A). Seal-in confirmed on scan trace. PASS.</div>
+          <div class="log-field-label">Signed</div>
+          <div class="log-line">A. Kowalski — Tech Grade 2 · Witnessed: P. Osei (Supervisor)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Section 4: Practice Form ─── -->
+    <section class="lesson-section" id="sec4" aria-labelledby="sec4-title">
+      <div class="sec-eyebrow"><span class="sec-num">4</span> Practice</div>
+      <h2 class="sec-title" id="sec4-title">Complete Your First Log Entry</h2>
+      <div class="sec-body">
+        <p>Use the scenario below to fill in the maintenance log. You must complete at least 5 fields before you can submit. The more detail you provide, the more useful the log becomes in a real plant.</p>
+      </div>
+      <div class="practice-form">
+        <div class="pf-title">Practice Maintenance Log</div>
+        <div class="pf-subtitle">Competency reference: IEC 62061 Annex C / ISO 9001:2015 cl. 7.5</div>
+        <div class="pf-scenario">
+          <strong>Scenario:</strong> You have just completed Level 1 — Start/Stop Latching Circuit. The simulated fault was a conveyor belt that would not latch ON after pressing START. You diagnosed the issue as a missing seal-in contact, added the Q0 seal-in branch in the ladder program, and verified the fix with three full start-run-stop cycles.
+        </div>
+        <form id="practice-form" novalidate autocomplete="off">
+          <div class="pf-grid">
+            <div class="pf-field">
+              <label class="pf-label" for="pf-date">Date &amp; Time <span class="required">*</span></label>
+              <input class="pf-input" type="text" id="pf-date" name="date" placeholder="e.g. 14/06/2026 — 09:00 to 09:45">
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pf-wo">Work Order # <span class="required">*</span></label>
+              <input class="pf-input" type="text" id="pf-wo" name="wo" placeholder="e.g. WO-0001">
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pf-equip">Equipment Tag / Asset ID <span class="required">*</span></label>
+              <input class="pf-input" type="text" id="pf-equip" name="equip" placeholder="e.g. CONV-01-L1 (Training Rig)">
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pf-priority">Priority</label>
+              <select class="pf-select" id="pf-priority" name="priority">
+                <option value="">Select…</option>
+                <option>Critical — Production stopped</option>
+                <option>High — Production impaired</option>
+                <option>Medium — Degraded performance</option>
+                <option>Low — Planned maintenance</option>
+              </select>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label" for="pf-fault">Fault Description <span class="required">*</span></label>
+              <textarea class="pf-textarea" id="pf-fault" name="fault" placeholder="What failed? How was it reported? Any error codes or alarms?"></textarea>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label" for="pf-cause">Root Cause <span class="required">*</span></label>
+              <textarea class="pf-textarea" id="pf-cause" name="cause" placeholder="The actual technical cause — not just the symptom. What was wrong and why?"></textarea>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label" for="pf-action">Corrective Action Taken <span class="required">*</span></label>
+              <textarea class="pf-textarea" id="pf-action" name="action" placeholder="Step-by-step: what exactly did you do to fix it?"></textarea>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label" for="pf-parts">Parts / Materials Used</label>
+              <input class="pf-input" type="text" id="pf-parts" name="parts" placeholder='e.g. "None — software change only" or part number + description'>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label" for="pf-test">Test &amp; Verification Results <span class="required">*</span></label>
+              <textarea class="pf-textarea" id="pf-test" name="test" placeholder="What did you do to confirm the fix worked? Results, measurements, pass/fail criteria."></textarea>
+            </div>
+            <div class="pf-field full">
+              <label class="pf-label">Safety Checks Completed</label>
+              <div class="pf-checks">
+                <label class="pf-check"><input type="checkbox" name="chk-iso"> Isolation / LOTO procedure followed</label>
+                <label class="pf-check"><input type="checkbox" name="chk-ppe"> Appropriate PPE worn throughout</label>
+                <label class="pf-check"><input type="checkbox" name="chk-area"> Work area cleared and equipment safe to return to service</label>
+                <label class="pf-check"><input type="checkbox" name="chk-permit"> Permit to Work closed out</label>
+              </div>
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pf-tech">Technician Name</label>
+              <input class="pf-input" type="text" id="pf-tech" name="tech" placeholder="Your name + grade">
+            </div>
+            <div class="pf-field">
+              <label class="pf-label" for="pf-supervisor">Supervisor / Witness</label>
+              <input class="pf-input" type="text" id="pf-supervisor" name="supervisor" placeholder="Supervisor's name">
+            </div>
+          </div>
+          <button type="button" class="pf-submit" id="pf-submit" disabled>Submit Practice Log</button>
+          <div class="pf-progress" id="pf-progress" aria-live="polite">Fill in at least 5 required fields to enable submission (0 / 5 complete)</div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ─── Completion Banner ─── -->
+    <div class="complete-banner" id="complete-banner" role="status" aria-live="polite">
+      <div class="cb-title">🎉 Module Complete — "Learn Your Log"</div>
+      <div class="cb-body">
+        You have demonstrated understanding of why maintenance records matter, the 8 essential fields, how to identify a poor log entry, and how to write your own. These habits will follow you through every job you work on.
+        <br><br>
+        Use the <strong>Maintenance Log Template</strong> after every challenge (and every real job) to build the discipline from day one.
+      </div>
+      <div class="cb-links">
+        <a href="maintenance-log.html" class="cb-link cb-link-primary">Open Log Template →</a>
+        <a href="level2.html" class="cb-link cb-link-secondary">Next: Level 2 →</a>
+        <a href="index.html" class="cb-link cb-link-secondary">⌂ Home</a>
+      </div>
+    </div>
+
+  </main><!-- /.main -->
+
+  <!-- ═══════════════ SIDEBAR ═══════════════ -->
+  <aside aria-label="Lesson progress">
+    <div class="progress-title">Lesson Milestones</div>
+    <div id="m1" class="milestone"><div class="msdot"></div>Read — Why logs are legally required</div>
+    <div id="m2" class="milestone"><div class="msdot"></div>Study — The 8 essential log fields</div>
+    <div id="m3" class="milestone"><div class="msdot"></div>Identify — All 3 bad log mistakes found</div>
+    <div id="m4" class="milestone"><div class="msdot"></div>Practice — Log entry 5+ fields filled</div>
+    <div id="m5" class="milestone"><div class="msdot"></div>Submit — Practice log submitted</div>
+
+    <div class="sidebar-stats-row">
+      <div class="sidebar-stat">
+        <div class="ss-num" id="ms-count">0</div>
+        <div class="ss-lbl">of 5<br>Complete</div>
+      </div>
+      <div class="sidebar-stat">
+        <div class="ss-num" id="ms-pct">0%</div>
+        <div class="ss-lbl">Module<br>Progress</div>
+      </div>
+    </div>
+
+    <div class="sidebar-info">
+      <div class="si-title">📋 Why This Module?</div>
+      <div class="si-body">In industry, a technician who cannot document their work is a liability — no matter how good they are with tools. This module is placed between L1 and L2 to establish the habit from the very beginning of your training.</div>
+    </div>
+
+    <div class="sidebar-info">
+      <div class="si-title">🔗 After This Lesson</div>
+      <div class="si-body">Open the <a href="maintenance-log.html" style="color:var(--amber);">Maintenance Log Template</a> and fill it out for real after completing each challenge. Build the habit now — it will be automatic on the plant floor.</div>
+    </div>
+  </aside>
+
+</div><!-- /.workspace -->
+
+<script>
+// ── Milestone state ──
+var ms = { m1:false, m2:false, m3:false, m4:false, m5:false };
+
+function setMilestone(id, val) {
+  if (ms[id] === val) return;
+  ms[id] = val;
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('done', val);
+  updateCounters();
+  checkComplete();
+}
+
+function updateCounters() {
+  var done = Object.values(ms).filter(Boolean).length;
+  document.getElementById('ms-count').textContent = done;
+  document.getElementById('ms-pct').textContent   = Math.round(done / 5 * 100) + '%';
+}
+
+function checkComplete() {
+  var allDone = Object.values(ms).every(Boolean);
+  if (allDone) document.getElementById('complete-banner').classList.add('show');
+}
+
+// ── Section 1: mark as read ──
+document.getElementById('mark-m1').addEventListener('click', function() {
+  setMilestone('m1', true);
+  this.textContent = '✓ Read';
+  this.disabled = true;
+});
+
+// ── Section 2: mark as understood ──
+document.getElementById('mark-m2').addEventListener('click', function() {
+  setMilestone('m2', true);
+  this.textContent = '✓ Understood';
+  this.disabled = true;
+});
+
+// ── Section 3: bad log quiz ──
+var quizFound = 0;
+var quizErrors = { 1: false, 2: false, 3: false };
+var quizLabels = {
+  1: '"Not sure, probably electrical" — this is not a root cause. A root cause must explain specifically why the fault occurred, not guess at a category.',
+  2: '"None" for parts with no qualification — even if no parts were replaced, the entry must say so clearly with context (e.g. "software-only change, no physical parts replaced").',
+  3: '"Looks OK" is not a test result. Every test must state what was done, what the pass criterion was, and the actual measured or observed outcome.'
+};
+
+document.querySelectorAll('.log-line.clickable').forEach(function(el) {
+  el.addEventListener('click', function() {
+    var err = parseInt(this.getAttribute('data-err'));
+    if (quizErrors[err]) return;
+    quizErrors[err] = true;
+    quizFound++;
+    this.classList.add('found');
+    this.title = quizLabels[err];
+    document.getElementById('quiz-progress').textContent = 'Found: ' + quizFound + ' / 3';
+    if (quizFound === 3) {
+      document.getElementById('quiz-hint').textContent = '✓ All 3 problems identified — well done!';
+      document.getElementById('quiz-hint').style.color = 'var(--green)';
+      setMilestone('m3', true);
+    }
+  });
+  el.setAttribute('tabindex', '0');
+  el.setAttribute('role', 'button');
+  el.setAttribute('aria-label', 'Click to identify this as a problem');
+  el.addEventListener('keydown', function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.click(); } });
+});
+
+// ── Section 4: practice form ──
+var REQUIRED_IDS = ['pf-date','pf-wo','pf-equip','pf-fault','pf-cause','pf-action','pf-test'];
+
+function countFilled() {
+  return REQUIRED_IDS.filter(function(id) {
+    return document.getElementById(id).value.trim().length > 0;
+  }).length;
+}
+
+function updateFormProgress() {
+  var filled = countFilled();
+  var pct = Math.min(filled, 5);
+  document.getElementById('pf-progress').textContent =
+    'Fill in at least 5 required fields to enable submission (' + pct + ' / 5 complete)';
+  document.getElementById('pf-submit').disabled = (filled < 5);
+  setMilestone('m4', filled >= 5);
+}
+
+REQUIRED_IDS.forEach(function(id) {
+  document.getElementById(id).addEventListener('input', updateFormProgress);
+});
+
+document.getElementById('pf-submit').addEventListener('click', function() {
+  setMilestone('m5', true);
+  this.textContent = '✓ Log Submitted';
+  this.disabled = true;
+  this.style.background = 'linear-gradient(135deg,#166534,#15803d)';
+  document.getElementById('complete-banner').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+
+// ── Theme toggle ──
+(function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
+</script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'📋',v:'',tx:'<strong>Read Section 1 fully first.</strong> The legal requirement is what separates a professional from a liability. HSE inspectors ask for maintenance records — not having them is a prosecutable offence.'},
+    {ic:'📝',v:'warn',tx:'<strong>The 8 fields in Section 2</strong> are not suggestions. They\'re the minimum for a log to be audit-compliant under ISO 9001:2015 and IEC 62061 Annex C. Know all eight.'},
+    {ic:'🔍',v:'warn',tx:'<strong>Section 3 — spotting bad logs:</strong> look for vague root cause ("not sure, probably electrical"), missing parts list, and untestable test results like "looks OK".'},
+    {ic:'✍️',v:'',tx:'<strong>Section 4 — be specific.</strong> "Checked it and it worked" fails an audit. Write the actual measurement: "Measured 23.8V DC at Q0.0 terminal under load — within ±6% spec."'},
+    {ic:'⚖️',v:'danger',tx:'<strong>Assume someone else must undo your work.</strong> Your corrective action notes should be detailed enough for another engineer to safely reverse the repair if something goes wrong later.'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

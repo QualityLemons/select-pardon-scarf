@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLeC | PLC Foundations — Boot Camp</title>
+  <script>(function(){var t=localStorage.getItem('plc-theme')||'dark';document.documentElement.dataset.theme=t;})()</script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="supervisor.css">
+  <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  /* ── TOKENS ── */
+  :root {
+    --bg:    #0a0e1a;
+    --card:  rgba(13,19,35,.85);
+    --cyan:  #06b6d4;
+    --cyan2: #22d3ee;
+    --blue:  #3b82f6;
+    --blue2: #60a5fa;
+    --amber: #f59e0b;
+    --green: #22c55e;
+    --red:   #ef4444;
+    --purple:#a78bfa;
+    --text:  #e2e8f0;
+    --muted: #64748b;
+    --font-d:'Teko','Impact',sans-serif;
+    --font-m:'Share Tech Mono','Courier New',monospace;
+  }
+
+  /* ── RESET / BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: var(--font-m); font-size: 13px; line-height: 1.6;
+    min-height: 100vh;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(6,182,212,.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(6,182,212,.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* ── ACCESSIBILITY ── */
+  .skip-link {
+    position: absolute; top: -50px; left: 16px; z-index: 9999;
+    padding: 10px 18px; background: var(--cyan); color: var(--bg);
+    font-weight: 700; font-size: 14px; border-radius: 0 0 6px 6px;
+    transition: top .15s; text-decoration: none;
+  }
+  .skip-link:focus { top: 0; outline: 3px solid #fff; outline-offset: 2px; }
+  .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+  :focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; border-radius: 2px; }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,14,26,.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(30,41,59,.8);
+    padding: 0 20px; height: 52px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .back-link {
+    font-family: var(--font-m); font-size: 11px; color: var(--muted);
+    text-decoration: none; letter-spacing: .08em;
+    transition: color .2s;
+  }
+  .back-link:hover { color: var(--cyan); }
+  .hdr-div { width: 1px; height: 24px; background: rgba(30,41,59,.8); flex-shrink: 0; }
+  .hdr-title {
+    font-family: var(--font-d); font-size: 20px; letter-spacing: 2px;
+    color: #fff; flex: 1;
+  }
+  .hdr-title em { color: var(--cyan); font-style: normal; }
+  .hdr-badge {
+    font-family: var(--font-m); font-size: 9px; letter-spacing: .12em;
+    color: var(--green); border: 1px solid rgba(34,197,94,.3);
+    padding: 2px 8px; background: rgba(34,197,94,.08);
+  }
+  .theme-btn {
+    background: none; border: 1px solid rgba(30,41,59,.8); cursor: pointer;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--muted); transition: color .2s, border-color .2s;
+    flex-shrink: 0;
+  }
+  .theme-btn:hover { color: var(--cyan); border-color: rgba(6,182,212,.4); }
+
+  /* ── LAYOUT ── */
+  main { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 20px 80px; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 52px 0 40px;
+    border-bottom: 1px solid rgba(30,41,59,.6);
+    margin-bottom: 48px;
+  }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 10px; letter-spacing: .2em; color: var(--green);
+    border: 1px solid rgba(34,197,94,.25); padding: 4px 12px;
+    background: rgba(34,197,94,.06); margin-bottom: 20px;
+  }
+  .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.4} }
+  .hero-h { font-family: var(--font-d); font-size: clamp(36px,6vw,68px); font-weight: 600; line-height: .95; letter-spacing: 2px; color: #fff; margin-bottom: 16px; }
+  .hero-h span { color: var(--cyan); }
+  .hero-sub { font-size: 13px; color: var(--muted); max-width: 560px; line-height: 1.8; margin-bottom: 28px; }
+  .hero-path {
+    display: flex; align-items: center; gap: 0; flex-wrap: wrap;
+    font-size: 10px; letter-spacing: .12em;
+  }
+  .path-step {
+    padding: 6px 16px; background: rgba(13,19,35,.9);
+    border: 1px solid rgba(30,41,59,.8); color: var(--muted);
+    white-space: nowrap;
+  }
+  .path-step.active { background: rgba(6,182,212,.1); border-color: rgba(6,182,212,.4); color: var(--cyan); }
+  .path-step.done { background: rgba(34,197,94,.06); border-color: rgba(34,197,94,.3); color: var(--green); }
+  .path-arr { color: var(--muted); padding: 0 4px; font-size: 12px; }
+
+  /* ── SECTION HEADERS ── */
+  .sec-hdr { margin-bottom: 28px; }
+  .sec-label {
+    font-size: 10px; letter-spacing: .2em; color: var(--cyan);
+    display: flex; align-items: center; gap: 8px; margin-bottom: 6px;
+  }
+  .sec-label::before { content: ''; flex: 0 0 24px; height: 1px; background: var(--cyan); }
+  .sec-title { font-family: var(--font-d); font-size: 32px; font-weight: 600; letter-spacing: 2px; color: #fff; }
+  .sec-desc { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.7; }
+
+  section { margin-bottom: 64px; }
+
+  /* ══════════════════════════════════
+     GLOSSARY
+  ══════════════════════════════════ */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; align-items: center;
+  }
+  .filter-input {
+    font-family: var(--font-m); font-size: 11px; letter-spacing: .06em;
+    background: rgba(13,19,35,.9); border: 1px solid rgba(30,41,59,.8);
+    color: var(--text); padding: 7px 14px; flex: 1; min-width: 180px;
+    outline: none; transition: border-color .2s;
+  }
+  .filter-input:focus { border-color: rgba(6,182,212,.5); }
+  .filter-input::placeholder { color: var(--muted); }
+  .cat-btn {
+    font-family: var(--font-m); font-size: 10px; letter-spacing: .1em;
+    padding: 6px 14px; cursor: pointer; border: 1px solid rgba(30,41,59,.8);
+    background: rgba(13,19,35,.9); color: var(--muted);
+    transition: all .2s; white-space: nowrap;
+  }
+  .cat-btn:hover, .cat-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(6,182,212,.08); }
+
+  .glossary-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 14px;
+  }
+  .term-card {
+    background: var(--card); border: 1px solid rgba(30,41,59,.8);
+    padding: 18px 20px;
+    clip-path: polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px);
+    transition: border-color .2s, background .2s;
+  }
+  .term-card:hover { border-color: rgba(6,182,212,.3); background: rgba(13,19,35,.98); }
+  .term-card[hidden] { display: none; }
+
+  .term-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .term-name { font-family: var(--font-d); font-size: 20px; font-weight: 600; letter-spacing: 1px; color: #fff; line-height: 1; }
+  .term-abbr { font-size: 10px; color: var(--muted); letter-spacing: .08em; margin-top: 2px; }
+  .cat-pill {
+    font-size: 9px; letter-spacing: .12em; padding: 2px 8px; flex-shrink: 0;
+    border: 1px solid; white-space: nowrap;
+  }
+  .cat-pill.hw  { color: var(--blue2);  border-color: rgba(96,165,250,.3);  background: rgba(96,165,250,.08); }
+  .cat-pill.lgc { color: var(--cyan);   border-color: rgba(6,182,212,.3);   background: rgba(6,182,212,.08); }
+  .cat-pill.com { color: var(--purple); border-color: rgba(167,139,250,.3); background: rgba(167,139,250,.08); }
+  .cat-pill.saf { color: var(--amber);  border-color: rgba(245,158,11,.3);  background: rgba(245,158,11,.08); }
+
+  .term-def { font-size: 12px; color: var(--muted); line-height: 1.75; }
+  .term-def strong { color: var(--text); font-weight: normal; font-family: var(--font-m); }
+  .term-eg {
+    margin-top: 10px; padding: 8px 10px;
+    background: rgba(6,182,212,.05); border-left: 2px solid rgba(6,182,212,.3);
+    font-size: 11px; color: var(--cyan); letter-spacing: .04em; line-height: 1.6;
+  }
+
+  .no-results { display: none; font-size: 12px; color: var(--muted); padding: 32px; text-align: center; }
+  .no-results.show { display: block; }
+
+  /* ══════════════════════════════════
+     TOOLS & GAMES
+  ══════════════════════════════════ */
+  .tools-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
+  }
+  .tool-card {
+    background: var(--card); border: 1px solid rgba(30,41,59,.8);
+    padding: 24px; display: flex; flex-direction: column; gap: 12px;
+    clip-path: polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    transition: border-color .2s;
+  }
+  .tool-card:hover { border-color: rgba(6,182,212,.35); }
+  .tool-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+  .tool-icon { font-size: 28px; line-height: 1; }
+  .tool-badges { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .tool-price {
+    font-size: 9px; letter-spacing: .1em; padding: 2px 8px; border: 1px solid;
+  }
+  .tool-price.free  { color: var(--green);  border-color: rgba(34,197,94,.35);  background: rgba(34,197,94,.07); }
+  .tool-price.paid  { color: var(--amber);  border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.07); }
+  .tool-price.trial { color: var(--blue2);  border-color: rgba(96,165,250,.35); background: rgba(96,165,250,.07); }
+  .diff-stars { font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+  .diff-stars span { color: var(--cyan); }
+
+  .tool-name { font-family: var(--font-d); font-size: 22px; letter-spacing: 1px; color: #fff; }
+  .tool-tag  { font-size: 10px; color: var(--muted); letter-spacing: .08em; margin-top: -6px; }
+  .tool-desc { font-size: 12px; color: var(--muted); line-height: 1.75; flex: 1; }
+  .tool-features { display: flex; flex-wrap: wrap; gap: 6px; }
+  .t-feat {
+    font-size: 10px; letter-spacing: .06em; padding: 2px 8px;
+    background: rgba(15,23,42,.6); border: 1px solid rgba(30,41,59,.8); color: var(--muted);
+  }
+  .tool-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-m); font-size: 11px; letter-spacing: .08em;
+    color: var(--cyan); text-decoration: none;
+    border: 1px solid rgba(6,182,212,.35); padding: 7px 14px;
+    background: rgba(6,182,212,.06); align-self: flex-start;
+    clip-path: polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    transition: background .2s, border-color .2s;
+  }
+  .tool-link:hover { background: rgba(6,182,212,.14); border-color: rgba(6,182,212,.6); }
+
+  /* ══════════════════════════════════
+     VIDEOS
+  ══════════════════════════════════ */
+  .videos-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px;
+  }
+  .vid-card {
+    background: var(--card); border: 1px solid rgba(30,41,59,.8);
+    clip-path: polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px);
+    overflow: hidden; transition: border-color .2s;
+    display: flex; flex-direction: column;
+  }
+  .vid-card:hover { border-color: rgba(6,182,212,.35); }
+  .vid-thumb {
+    position: relative; background: #080c17; height: 160px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    overflow: hidden;
+  }
+  .vid-thumb-bg {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(6,182,212,.08) 0%, rgba(59,130,246,.08) 100%);
+  }
+  .vid-channel-art {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px; z-index: 1;
+  }
+  .vid-channel-logo { font-size: 36px; line-height: 1; }
+  .vid-channel-name {
+    font-size: 9px; letter-spacing: .15em; color: var(--muted);
+    background: rgba(10,14,26,.8); padding: 2px 10px; border: 1px solid rgba(30,41,59,.8);
+  }
+  .vid-play-overlay {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(10,14,26,.4); opacity: 0; transition: opacity .2s; z-index: 2;
+  }
+  .vid-card:hover .vid-play-overlay { opacity: 1; }
+  .vid-play-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--cyan); display: flex; align-items: center; justify-content: center;
+    color: var(--bg); font-size: 20px;
+  }
+  .vid-duration {
+    position: absolute; bottom: 8px; right: 10px; z-index: 3;
+    font-size: 10px; background: rgba(10,14,26,.9); color: #fff;
+    padding: 1px 6px; letter-spacing: .04em;
+  }
+  .vid-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+  .vid-meta { display: flex; align-items: center; gap: 8px; }
+  .vid-channel-tag { font-size: 10px; letter-spacing: .08em; color: var(--muted); }
+  .vid-level {
+    font-size: 9px; letter-spacing: .1em; padding: 1px 7px; border: 1px solid;
+    margin-left: auto;
+  }
+  .vid-level.beg { color: var(--green); border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.07); }
+  .vid-level.int { color: var(--amber); border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.07); }
+  .vid-title { font-family: var(--font-d); font-size: 18px; letter-spacing: .5px; color: #fff; line-height: 1.15; }
+  .vid-desc { font-size: 11px; color: var(--muted); line-height: 1.7; flex: 1; }
+  .vid-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--font-m); font-size: 10px; letter-spacing: .08em;
+    color: var(--cyan); text-decoration: none;
+    border: 1px solid rgba(6,182,212,.3); padding: 6px 12px;
+    background: rgba(6,182,212,.05); align-self: flex-start; margin-top: 4px;
+    clip-path: polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+    transition: background .2s, border-color .2s;
+  }
+  .vid-link:hover { background: rgba(6,182,212,.12); border-color: rgba(6,182,212,.55); }
+  .vid-link-icon { font-size: 12px; }
+
+  /* ══════════════════════════════════
+     CTA
+  ══════════════════════════════════ */
+  .cta-block {
+    margin-top: 20px; padding: 36px 40px;
+    background: rgba(6,182,212,.05); border: 1px solid rgba(6,182,212,.2);
+    clip-path: polygon(18px 0,100% 0,100% calc(100% - 18px),calc(100% - 18px) 100%,0 100%,0 18px);
+    display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px;
+  }
+  .cta-text {}
+  .cta-eyebrow { font-size: 10px; letter-spacing: .18em; color: var(--cyan); margin-bottom: 6px; }
+  .cta-h { font-family: var(--font-d); font-size: 28px; color: #fff; letter-spacing: 1px; }
+  .cta-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-m); font-size: 13px; letter-spacing: .1em;
+    color: var(--bg); background: var(--cyan); text-decoration: none;
+    padding: 14px 28px; font-weight: 700; white-space: nowrap;
+    clip-path: polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    transition: background .2s, transform .2s;
+  }
+  .cta-btn:hover { background: var(--cyan2); transform: translateY(-2px); }
+  .cta-arr { transition: transform .2s; }
+  .cta-btn:hover .cta-arr { transform: translateX(4px); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid rgba(30,41,59,.8);
+    background: var(--bg); padding: 24px 20px;
+    position: relative; z-index: 20; margin-top: 40px;
+  }
+  .foot-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .foot-left { font-size: 11px; color: var(--muted); }
+  .foot-nav { display: flex; gap: 16px; }
+  .foot-nav a { font-size: 11px; color: var(--muted); text-decoration: none; transition: color .2s; }
+  .foot-nav a:hover { color: var(--cyan); }
+
+  /* ── LIGHT MODE ── */
+  [data-theme="light"] {
+    --bg:    #f0f4f8;
+    --card:  rgba(255,255,255,.88);
+    --text:  #0f172a;
+    --muted: #475569;
+  }
+  [data-theme="light"] body { background: var(--bg); color: var(--text); }
+  [data-theme="light"] header { background: rgba(240,244,248,.95); border-color: rgba(148,163,184,.4); }
+  [data-theme="light"] .term-card,
+  [data-theme="light"] .tool-card,
+  [data-theme="light"] .vid-card { background: rgba(255,255,255,.9); border-color: rgba(148,163,184,.5); }
+  [data-theme="light"] footer { background: #f0f4f8; }
+  [data-theme="light"] .vid-thumb { background: #e2e8f0; }
+  [data-theme="light"] .filter-input { background: #fff; border-color: rgba(148,163,184,.5); }
+  [data-theme="light"] .cat-btn { background: #fff; border-color: rgba(148,163,184,.5); }
+
+  @media (max-width: 600px) {
+    .hero-path { flex-direction: column; align-items: flex-start; }
+    .path-arr  { display: none; }
+    .cta-block { padding: 24px 20px; }
+    .cta-btn   { width: 100%; justify-content: center; }
+    header     { gap: 10px; }
+    .hdr-title { font-size: 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<!-- ── HEADER ── -->
+<header>
+  <a href="index.html" class="back-link" aria-label="Back to mission select">← BACK</a>
+  <div class="hdr-div"></div>
+  <div class="hdr-title">PLC <em>BOOT CAMP</em></div>
+  <span class="hdr-badge">FOUNDATIONS</span>
+  <button class="theme-btn" id="theme-btn" aria-label="Toggle light/dark theme" title="Toggle theme">☀</button>
+</header>
+
+<!-- ── MAIN ── -->
+<main id="main-content">
+
+  <!-- ── HERO ── -->
+  <div class="hero" role="banner">
+    <div class="hero-eyebrow" aria-hidden="true">
+      <span class="hero-eyebrow-dot"></span>
+      MISSION 01 — FOUNDATIONS
+    </div>
+    <h1 class="hero-h">BEFORE YOU<br><span>TOUCH A WIRE.</span></h1>
+    <p class="hero-sub">
+      Every technician starts somewhere. This page gives you the vocabulary, the tools to
+      explore, and the videos to watch — so the rest of PLeC clicks into place from your
+      very first rung.
+    </p>
+    <nav class="hero-path" aria-label="Learning path">
+      <span class="path-step active" aria-current="step">01 FOUNDATIONS</span>
+      <span class="path-arr" aria-hidden="true">▶</span>
+      <span class="path-step">02 MULTIMETER LESSON</span>
+      <span class="path-arr" aria-hidden="true">▶</span>
+      <span class="path-step">03 DMM TOOL</span>
+      <span class="path-arr" aria-hidden="true">▶</span>
+      <span class="path-step">04 CHALLENGES</span>
+    </nav>
+  </div>
+
+  <!-- ══════════════════════════════════
+       SECTION 1 — GLOSSARY
+  ══════════════════════════════════ -->
+  <section id="glossary" aria-labelledby="glossary-hdr">
+    <div class="sec-hdr">
+      <div class="sec-label">01 / KEY TERMS</div>
+      <h2 class="sec-title" id="glossary-hdr">THE JARGON, DECODED</h2>
+      <p class="sec-desc">25 terms every PLC engineer knows — filtered by category or searched by name.</p>
+    </div>
+
+    <div class="filter-bar" role="group" aria-label="Glossary filters">
+      <input class="filter-input" type="search" id="term-search"
+             placeholder="SEARCH TERMS..." aria-label="Search glossary terms">
+      <button class="cat-btn active" data-cat="all"     aria-pressed="true">ALL</button>
+      <button class="cat-btn"        data-cat="hw"      aria-pressed="false">HARDWARE</button>
+      <button class="cat-btn"        data-cat="lgc"     aria-pressed="false">LOGIC</button>
+      <button class="cat-btn"        data-cat="com"     aria-pressed="false">COMMS</button>
+      <button class="cat-btn"        data-cat="saf"     aria-pressed="false">SAFETY</button>
+    </div>
+
+    <div class="glossary-grid" role="list" aria-label="PLC glossary" id="glossary-grid">
+
+      <!-- HARDWARE -->
+      <article class="term-card" data-cat="hw" data-name="plc programmable logic controller" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">PLC</div>
+            <div class="term-abbr">PROGRAMMABLE LOGIC CONTROLLER</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">A ruggedised industrial computer designed to <strong>control machinery</strong> in real time. Unlike a PC, it runs the same program in a continuous loop (the scan cycle) and is built to survive vibration, temperature extremes, and electrical noise on a factory floor.</p>
+        <div class="term-eg">e.g. Siemens S7-1200 · Allen-Bradley CompactLogix · Mitsubishi FX5U</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="cpu central processing unit module" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">CPU MODULE</div>
+            <div class="term-abbr">CENTRAL PROCESSING UNIT</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">The "brain" of the PLC rack. It stores the user program, executes the scan cycle, and manages communication with I/O modules. Most modern CPUs also include built-in Ethernet ports and onboard I/O.</p>
+        <div class="term-eg">e.g. Siemens CPU 1214C has 14 digital inputs, 10 digital outputs, 2 analogue inputs built in</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="io input output module" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">I/O MODULE</div>
+            <div class="term-abbr">INPUT / OUTPUT</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">Physical cards that connect the PLC to the real world. <strong>Input modules</strong> read sensors and switches. <strong>Output modules</strong> drive actuators, contactors, and lights. Available in digital (on/off) and analogue (0-10 V, 4-20 mA) variants.</p>
+        <div class="term-eg">e.g. DI 8×24VDC reads eight 24 V digital switches simultaneously</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="sensor proximity limit switch photoelectric" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">SENSOR</div>
+            <div class="term-abbr">FIELD DETECTION DEVICE</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">A device that converts a physical condition (position, pressure, temperature, level) into an electrical signal the PLC can read. Common types: <strong>proximity</strong> (detects metal without contact), <strong>photoelectric</strong> (light beam), <strong>limit switch</strong> (mechanical contact).</p>
+        <div class="term-eg">e.g. LS_HIGH sensor on tank tells PLC when liquid reaches maximum level</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="actuator solenoid valve motor contactor" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">ACTUATOR</div>
+            <div class="term-abbr">OUTPUT / FIELD DEVICE</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">Any device the PLC drives as an output — motors, solenoid valves, contactors, warning lights, and alarms. The PLC's output module switches 24 V DC to energise these devices.</p>
+        <div class="term-eg">e.g. Q0 output energises a contactor, which closes to start the pump motor</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="relay electromechanical switching" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">RELAY</div>
+            <div class="term-abbr">ELECTROMECHANICAL SWITCH</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">A coil-driven switch that uses a small control signal to open or close a higher-power circuit. Widely used to <strong>isolate</strong> PLC outputs from high-voltage loads, and as the physical metaphor for ladder logic contacts and coils.</p>
+        <div class="term-eg">e.g. 24 V coil closes a set of contacts rated for 230 V AC motor power</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="hmi human machine interface touchscreen panel" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">HMI</div>
+            <div class="term-abbr">HUMAN-MACHINE INTERFACE</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">The touchscreen panel (or PC-based software) used by operators to monitor and control the machine. Displays live PLC data — tank levels, alarm status, motor speeds — and lets operators issue commands without touching the PLC directly.</p>
+        <div class="term-eg">e.g. Siemens KTP700 Basic 7" touchscreen showing tank fill percentage</div>
+      </article>
+
+      <article class="term-card" data-cat="hw" data-name="24v dc power supply voltage" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">24 V DC</div>
+            <div class="term-abbr">INDUSTRY STANDARD CONTROL VOLTAGE</div>
+          </div>
+          <span class="cat-pill hw">HARDWARE</span>
+        </div>
+        <p class="term-def">The standard control voltage used in almost all modern industrial panels. The 24 V PSU converts 230 V AC mains into a stable, safe DC supply for PLCs, sensors, and I/O modules. Low enough to reduce shock risk; high enough to be noise-immune.</p>
+        <div class="term-eg">e.g. Phoenix Contact QUINT PSU: 230 V AC in → 24 V DC, 10 A out</div>
+      </article>
+
+      <!-- LOGIC -->
+      <article class="term-card" data-cat="lgc" data-name="ladder logic ld diagram programming language" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">LADDER LOGIC</div>
+            <div class="term-abbr">IEC 61131-3 LANGUAGE: LD</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">The most common PLC programming language. Graphical and intentionally designed to <strong>look like relay wiring diagrams</strong> so electricians could transition to software in the 1960s. Each horizontal "rung" is a logical expression that controls an output coil.</p>
+        <div class="term-eg">e.g. ──[I0]──[/I1]──(Q0)── reads "if I0 is ON and I1 is OFF, energise Q0"</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="rung ladder logic line instruction" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">RUNG</div>
+            <div class="term-abbr">ONE LINE OF LADDER LOGIC</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">A single horizontal line in a ladder diagram. The PLC evaluates each rung left-to-right during the scan cycle. If the logic resolves to TRUE (the "power" reaches the right rail), the output coil is energised. Multiple rungs can share inputs.</p>
+        <div class="term-eg">e.g. A 10-rung program might have 3 rungs for motor control, 4 for alarms, 3 for timers</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="contact no nc normally open closed bit" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">CONTACT</div>
+            <div class="term-abbr">NORMALLY OPEN / NORMALLY CLOSED</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">A contact reads a bit value. <strong>NO (Normally Open)</strong> — passes power when the bit is 1 (TRUE). <strong>NC (Normally Closed)</strong> — passes power when the bit is 0 (FALSE). NC contacts are used for E-Stop and fault conditions so a wire break fails safe.</p>
+        <div class="term-eg">e.g. [I0] = NO contact on Start button · [/I1] = NC contact on Stop/E-Stop</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="coil output energise write bit" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">COIL</div>
+            <div class="term-abbr">OUTPUT ELEMENT</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">The output at the end of a rung — shown as <strong>(Q0)</strong>. When the rung logic is TRUE, the coil is energised (bit = 1), turning on the associated output. Named after the physical relay coil it replaced in early control panels.</p>
+        <div class="term-eg">e.g. (Q0) energised → output module delivers 24 V DC → contactor closes → motor starts</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="scan cycle plc loop read process write" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">SCAN CYCLE</div>
+            <div class="term-abbr">THE PLC'S MAIN LOOP</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">The repetitive process the PLC runs continuously: <strong>1. Read Inputs</strong> → copy all field signals into memory. <strong>2. Execute Program</strong> → evaluate all rungs using the snapshot. <strong>3. Write Outputs</strong> → push results to field devices. Typically 1–50 ms per cycle.</p>
+        <div class="term-eg">e.g. PLeC simulates a 50 ms scan cycle — fast enough for most industrial processes</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="tag address variable name memory" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">TAG</div>
+            <div class="term-abbr">NAMED MEMORY ADDRESS</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">A human-readable name for a PLC memory address. Instead of writing raw addresses like <strong>I0.0</strong>, engineers use tags like <strong>START_PB</strong> or <strong>MOTOR_RUN</strong>. Makes programs far easier to read, debug, and maintain.</p>
+        <div class="term-eg">e.g. I0.0 → "START_PB" · Q0.0 → "MOTOR_FWD" · M0.0 → "LATCH_BIT"</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="latch seal in self-holding circuit memory" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">LATCH / SEAL-IN</div>
+            <div class="term-abbr">SELF-HOLDING CIRCUIT</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def">A circuit pattern where the output's own contact is wired in parallel with the Start input. Once energised, Q0 holds itself ON even after the Start button is released. The only way to break it is the Stop/E-Stop opening the series NC contact.</p>
+        <div class="term-eg">e.g. ──[START]──┬──[/STOP]──(MOTOR)──  with MOTOR's NO contact on the ┬ branch</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="timer ton tof delay instruction" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">TIMER</div>
+            <div class="term-abbr">TON / TOF / TP INSTRUCTIONS</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def"><strong>TON (On-Delay)</strong> — starts counting when input goes TRUE; output fires after the preset time. <strong>TOF (Off-Delay)</strong> — output stays on for a set time after input drops. Timers have EN (enable), TT (timing), DN (done), ET (elapsed) bits.</p>
+        <div class="term-eg">e.g. TON T0, PT=10s: after 10 s, T0.DN = 1 → next rung sees the done bit</div>
+      </article>
+
+      <article class="term-card" data-cat="lgc" data-name="counter ctu ctd count pulse instruction" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">COUNTER</div>
+            <div class="term-abbr">CTU / CTD INSTRUCTIONS</div>
+          </div>
+          <span class="cat-pill lgc">LOGIC</span>
+        </div>
+        <p class="term-def"><strong>CTU (Count Up)</strong> — increments on each rising edge of the CU input. When accumulated value (ACV) reaches the preset value (PV), the done bit fires. Used for counting products, pallets, pulses from encoders.</p>
+        <div class="term-eg">e.g. CTU C0, PV=100: counts 100 boxes on a conveyor, then triggers a divert gate</div>
+      </article>
+
+      <!-- COMMS -->
+      <article class="term-card" data-cat="com" data-name="modbus rtu tcp protocol communication" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">MODBUS</div>
+            <div class="term-abbr">SERIAL / TCP PROTOCOL</div>
+          </div>
+          <span class="cat-pill com">COMMS</span>
+        </div>
+        <p class="term-def">The oldest and most universal industrial protocol (1979). <strong>Modbus RTU</strong> runs over RS-485 serial. <strong>Modbus TCP</strong> wraps the same frames in Ethernet packets. Function codes read/write coils (bits) and holding registers (16-bit words).</p>
+        <div class="term-eg">e.g. FC03 Read Holding Registers: master sends request → slave returns 10 register values</div>
+      </article>
+
+      <article class="term-card" data-cat="com" data-name="profinet ethernet ip industrial network" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">PROFINET / EtherNet/IP</div>
+            <div class="term-abbr">REAL-TIME ETHERNET PROTOCOLS</div>
+          </div>
+          <span class="cat-pill com">COMMS</span>
+        </div>
+        <p class="term-def">High-speed Industrial Ethernet protocols. <strong>PROFINET</strong> is Siemens-standard; <strong>EtherNet/IP</strong> is Rockwell/ODVA standard. Both run at 100 Mbit/s or 1 Gbit/s over standard Cat5e/6 cable and support sub-millisecond cycle times for motion control.</p>
+        <div class="term-eg">e.g. PROFINET connects a Siemens PLC to a remote I/O rack 50 metres away via Cat6</div>
+      </article>
+
+      <article class="term-card" data-cat="com" data-name="scada supervisory control data acquisition" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">SCADA</div>
+            <div class="term-abbr">SUPERVISORY CONTROL & DATA ACQUISITION</div>
+          </div>
+          <span class="cat-pill com">COMMS</span>
+        </div>
+        <p class="term-def">Software that connects to multiple PLCs, collects data, displays plant-wide overviews, logs historical trends, and generates alarms. The operator's window into the entire plant — from a single workstation or web browser.</p>
+        <div class="term-eg">e.g. Ignition SCADA, WinCC, InTouch — used in water treatment, power, food & beverage</div>
+      </article>
+
+      <article class="term-card" data-cat="com" data-name="rs485 serial bus two wire fieldbus" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">RS-485</div>
+            <div class="term-abbr">SERIAL BUS STANDARD</div>
+          </div>
+          <span class="cat-pill com">COMMS</span>
+        </div>
+        <p class="term-def">A 2-wire (A/B) serial bus standard that allows up to 32 devices on a single cable run of up to 1200 metres. The backbone of Modbus RTU and many older fieldbus systems. Still extremely common in industrial installations worldwide.</p>
+        <div class="term-eg">e.g. One RS-485 cable daisy-chains a PLC to 16 inverter drives, each with a unique slave address</div>
+      </article>
+
+      <!-- SAFETY -->
+      <article class="term-card" data-cat="saf" data-name="estop emergency stop safety button" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">E-STOP</div>
+            <div class="term-abbr">EMERGENCY STOP DEVICE</div>
+          </div>
+          <span class="cat-pill saf">SAFETY</span>
+        </div>
+        <p class="term-def">A <strong>red mushroom-head button</strong> that immediately de-energises all dangerous outputs when pressed. Wired as NC in series with the control circuit — pressing it breaks the circuit, dropping all outputs to safe state. Must be manually released before the machine can restart.</p>
+        <div class="term-eg">e.g. IEC 60947-5-5 specifies E-Stop requirements; PSSR 2000 requires them on UK installations</div>
+      </article>
+
+      <article class="term-card" data-cat="saf" data-name="fail-safe nc wiring fault detection" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">FAIL-SAFE</div>
+            <div class="term-abbr">SAFE-STATE ON FAILURE</div>
+          </div>
+          <span class="cat-pill saf">SAFETY</span>
+        </div>
+        <p class="term-def">Design principle: if any component fails (wire breaks, sensor fails, power lost), the system moves to a safe state — typically with all dangerous outputs <strong>de-energised</strong>. Achieved by wiring safety devices as NC so a wire break = de-energised = safe.</p>
+        <div class="term-eg">e.g. LS_HIGH wired NC: broken wire → I1 reads 0 → PLC sees "tank full" → pump stops ✓</div>
+      </article>
+
+      <article class="term-card" data-cat="saf" data-name="iec 61131-3 standard five languages" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">IEC 61131-3</div>
+            <div class="term-abbr">PLC PROGRAMMING STANDARD</div>
+          </div>
+          <span class="cat-pill saf">SAFETY</span>
+        </div>
+        <p class="term-def">The international standard defining five PLC programming languages: <strong>Ladder Diagram (LD)</strong>, Function Block Diagram (FBD), Structured Text (ST), Instruction List (IL), and Sequential Function Chart (SFC). Ensures programs are portable across compliant PLCs.</p>
+        <div class="term-eg">e.g. OpenPLC and Codesys both implement all five IEC 61131-3 languages</div>
+      </article>
+
+      <article class="term-card" data-cat="saf" data-name="sil safety integrity level iec 62061" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">SIL</div>
+            <div class="term-abbr">SAFETY INTEGRITY LEVEL</div>
+          </div>
+          <span class="cat-pill saf">SAFETY</span>
+        </div>
+        <p class="term-def">A rating (SIL 1–4) from IEC 62061 that quantifies how reliably a safety function reduces risk. Higher SIL = lower probability of dangerous failure per hour. Dual-channel E-Stop circuits with cross-monitoring typically achieve SIL 2 or SIL 3.</p>
+        <div class="term-eg">e.g. SIL 2 requires a probability of dangerous failure &lt; 10⁻⁷ per hour of operation</div>
+      </article>
+
+      <article class="term-card" data-cat="saf" data-name="pssr pressure systems safety regulations 2000" role="listitem">
+        <div class="term-top">
+          <div>
+            <div class="term-name">PSSR 2000</div>
+            <div class="term-abbr">PRESSURE SYSTEMS SAFETY REGULATIONS</div>
+          </div>
+          <span class="cat-pill saf">SAFETY</span>
+        </div>
+        <p class="term-def">UK legislation requiring all pressure systems (including pneumatic control systems) to have a written scheme of examination, adequate protection devices, and safe operating limits. Violations can result in prosecution. Referenced in Level 4 Safety Interlock challenge.</p>
+        <div class="term-eg">e.g. Pneumatic drill press controlled by a PLC must comply with PSSR 2000 inspection schedules</div>
+      </article>
+
+    </div>
+    <p class="no-results" id="no-results" aria-live="polite">No terms match your search.</p>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SECTION 2 — TOOLS & GAMES
+  ══════════════════════════════════ -->
+  <section id="tools" aria-labelledby="tools-hdr">
+    <div class="sec-hdr">
+      <div class="sec-label">02 / TOOLS &amp; GAMES</div>
+      <h2 class="sec-title" id="tools-hdr">OTHER PLACES TO PRACTISE</h2>
+      <p class="sec-desc">PLeC teaches the concepts. These platforms let you go further — write real ladder logic, simulate full factory lines, or explore professional IDEs.</p>
+    </div>
+
+    <div class="tools-grid">
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">🏭</div>
+          <div class="tool-badges">
+            <span class="tool-price paid">FREE TRIAL + PAID</span>
+            <div class="diff-stars" aria-label="Difficulty: 2 out of 5">
+              <span>★★</span>☆☆☆
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">Factory I/O</div>
+        <div class="tool-tag">3D FACTORY SIMULATION — factoryio.com</div>
+        <p class="tool-desc">
+          The gold standard for PLC education. Factory I/O renders a 3D factory environment
+          — conveyors, tanks, palletisers, pick-and-place robots — that connects directly to
+          a real PLC or a software simulation. Widely used by colleges and training centres
+          worldwide. 30-day free trial.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">3D REAL-TIME</span>
+          <span class="t-feat">CONNECTS TO REAL PLCs</span>
+          <span class="t-feat">30+ SCENES</span>
+          <span class="t-feat">WINDOWS ONLY</span>
+        </div>
+        <a class="tool-link" href="https://factoryio.com/" target="_blank" rel="noopener noreferrer"
+           aria-label="Visit Factory I/O website (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">🔓</div>
+          <div class="tool-badges">
+            <span class="tool-price free">100% FREE</span>
+            <div class="diff-stars" aria-label="Difficulty: 3 out of 5">
+              <span>★★★</span>☆☆
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">OpenPLC</div>
+        <div class="tool-tag">OPEN SOURCE RUNTIME + EDITOR — autonomylogic.com</div>
+        <p class="tool-desc">
+          The open-source IEC 61131-3 PLC platform that PLeC is inspired by. The
+          <strong>OpenPLC Editor</strong> lets you write real Ladder Diagram, Function Block
+          Diagram, or Structured Text programs. The <strong>OpenPLC Runtime</strong> runs on
+          Raspberry Pi, Linux, Arduino, and ESP32 — turning cheap hardware into a real PLC.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">ALL 5 IEC LANGUAGES</span>
+          <span class="t-feat">RASPBERRY PI</span>
+          <span class="t-feat">ARDUINO/ESP32</span>
+          <span class="t-feat">CROSS PLATFORM</span>
+        </div>
+        <a class="tool-link" href="https://autonomylogic.com/" target="_blank" rel="noopener noreferrer"
+           aria-label="Visit OpenPLC website (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">🧠</div>
+          <div class="tool-badges">
+            <span class="tool-price free">100% FREE</span>
+            <div class="diff-stars" aria-label="Difficulty: 2 out of 5">
+              <span>★★</span>☆☆☆
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">PLC Fiddle</div>
+        <div class="tool-tag">BROWSER-BASED LADDER EDITOR — plcfiddle.com</div>
+        <p class="tool-desc">
+          A free, browser-based ladder logic editor and simulator. No download, no account —
+          open a tab, draw rungs, add contacts and coils, run the simulation. Ideal for
+          quickly testing logic before writing it to a real controller. Share your programs
+          via URL.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">NO INSTALL</span>
+          <span class="t-feat">RUNS IN BROWSER</span>
+          <span class="t-feat">SHAREABLE LINKS</span>
+          <span class="t-feat">FREE FOREVER</span>
+        </div>
+        <a class="tool-link" href="https://plcfiddle.com/" target="_blank" rel="noopener noreferrer"
+           aria-label="Visit PLC Fiddle website (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">⚙️</div>
+          <div class="tool-badges">
+            <span class="tool-price free">FREE COMMUNITY ED.</span>
+            <div class="diff-stars" aria-label="Difficulty: 4 out of 5">
+              <span>★★★★</span>☆
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">Codesys</div>
+        <div class="tool-tag">PROFESSIONAL IEC 61131-3 IDE — codesys.com</div>
+        <p class="tool-desc">
+          The professional-grade IEC 61131-3 development environment used by hundreds of
+          PLC manufacturers worldwide. The Community Edition is free. Includes a built-in
+          software PLC (SoftPLC) so you can write and run programs on your PC without any
+          hardware. Highly regarded in the automation industry.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">INDUSTRY STANDARD</span>
+          <span class="t-feat">SOFTWARE PLC</span>
+          <span class="t-feat">MOTION CONTROL</span>
+          <span class="t-feat">WINDOWS ONLY</span>
+        </div>
+        <a class="tool-link" href="https://www.codesys.com/" target="_blank" rel="noopener noreferrer"
+           aria-label="Visit Codesys website (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">🎮</div>
+          <div class="tool-badges">
+            <span class="tool-price free">FREE</span>
+            <div class="diff-stars" aria-label="Difficulty: 1 out of 5">
+              <span>★</span>☆☆☆☆
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">Electrical Age</div>
+        <div class="tool-tag">MINECRAFT-STYLE ELECTRICAL GAME — electrical.age</div>
+        <p class="tool-desc">
+          A Minecraft mod (and standalone game) that simulates real electrical circuits inside
+          a game world. Build AC and DC circuits, transformers, wire systems, and basic
+          control logic using physically accurate simulation. A genuinely fun way to
+          build electrical intuition before picking up ladder logic.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">GAME FORMAT</span>
+          <span class="t-feat">MINECRAFT MOD</span>
+          <span class="t-feat">REAL PHYSICS SIM</span>
+          <span class="t-feat">OPEN SOURCE</span>
+        </div>
+        <a class="tool-link" href="https://electrical.age/" target="_blank" rel="noopener noreferrer"
+           aria-label="Visit Electrical Age website (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+      <article class="tool-card">
+        <div class="tool-top">
+          <div class="tool-icon" aria-hidden="true">🔷</div>
+          <div class="tool-badges">
+            <span class="tool-price trial">21-DAY TRIAL</span>
+            <div class="diff-stars" aria-label="Difficulty: 5 out of 5">
+              <span>★★★★★</span>
+            </div>
+          </div>
+        </div>
+        <div class="tool-name">TIA Portal</div>
+        <div class="tool-tag">SIEMENS INDUSTRY IDE — siemens.com/tia</div>
+        <p class="tool-desc">
+          The professional Siemens programming environment for the S7-1200/1500 family — the
+          most widely deployed PLCs in European industry. Heavy, complex, and powerful.
+          Free 21-day trial of the full software. If you're aiming for a career in automation,
+          this is the tool to eventually master.
+        </p>
+        <div class="tool-features">
+          <span class="t-feat">INDUSTRY STANDARD</span>
+          <span class="t-feat">S7-1200/1500</span>
+          <span class="t-feat">HMI DESIGN</span>
+          <span class="t-feat">WINDOWS ONLY</span>
+        </div>
+        <a class="tool-link" href="https://www.siemens.com/global/en/products/automation/industry-software/automation-software/tia-portal.html"
+           target="_blank" rel="noopener noreferrer"
+           aria-label="Visit Siemens TIA Portal page (opens in new tab)">
+          VISIT SITE →
+        </a>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════
+       SECTION 3 — VIDEOS
+  ══════════════════════════════════ -->
+  <section id="videos" aria-labelledby="videos-hdr">
+    <div class="sec-hdr">
+      <div class="sec-label">03 / WATCH FIRST</div>
+      <h2 class="sec-title" id="videos-hdr">BEGINNER VIDEOS</h2>
+      <p class="sec-desc">These channels are trusted by students and working engineers alike. Watch a few before your first challenge — it'll make every rung click into place.</p>
+    </div>
+
+    <div class="videos-grid">
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">📡</div>
+            <div class="vid-channel-name">REALPARS</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">7:22</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">RealPars</span>
+            <span class="vid-level beg">BEGINNER</span>
+          </div>
+          <h3 class="vid-title">What is a PLC? (Programmable Logic Controller)</h3>
+          <p class="vid-desc">The single best 7-minute introduction to PLCs on YouTube. Clear animation, real hardware examples, and a concise explanation of how scan cycles, I/O, and ladder logic fit together.</p>
+          <a class="vid-link"
+             href="https://www.youtube.com/watch?v=_Hua7GVSN7c"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Watch 'What is a PLC?' by RealPars on YouTube (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            WATCH ON YOUTUBE
+          </a>
+        </div>
+      </article>
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg" style="background:linear-gradient(135deg,rgba(59,130,246,.1) 0%,rgba(167,139,250,.08) 100%)"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">⚡</div>
+            <div class="vid-channel-name">REALPARS</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">9:48</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">RealPars</span>
+            <span class="vid-level beg">BEGINNER</span>
+          </div>
+          <h3 class="vid-title">PLC Ladder Logic Programming — Basics</h3>
+          <p class="vid-desc">Walks through your first ladder logic program from scratch — contacts, coils, seal-in circuits, and a basic start/stop motor control. Exactly the foundation PLeC's Level 1 challenge builds on.</p>
+          <a class="vid-link"
+             href="https://www.youtube.com/watch?v=uTjHbsHt2Vk"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Watch PLC Ladder Logic Basics by RealPars on YouTube (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            WATCH ON YOUTUBE
+          </a>
+        </div>
+      </article>
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg" style="background:linear-gradient(135deg,rgba(245,158,11,.08) 0%,rgba(239,68,68,.06) 100%)"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">🔌</div>
+            <div class="vid-channel-name">ENGINEERING MINDSET</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">11:15</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">The Engineering Mindset</span>
+            <span class="vid-level beg">BEGINNER</span>
+          </div>
+          <h3 class="vid-title">How Does a Relay Work?</h3>
+          <p class="vid-desc">Brilliant animation of how electromechanical relays work — the physical device that ladder logic was designed to replace. Understanding relays makes ladder logic notation instantly obvious.</p>
+          <a class="vid-link"
+             href="https://www.youtube.com/@EngineeringMindset"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Visit The Engineering Mindset YouTube channel (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            VIEW CHANNEL
+          </a>
+        </div>
+      </article>
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg" style="background:linear-gradient(135deg,rgba(34,197,94,.08) 0%,rgba(6,182,212,.06) 100%)"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">🏗</div>
+            <div class="vid-channel-name">TIM WILBORNE</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">SERIES</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">TimWilborne</span>
+            <span class="vid-level beg">BEGINNER</span>
+          </div>
+          <h3 class="vid-title">PLC Training — Full Beginner Series</h3>
+          <p class="vid-desc">Tim Wilborne's free series takes you from zero to writing real programs on Allen-Bradley PLCs. Practical, no-nonsense, and covering real-world industrial scenarios including timers, counters, and motor control.</p>
+          <a class="vid-link"
+             href="https://www.youtube.com/@TimWilborne"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Visit Tim Wilborne's YouTube channel (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            VIEW CHANNEL
+          </a>
+        </div>
+      </article>
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg" style="background:linear-gradient(135deg,rgba(167,139,250,.1) 0%,rgba(59,130,246,.06) 100%)"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">🛡</div>
+            <div class="vid-channel-name">REALPARS</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">8:11</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">RealPars</span>
+            <span class="vid-level int">INTERMEDIATE</span>
+          </div>
+          <h3 class="vid-title">What is an E-Stop and How Does It Work?</h3>
+          <p class="vid-desc">Demystifies emergency stop circuits — NC wiring, categories (Cat 0/1/2), and the fail-safe principle. Essential context before attempting the Safety Interlock challenge in PLeC Level 4.</p>
+          <a class="vid-link"
+             href="https://www.youtube.com/results?search_query=realpars+emergency+stop+plc"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Search for E-Stop PLC videos by RealPars on YouTube (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            SEARCH ON YOUTUBE
+          </a>
+        </div>
+      </article>
+
+      <article class="vid-card">
+        <div class="vid-thumb" aria-hidden="true">
+          <div class="vid-thumb-bg" style="background:linear-gradient(135deg,rgba(6,182,212,.1) 0%,rgba(34,197,94,.05) 100%)"></div>
+          <div class="vid-channel-art">
+            <div class="vid-channel-logo">📊</div>
+            <div class="vid-channel-name">AUTOMATION DIRECT</div>
+          </div>
+          <div class="vid-play-overlay"><div class="vid-play-btn">▶</div></div>
+          <div class="vid-duration">SERIES</div>
+        </div>
+        <div class="vid-body">
+          <div class="vid-meta">
+            <span class="vid-channel-tag">AutomationDirect</span>
+            <span class="vid-level beg">BEGINNER</span>
+          </div>
+          <h3 class="vid-title">Free PLC Training Videos — Complete Library</h3>
+          <p class="vid-desc">AutomationDirect offers a comprehensive free video library covering PLC fundamentals, wiring, and programming. Manufacturer-neutral enough to be universally useful. No registration required.</p>
+          <a class="vid-link"
+             href="https://www.automationdirect.com/adc/education/plc-training"
+             target="_blank" rel="noopener noreferrer"
+             aria-label="Visit AutomationDirect free PLC training library (opens in new tab)">
+            <span class="vid-link-icon" aria-hidden="true">▶</span>
+            VIEW LIBRARY
+          </a>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ── NEXT STEP CTA ── -->
+  <div class="cta-block" role="complementary" aria-label="Next step">
+    <div class="cta-text">
+      <div class="cta-eyebrow">FOUNDATIONS COMPLETE — NEXT MISSION</div>
+      <div class="cta-h">PICK UP YOUR MULTIMETER.</div>
+      <div class="cta-sub">The digital multimeter is the first tool every field engineer reaches for. Learn it before your first fault.</div>
+    </div>
+    <a href="multimeter-lesson.html" class="cta-btn" aria-label="Proceed to Multimeter Lesson">
+      START LESSON 02
+      <span class="cta-arr" aria-hidden="true">→</span>
+    </a>
+  </div>
+
+</main>
+
+<!-- ── FOOTER ── -->
+<footer role="contentinfo">
+  <div class="foot-inner">
+    <p class="foot-left">PLeC — Learn PLC Engineering · Mission 01: Foundations</p>
+    <nav class="foot-nav" aria-label="Quick navigation">
+      <a href="index.html">Mission Select</a>
+      <a href="multimeter-lesson.html">Next: DMM Lesson →</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- ══ SUPERVISOR WIDGET ══ -->
+<div id="sv-fab-wrap">
+  <button class="sv-fab" id="sv-fab" onclick="svOpen()"
+          aria-label="Ask for help — open supervisor tips panel"
+          aria-expanded="false" aria-controls="sv-panel">
+    <span aria-hidden="true">👷</span>
+  </button>
+</div>
+
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true"
+     aria-label="Supervisor tips panel" aria-hidden="true">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div style="font-size:14px;color:#fff;letter-spacing:1px">SUPERVISOR</div>
+      <div style="font-size:9px;color:var(--sv-muted,#64748b);letter-spacing:.1em">SENIOR CONTROL ENGINEER · 22 YRS</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor tips panel">✕</button>
+  </div>
+  <div class="sv-body-p">
+    <p class="sv-intro">Before you touch any equipment, make sure the language makes sense. Here are my tips for this page:</p>
+    <div id="sv-tips"></div>
+  </div>
+  <div class="sv-ftr">
+    <button onclick="svPrev()" aria-label="Previous tip">◀ PREV</button>
+    <span id="sv-counter" style="font-size:10px;color:var(--sv-muted,#64748b)"></span>
+    <button onclick="svNext()" aria-label="Next tip">NEXT ▶</button>
+  </div>
+</div>
+
+<script>
+/* ── THEME TOGGLE ── */
+document.getElementById('theme-btn').addEventListener('click', function() {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('plc-theme', next);
+});
+
+/* ── GLOSSARY FILTER ── */
+(function() {
+  const cards  = Array.from(document.querySelectorAll('.term-card'));
+  const search = document.getElementById('term-search');
+  const noRes  = document.getElementById('no-results');
+  let activeCat = 'all';
+
+  function applyFilter() {
+    const q = search.value.toLowerCase().trim();
+    let visible = 0;
+    cards.forEach(function(c) {
+      const cat    = c.dataset.cat;
+      const name   = c.dataset.name;
+      const catOk  = activeCat === 'all' || cat === activeCat;
+      const termOk = !q || name.includes(q);
+      if (catOk && termOk) {
+        c.removeAttribute('hidden');
+        visible++;
+      } else {
+        c.setAttribute('hidden', '');
+      }
+    });
+    noRes.classList.toggle('show', visible === 0);
+  }
+
+  document.querySelectorAll('.cat-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      activeCat = btn.dataset.cat;
+      document.querySelectorAll('.cat-btn').forEach(function(b) {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-pressed', 'true');
+      applyFilter();
+    });
+  });
+
+  search.addEventListener('input', applyFilter);
+})();
+
+/* ── SUPERVISOR TIPS ── */
+const T = [
+  { ic:'💡', v:'',         tx:'Don\'t try to memorise all 25 terms right now. Read the ones that seem unfamiliar, then go do Level 1. You\'ll absorb them naturally as you interact with the challenges.' },
+  { ic:'🎯', v:'tv-good',  tx:'The most important terms for a beginner: <strong>Scan Cycle, Contact (NO/NC), Coil, Latch, and Fail-Safe</strong>. Everything else in PLC work builds on those five.' },
+  { ic:'🔌', v:'tv-warn',  tx:'Ladder Logic looks like electrical wiring because it IS electrical wiring — just drawn as software. If you can read a relay circuit, you can read ladder logic. The notation is intentional.' },
+  { ic:'🛡', v:'tv-danger',tx:'Never underestimate NC wiring. When I was a junior, I wired an E-Stop as NO by mistake. The machine ran even with the E-Stop pressed. That mistake earns you a formal incident report. Fail-safe is not optional.' },
+  { ic:'🎮', v:'tv-purple',tx:'If you\'re enjoying PLeC and want a next step, try Factory I/O with OpenPLC. It\'s free, connects real ladder logic to a 3D factory, and it\'s exactly what I use to train my apprentices before they touch real hardware.' },
+  { ic:'📺', v:'',         tx:'RealPars on YouTube is the best free PLC education resource I\'ve found. Their "What is a PLC?" video is 7 minutes and will make the next hour in PLeC twice as productive. Watch it first.' },
+];
+
+let svIdx = 0;
+function svRender() {
+  const tip = T[svIdx];
+  const wrap = document.getElementById('sv-tips');
+  wrap.innerHTML = '<div class="sv-tip ' + tip.v + '"><span class="sv-tip-icon">' + tip.ic + '</span><span>' + tip.tx + '</span></div>';
+  document.getElementById('sv-counter').textContent = (svIdx + 1) + ' / ' + T.length;
+}
+function svOpen() {
+  const panel = document.getElementById('sv-panel');
+  const fab   = document.getElementById('sv-fab');
+  svRender();
+  panel.classList.add('sv-open');
+  panel.setAttribute('aria-hidden', 'false');
+  fab.setAttribute('aria-expanded', 'true');
+  panel.querySelector('.sv-x').focus();
+}
+function svClose() {
+  const panel = document.getElementById('sv-panel');
+  const fab   = document.getElementById('sv-fab');
+  panel.classList.remove('sv-open');
+  panel.setAttribute('aria-hidden', 'true');
+  fab.setAttribute('aria-expanded', 'false');
+  fab.focus();
+}
+function svNext() { svIdx = (svIdx + 1) % T.length; svRender(); }
+function svPrev() { svIdx = (svIdx - 1 + T.length) % T.length; svRender(); }
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') svClose();
+});
+</script>
+</body>
+</html>

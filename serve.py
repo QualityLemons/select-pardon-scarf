@@ -5,13 +5,18 @@ import sys
 import json
 import sqlite3
 
-PORT      = 5000
+PORT      = int(os.environ.get("PORT", 5000))
 DIRECTORY = os.path.join(os.path.dirname(os.path.abspath(__file__)), "challenge")
 DB_PATH   = os.path.join(os.path.dirname(os.path.abspath(__file__)), "plec.db")
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from apps.assessment.scorer   import score_attempt
 from apps.assessment.reviewer import generate_review
+
+# Auto-create the database on first run (needed on Heroku ephemeral dynos)
+if not os.path.exists(DB_PATH):
+    import create_db
+    create_db.build()
 
 
 def _db():

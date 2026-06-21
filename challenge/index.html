@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PLeC — Learn PLC Engineering</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  <noscript>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  </noscript>
+
+  <style>
+    /* ─── Custom Properties ─── */
+    :root {
+      --bg:      #0a0e1a;
+      --surface: #0d1117;
+      --card:    rgba(15,23,42,.5);
+      --border:  rgba(30,58,76,.8);
+      --text:    #cbd5e1;
+      --muted:   #64748b;
+      --cyan:    #06b6d4;
+      --cyan2:   #22d3ee;
+      --blue:    #3b82f6;
+      --blue2:   #60a5fa;
+      --amber:   #f59e0b;
+      --amber2:  #fbbf24;
+      --red:     #ef4444;
+      --emerald: #10b981;
+      --purple:  #a855f7;
+      --teal:    #14b8a6;
+      --font-d:  'Teko', 'Impact', sans-serif;
+      --font-m:  'Share Tech Mono', 'Courier New', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-m);
+      font-size: 14px;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── Grid overlay ─── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ─── Animations ─── */
+
+    @keyframes pulse-cyan {
+      0%,100% { opacity:1; box-shadow:0 0 10px rgba(6,182,212,.5); }
+      50%      { opacity:.5; box-shadow:0 0 2px rgba(6,182,212,.2); }
+    }
+    @keyframes glitch {
+      0%  { text-shadow: .05em 0 0 #ff00c1,-.05em -.025em 0 #00fff9,-.025em .05em 0 #3b82f6; }
+      14% { text-shadow: .05em 0 0 #ff00c1,-.05em -.025em 0 #00fff9,-.025em .05em 0 #3b82f6; }
+      15% { text-shadow: -.05em -.025em 0 #ff00c1,.025em .025em 0 #00fff9,-.05em -.05em 0 #3b82f6; }
+      49% { text-shadow: -.05em -.025em 0 #ff00c1,.025em .025em 0 #00fff9,-.05em -.05em 0 #3b82f6; }
+      50% { text-shadow: .025em .05em 0 #ff00c1,.05em 0 0 #00fff9,0 -.05em 0 #3b82f6; }
+      99% { text-shadow: .025em .05em 0 #ff00c1,.05em 0 0 #00fff9,0 -.05em 0 #3b82f6; }
+      100%{ text-shadow:-.025em 0 0 #ff00c1,-.025em -.025em 0 #00fff9,-.025em -.05em 0 #3b82f6; }
+    }
+    @keyframes shimmer {
+      0%   { transform: translateX(-100%) skewX(-15deg); }
+      100% { transform: translateX(250%) skewX(-15deg); }
+    }
+
+    .pulse { animation: pulse-cyan 2s ease-in-out infinite; }
+    .hero-h1:hover { animation: glitch .3s cubic-bezier(.25,.46,.45,.94) both infinite; }
+
+    /* ─── Clip paths ─── */
+    .card-clip {
+      clip-path: polygon(15px 0,100% 0,100% calc(100% - 15px),calc(100% - 15px) 100%,0 100%,0 15px);
+    }
+    .btn-clip {
+      clip-path: polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+    }
+    .node-clip {
+      clip-path: polygon(8px 0,100% 0,100% calc(100% - 8px),calc(100% - 8px) 100%,0 100%,0 8px);
+    }
+
+    /* ─── Hex background ─── */
+    .hex-bg {
+      background-image:
+        linear-gradient(rgba(10,14,26,.9), rgba(10,14,26,.95)),
+        url("data:image/svg+xml,%3Csvg width='60' height='100' viewBox='0 0 60 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' stroke-width='1' stroke='%231e293b' fill='none' fill-rule='evenodd' opacity='0.5'/%3E%3C/svg%3E");
+    }
+
+    .container { max-width: 1280px; margin: 0 auto; padding: 0 20px; }
+
+    /* ══════════════════════════════════
+       HEADER
+    ══════════════════════════════════ */
+    header {
+      position: sticky; top: 0; z-index: 40;
+      border-bottom: 1px solid rgba(6,182,212,.15);
+      background: rgba(10,14,26,.85);
+      backdrop-filter: blur(12px);
+    }
+    .header-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 20px;
+      height: 64px; display: flex; align-items: center; gap: 12px;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+    .logo-pulse {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan); flex-shrink: 0;
+    }
+    .logo-text {
+      font-family: var(--font-d); font-size: 26px;
+      letter-spacing: 2px; color: #f0f9ff; line-height: 1;
+    }
+    .logo-text em { font-style: normal; color: var(--cyan); }
+    .logo-sub {
+      font-size: 9px; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .header-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .header-tag {
+      font-size: 10px; font-family: var(--font-m); padding: 4px 10px;
+      color: var(--muted); border: 1px solid rgba(30,41,59,.8); flex-shrink: 0;
+    }
+    .status-badge {
+      display: flex; align-items: center; gap: 7px;
+      background: rgba(6,182,212,.06); border: 1px solid rgba(6,182,212,.25);
+      padding: 5px 12px; flex-shrink: 0;
+      font-size: 10px; color: var(--cyan); letter-spacing: 1.5px;
+    }
+    .status-dot { width:7px; height:7px; border-radius:50%; background:var(--cyan); flex-shrink:0; }
+
+    #theme-toggle {
+      background: transparent; border: 1px solid rgba(30,41,59,.8);
+      color: var(--muted); font-size: 16px; line-height: 1;
+      padding: 4px 10px; cursor: pointer; flex-shrink: 0;
+      transition: background .15s, border-color .15s; min-height: 36px;
+    }
+    #theme-toggle:hover { background: rgba(255,255,255,.05); border-color: rgba(6,182,212,.35); }
+
+    /* ══════════════════════════════════
+       HERO
+    ══════════════════════════════════ */
+    .hero {
+      position: relative; z-index: 10;
+      padding: 80px 0 64px;
+      border-bottom: 1px solid rgba(59,130,246,.15);
+      overflow: hidden;
+    }
+    .hero-glow {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 700px; height: 350px;
+      background: radial-gradient(ellipse, rgba(59,130,246,.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      position: relative; z-index: 10;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(59,130,246,.3); background: rgba(29,78,216,.12);
+      padding: 5px 16px; margin-bottom: 28px;
+      font-size: 11px; color: var(--blue2); letter-spacing: 2px; text-transform: uppercase;
+    }
+    .hero-eyebrow-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--blue2); }
+    .hero-h1 {
+      font-family: var(--font-d);
+      font-size: clamp(54px, 10vw, 120px);
+      letter-spacing: -1px; color: #fff; text-transform: uppercase;
+      line-height: 1; margin-bottom: 24px; cursor: default;
+    }
+    .hero-h1 span {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-p {
+      font-size: 14px; color: var(--muted);
+      max-width: 580px; margin-bottom: 36px; line-height: 1.9;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .hero-cta {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      background: var(--cyan); color: var(--bg);
+      font-family: var(--font-d); font-size: 22px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      padding: 14px 40px; min-height: 52px;
+      transition: background .15s, transform .15s;
+    }
+    .hero-cta:hover { background: #22d3ee; transform: translateY(-2px); }
+    .hero-cta:hover .cta-arr { transform: translateX(4px); }
+    .cta-arr { display: inline-block; transition: transform .15s; }
+
+    /* ══════════════════════════════════
+       INTEL BAR
+    ══════════════════════════════════ */
+    .intel-bar {
+      position: relative; z-index: 20;
+      border-bottom: 1px solid rgba(30,41,59,.8);
+      background: var(--bg);
+    }
+    .intel-grid {
+      max-width: 1280px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(4,1fr);
+      border-left: 1px solid rgba(30,41,59,.8);
+    }
+    .intel-stat { padding: 20px 24px; border-right: 1px solid rgba(30,41,59,.8); }
+    .intel-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; color: var(--muted);
+      letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .intel-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .intel-val {
+      font-family: var(--font-d); font-size: 38px;
+      color: #e2e8f0; letter-spacing: 1px; line-height: 1;
+    }
+
+    /* ══════════════════════════════════
+       MISSION GRID
+    ══════════════════════════════════ */
+    .missions-section { position: relative; z-index: 10; padding: 80px 0; }
+    .missions-header {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      margin-bottom: 40px; padding-bottom: 16px;
+      border-bottom: 1px solid rgba(30,41,59,.8);
+    }
+    .missions-title {
+      font-family: var(--font-d); font-size: 42px; color: #fff;
+      letter-spacing: 3px; text-transform: uppercase;
+    }
+    .missions-sub { font-size: 11px; color: var(--cyan); letter-spacing: 1.5px; margin-top: 4px; }
+    .sort-label { font-size: 11px; color: var(--muted); }
+
+    .missions-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 24px;
+    }
+
+    /* ── Mission Card ── */
+    .mission-card {
+      position: relative;
+      background: var(--card);
+      border: 1px solid rgba(30,58,76,.8);
+      backdrop-filter: blur(4px);
+      padding: 24px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+      opacity: 0; transform: translateY(20px);
+      transition: border-color .3s, background .3s, opacity .5s, transform .5s;
+    }
+    .mission-card.mounted { opacity: 1; transform: translateY(0); }
+    .mission-card:hover {
+      border-color: rgba(6,182,212,.4);
+      background: rgba(30,41,59,.6);
+    }
+    .mission-card::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+      background: linear-gradient(to right, transparent, rgba(6,182,212,.08), transparent);
+      opacity: 0; pointer-events: none; z-index: 1;
+    }
+    .mission-card:hover::before { opacity: 1; animation: shimmer 3s infinite; }
+
+    .card-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 14px;
+    }
+    .card-badges { display: flex; flex-direction: column; gap: 5px; }
+    .card-badge {
+      display: inline-block; font-size: 9px; font-family: var(--font-m);
+      letter-spacing: 2px; padding: 2px 8px; text-transform: uppercase;
+    }
+    .badge-level  { background:rgba(6,182,212,.1); color:var(--cyan); border:1px solid rgba(6,182,212,.3); }
+    .badge-module { background:rgba(168,85,247,.1); color:#c084fc; border:1px solid rgba(168,85,247,.3); }
+    .badge-tool   { background:rgba(245,158,11,.1); color:var(--amber2); border:1px solid rgba(245,158,11,.3); }
+    .badge-safety { background:rgba(239,68,68,.1); color:#f87171; border:1px solid rgba(239,68,68,.3); }
+    .badge-timer  { background:rgba(245,158,11,.1); color:var(--amber2); border:1px solid rgba(245,158,11,.3); }
+    .badge-batch  { background:rgba(139,92,246,.1); color:#a78bfa; border:1px solid rgba(139,92,246,.3); }
+
+    .card-lnum { font-family: var(--font-d); font-size: 20px; color: var(--muted); margin-top: 2px; }
+    .card-icon-box {
+      padding: 10px; font-size: 22px; line-height: 1; flex-shrink: 0;
+      background: rgba(29,78,216,.15); border: 1px solid rgba(59,130,246,.2);
+    }
+    .card-icon-box.dim { background: rgba(30,41,59,.6); border-color: rgba(71,85,105,.4); }
+
+    .card-title {
+      font-family: var(--font-d); font-size: 26px; color: #fff;
+      letter-spacing: 1px; line-height: 1.1;
+    }
+
+    .threat-wrap { margin: 12px 0 14px; }
+    .threat-row  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+    .threat-lbl  { font-size: 9px; color: var(--muted); letter-spacing: 2px; }
+    .threat-cls  { font-size: 11px; color: var(--amber); }
+    .threat-segs { display: flex; gap: 3px; height: 5px; }
+    .tseg        { flex: 1; background: rgba(30,41,59,.8); }
+    .tseg.lo     { background: var(--amber); }
+    .tseg.hi     { background: var(--red); }
+
+    .card-desc {
+      font-size: 12.5px; color: var(--muted); line-height: 1.75; flex: 1;
+      margin: 10px 0 20px; padding-left: 12px;
+      border-left: 2px solid rgba(30,41,59,.8);
+      position: relative; z-index: 2;
+    }
+
+    .card-protocols { margin-bottom: 16px; position: relative; z-index: 2; }
+    .proto-lbl { font-size: 9px; color: var(--muted); letter-spacing: 2px; margin-bottom: 7px; }
+    .proto-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+    .ptag {
+      font-size: 11px; font-family: var(--font-m); color: #94a3b8;
+      background: rgba(30,41,59,.8); padding: 3px 8px;
+    }
+
+    .card-cta {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      font-family: var(--font-d); font-size: 18px; letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 10px 16px; transition: all .2s; position: relative; z-index: 2;
+      min-height: 44px; margin-top: auto;
+    }
+    .cta-mission {
+      background: rgba(37,99,235,.15); color: var(--blue2);
+      border: 1px solid rgba(59,130,246,.4);
+    }
+    .cta-mission:hover { background: var(--blue); color: #fff; }
+    .cta-tool {
+      background: rgba(30,41,59,.6); color: #94a3b8;
+      border: 1px solid rgba(71,85,105,.4);
+    }
+    .cta-tool:hover { background: rgba(51,65,85,.8); color: #fff; }
+    .cta-arr2 { display: inline-block; transition: transform .15s; }
+    .card-cta:hover .cta-arr2 { transform: translateX(3px); }
+
+    /* ══════════════════════════════════
+       TACTICAL PROGRESSION
+    ══════════════════════════════════ */
+    .prog-section {
+      position: relative; z-index: 10; padding: 80px 0;
+      border-top: 1px solid rgba(30,41,59,.5);
+      border-bottom: 1px solid rgba(30,41,59,.5);
+    }
+    .prog-title {
+      font-family: var(--font-d); font-size: 42px; color: #fff;
+      letter-spacing: 3px; text-align: center; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .prog-sub {
+      font-size: 11px; color: var(--cyan); text-align: center;
+      letter-spacing: 1.5px; margin-bottom: 56px;
+    }
+    .prog-track {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      position: relative;
+    }
+    .prog-track::before {
+      content: ''; position: absolute;
+      top: 24px; left: 24px; right: 24px; height: 1px;
+      background: rgba(30,41,59,.8); pointer-events: none;
+    }
+    .prog-step {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px; flex: 1;
+    }
+    .prog-node {
+      width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-d); font-size: 18px; font-weight: 700;
+      background: var(--bg); border: 2px solid rgba(30,41,59,.8);
+      color: var(--muted); position: relative; z-index: 1;
+      transition: border-color .2s, color .2s;
+    }
+    .prog-node:hover { border-color: rgba(100,116,139,.6); color: #cbd5e1; }
+    .prog-label { font-size: 10px; color: var(--muted); text-align: center; letter-spacing: .5px; }
+    .prog-topic { font-size: 9px; color: rgba(100,116,139,.5); text-align: center; }
+
+    /* ══════════════════════════════════
+       INTEL BREAKDOWN (TOPICS)
+    ══════════════════════════════════ */
+    .topics-section { position: relative; z-index: 10; padding: 80px 0 60px; }
+    .topics-title {
+      font-family: var(--font-d); font-size: 42px; color: #fff;
+      letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .topics-sub { font-size: 11px; color: var(--muted); margin-bottom: 36px; letter-spacing: .5px; }
+    .topics-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+    .topic-card {
+      background: var(--card); border: 1px solid rgba(30,41,59,.8);
+      padding: 20px 22px; display: flex; gap: 16px; align-items: flex-start;
+      transition: border-color .2s;
+    }
+    .topic-card:hover { border-color: rgba(6,182,212,.25); }
+    .topic-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+    .topic-title { font-family: var(--font-d); font-size: 20px; color: #fff; letter-spacing: .5px; margin-bottom: 5px; }
+    .topic-desc { font-size: 12px; color: var(--muted); line-height: 1.7; }
+
+    /* ══════════════════════════════════
+       FOOTER
+    ══════════════════════════════════ */
+    footer {
+      border-top: 1px solid rgba(30,41,59,.8);
+      background: var(--bg); padding: 28px 0;
+      position: relative; z-index: 20;
+    }
+    .footer-inner {
+      max-width: 1280px; margin: 0 auto; padding: 0 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .footer-left  { font-size: 11px; color: var(--muted); }
+    .footer-tags  { display: flex; gap: 8px; flex-wrap: wrap; }
+    .ftag {
+      font-size: 10px; font-family: var(--font-m); color: var(--muted);
+      background: rgba(15,23,42,.5); border: 1px solid rgba(30,41,59,.8); padding: 2px 8px;
+    }
+    .footer-ver { font-size: 11px; color: rgba(100,116,139,.45); font-family: var(--font-m); }
+    .donate-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--font-m); font-size: 11px; letter-spacing: .06em;
+      color: var(--cyan); text-decoration: none;
+      border: 1px solid rgba(6,182,212,.35); padding: 5px 12px;
+      background: rgba(6,182,212,.06);
+      clip-path: polygon(7px 0,100% 0,100% calc(100% - 7px),calc(100% - 7px) 100%,0 100%,0 7px);
+      transition: background .2s, border-color .2s;
+    }
+    .donate-btn:hover { background: rgba(6,182,212,.14); border-color: rgba(6,182,212,.6); }
+    .donate-btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+    .donate-btn .d-icon { font-size: 13px; line-height: 1; }
+
+    /* ══════════════════════════════════
+       ACCESSIBILITY
+    ══════════════════════════════════ */
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    .skip-link { position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:var(--cyan);color:var(--bg);font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none; }
+    .skip-link:focus { top:0;outline:3px solid #fff;outline-offset:2px; }
+    :focus-visible { outline:2px solid var(--cyan);outline-offset:3px;border-radius:2px; }
+    button:focus-visible { outline:3px solid var(--cyan2);outline-offset:3px; }
+    a:focus-visible  { outline:2px solid var(--cyan);outline-offset:3px; }
+    .mission-card:focus-visible { outline:2px solid var(--cyan);outline-offset:3px; }
+
+    /* ══════════════════════════════════
+       LIGHT MODE
+    ══════════════════════════════════ */
+    [data-theme="light"] {
+      --bg:    #f0f4f8;
+      --card:  rgba(255,255,255,.88);
+      --text:  #0f172a;
+      --muted: #475569;
+    }
+    [data-theme="light"] body { background: var(--bg); color: var(--text); }
+    [data-theme="light"] body::before {
+      background-image:
+        linear-gradient(rgba(15,23,42,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15,23,42,.04) 1px, transparent 1px);
+    }
+    [data-theme="light"] header { background: rgba(240,244,248,.95); border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .logo-text { color: #0f172a; }
+    [data-theme="light"] .header-tag { border-color: rgba(148,163,184,.5); }
+    [data-theme="light"] .status-badge { background: rgba(6,182,212,.08); border-color: rgba(6,182,212,.3); }
+    [data-theme="light"] #theme-toggle { border-color: rgba(148,163,184,.5); }
+    [data-theme="light"] .hero { border-color: rgba(59,130,246,.15); }
+    [data-theme="light"] .hex-bg {
+      background-image:
+        linear-gradient(rgba(240,244,248,.93), rgba(248,250,252,.97)),
+        url("data:image/svg+xml,%3Csvg width='60' height='100' viewBox='0 0 60 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' stroke-width='1' stroke='%23cbd5e1' fill='none' fill-rule='evenodd' opacity='0.5'/%3E%3C/svg%3E");
+    }
+    [data-theme="light"] .intel-bar { background: #f8fafc; }
+    [data-theme="light"] .intel-grid { border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .intel-stat { border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .intel-val  { color: #0f172a; }
+    [data-theme="light"] .missions-header { border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .mission-card { background: rgba(255,255,255,.88); border-color: rgba(148,163,184,.5); }
+    [data-theme="light"] .mission-card:hover { border-color: rgba(6,182,212,.5); background: rgba(255,255,255,.98); }
+    [data-theme="light"] .card-icon-box { background: rgba(219,234,254,.5); border-color: rgba(147,197,253,.4); }
+    [data-theme="light"] .card-icon-box.dim { background: rgba(241,245,249,.9); border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .card-desc { border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .tseg  { background: rgba(148,163,184,.25); }
+    [data-theme="light"] .ptag  { background: rgba(241,245,249,.9); color: #475569; }
+    [data-theme="light"] .prog-section { border-color: rgba(148,163,184,.3); }
+    [data-theme="light"] .prog-track::before { background: rgba(148,163,184,.4); }
+    [data-theme="light"] .prog-node  { background: #f0f4f8; border-color: rgba(148,163,184,.5); }
+    [data-theme="light"] .topic-card { background: rgba(255,255,255,.88); border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] footer { background: #f0f4f8; border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .ftag  { background: rgba(255,255,255,.8); border-color: rgba(148,163,184,.4); }
+
+    /* ══════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════ */
+    @media (max-width: 960px) {
+      .missions-grid { grid-template-columns: repeat(2,1fr); }
+      .intel-grid    { grid-template-columns: repeat(2,1fr); }
+      .intel-stat:nth-child(2n) { border-right: none; }
+      .missions-header { flex-direction: column; align-items: flex-start; gap: 6px; }
+      .sort-label { display: none; }
+      .prog-track { flex-wrap: wrap; justify-content: center; gap: 28px; padding: 0; }
+      .prog-track::before { display: none; }
+      .topics-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .missions-grid { grid-template-columns: 1fr; }
+      .hero-h1 { font-size: 52px; }
+      .header-tag { display: none; }
+      .status-badge span { display: none; }
+    }
+  </style>
+
+  <!-- FOUC prevention -->
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+</head>
+<body>
+
+<!-- Accessibility helpers -->
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="a11y-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div id="a11y-alert"  role="alert"  aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<!-- ══════════════════════════════════════
+     HEADER
+══════════════════════════════════════ -->
+<header>
+  <div class="header-inner">
+    <a href="index.html" class="nav-logo" aria-label="PLeC — Home">
+      <div class="logo-pulse pulse" aria-hidden="true"></div>
+      <div>
+        <div class="logo-text">PL<em>eC</em></div>
+        <div class="logo-sub">Learn PLC Engineering</div>
+      </div>
+    </a>
+    <div class="header-right">
+      <span class="header-tag" aria-hidden="true">50 ms Scan Cycle</span>
+      <span class="header-tag" aria-hidden="true">IEC 61131-3</span>
+      <div class="status-badge" role="status" aria-label="System online">
+        <div class="status-dot pulse" aria-hidden="true"></div>
+        <span>SYSTEM STATUS: ONLINE</span>
+      </div>
+      <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN
+══════════════════════════════════════ -->
+<main id="main-content">
+
+  <!-- ── HERO ── -->
+  <section class="hero hex-bg" aria-labelledby="hero-heading">
+    <div class="hero-glow" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-eyebrow" aria-hidden="true">
+        <div class="hero-eyebrow-dot"></div>
+        MISSION BRIEFING // UPLINK ESTABLISHED
+      </div>
+      <h1 class="hero-h1" id="hero-heading">
+        Real Factory <span>Logic.</span>
+      </h1>
+      <p class="hero-p">
+        6 active missions. Zero fluff.<br>
+        Master industrial automation — sequences, interlocks, process control —
+        the same logic that runs real factories.
+      </p>
+      <a href="plc-primer.html" class="hero-cta btn-clip"
+         aria-label="Start training — begin with PLC Boot Camp foundations">
+        ACCEPT MISSION <span class="cta-arr" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ── INTEL BAR ── -->
+  <div class="intel-bar" role="region" aria-label="Platform statistics">
+    <div class="intel-grid">
+      <div class="intel-stat">
+        <div class="intel-label">
+          <div class="intel-dot" style="background:var(--cyan);" aria-hidden="true"></div>
+          ACTIVE MISSIONS
+        </div>
+        <div class="intel-val">06</div>
+      </div>
+      <div class="intel-stat">
+        <div class="intel-label">
+          <div class="intel-dot" style="background:var(--blue);" aria-hidden="true"></div>
+          SCAN CYCLE
+        </div>
+        <div class="intel-val">50<span style="font-size:20px;">ms</span></div>
+      </div>
+      <div class="intel-stat">
+        <div class="intel-label">
+          <div class="intel-dot" style="background:var(--emerald);" aria-hidden="true"></div>
+          SKILLS LOADED
+        </div>
+        <div class="intel-val">18+</div>
+      </div>
+      <div class="intel-stat">
+        <div class="intel-label">
+          <div class="intel-dot" style="background:var(--amber);" aria-hidden="true"></div>
+          COMPLIANCE
+        </div>
+        <div class="intel-val" style="font-size:28px;">IEC 61131</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MISSION GRID ── -->
+  <section class="missions-section" aria-labelledby="missions-heading">
+    <div class="container">
+      <div class="missions-header">
+        <div>
+          <h2 class="missions-title" id="missions-heading">OPERATIONS LOGIC</h2>
+          <div class="missions-sub">SELECT TARGET // INITIALIZE SEQUENCE</div>
+        </div>
+        <div class="sort-label" aria-hidden="true">SORTED BY: COMPLEXITY [ASC]</div>
+      </div>
+
+      <div class="missions-grid" id="missions-grid">
+
+        <!-- PLC Foundations PRIMER -->
+        <a href="plc-primer.html" class="mission-card card-clip"
+           aria-label="Mission 01 — PLC Foundations Boot Camp: 25-term glossary, 6 alternative tools, and beginner video recommendations before your first challenge.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-module">📖 MODULE</span>
+              <span class="card-badge" style="background:rgba(34,197,94,.12);color:#22c55e;border-color:rgba(34,197,94,.3);">START HERE</span>
+            </div>
+            <div class="card-icon-box dim" aria-hidden="true">🎓</div>
+          </div>
+          <h3 class="card-title" style="margin-top:14px;">PLC Boot Camp</h3>
+          <p class="card-desc">
+            New to PLCs? Start here. 25 decoded key terms — hardware, logic, comms, and safety — a
+            filterable glossary, six alternative simulators to explore, and hand-picked beginner
+            YouTube videos. Build your vocabulary before you touch a rung.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">COVERS:</div>
+            <div class="proto-tags">
+              <span class="ptag">25 Key Terms</span>
+              <span class="ptag">6 Tools &amp; Games</span>
+              <span class="ptag">6 Videos</span>
+              <span class="ptag">IEC 61131-3</span>
+            </div>
+          </div>
+          <span class="card-cta cta-tool btn-clip">ENTER BOOT CAMP <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- Digital Multimeter TOOL -->
+        <a href="multimeter.html" class="mission-card card-clip"
+           aria-label="Tool — Digital Multimeter Simulator: Interactive DMM with 4 PLC measurement scenarios.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-tool">🔧 TOOL</span>
+            </div>
+            <div class="card-icon-box dim" aria-hidden="true">🔌</div>
+          </div>
+          <h3 class="card-title" style="margin-top:14px;">Digital Multimeter</h3>
+          <p class="card-desc">
+            An interactive DMM simulator with a real rotary dial, LCD display, and four PLC measurement
+            scenarios — PSU check, input card voltage, output coil test, and wiring continuity. Place
+            virtual probes, read the display, and interpret faults exactly as you would on-site.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">VDC / VAC</span>
+              <span class="ptag">Resistance Ω</span>
+              <span class="ptag">Continuity</span>
+              <span class="ptag">Probe Placement</span>
+            </div>
+          </div>
+          <span class="card-cta cta-tool btn-clip">OPEN TOOL <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- Multimeter Lesson MODULE -->
+        <a href="multimeter-lesson.html" class="mission-card card-clip"
+           aria-label="Module — Multimeter Lesson: 7-section guide covering parts, modes, procedures, safety, and fault-finding. Includes 5-question quiz.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-module">📖 MODULE</span>
+            </div>
+            <div class="card-icon-box dim" aria-hidden="true">📊</div>
+          </div>
+          <h3 class="card-title" style="margin-top:14px;">Multimeter Lesson</h3>
+          <p class="card-desc">
+            Seven sections covering every skill a PLC engineer needs: meter parts, dial modes, DC voltage
+            procedure, resistance and continuity, safety rules, a structured fault-finding workflow, and
+            a 5-question quiz. Read it once, remember it for life.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">CAT III Safety</span>
+              <span class="ptag">LOTO Procedure</span>
+              <span class="ptag">Fault Workflow</span>
+              <span class="ptag">5-Q Quiz</span>
+            </div>
+          </div>
+          <span class="card-cta cta-tool btn-clip">ACCESS DATA <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- L1: Start/Stop Latching Circuit -->
+        <a href="level1.html" class="mission-card card-clip"
+           aria-label="Level 1 — Start/Stop Latching Circuit: Build the seal-in latch and E-Stop for a conveyor belt. Beginner. 5 milestones.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-level">LEVEL</span>
+              <span class="card-lnum">L1</span>
+            </div>
+            <div class="card-icon-box" aria-hidden="true">🏭</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 1 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 1</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg lo"></div><div class="tseg"></div><div class="tseg"></div><div class="tseg"></div><div class="tseg"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Start/Stop Latching Circuit</h3>
+          <p class="card-desc">
+            A conveyor belt won't run with just a START button — learn to build the seal-in latch
+            that keeps it running, and the STOP that drops it. The foundation of every machine in existence.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">Ladder Logic</span>
+              <span class="ptag">NO/NC Contacts</span>
+              <span class="ptag">Seal-In Circuit</span>
+              <span class="ptag">Output Coils</span>
+            </div>
+          </div>
+          <span class="card-cta cta-mission btn-clip">BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- Learn Your Log MODULE -->
+        <a href="learn-your-log.html" class="mission-card card-clip"
+           aria-label="Module — Learn Your Log: Interactive lesson on maintenance documentation, 8 required fields, HSE audit compliance. 5 milestones.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-module">📋 MODULE</span>
+            </div>
+            <div class="card-icon-box dim" aria-hidden="true">📋</div>
+          </div>
+          <h3 class="card-title" style="margin-top:14px;">Learn Your Log</h3>
+          <p class="card-desc">
+            A technician who can't document their work is a liability — no matter how good they are with
+            tools. Learn why maintenance logs are legally required, what 8 fields every entry must
+            contain, and how to spot a log that would fail an HSE audit.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">ISO 9001:2015</span>
+              <span class="ptag">IEC 62061 Annex C</span>
+              <span class="ptag">PSSR 2000</span>
+              <span class="ptag">Root Cause</span>
+            </div>
+          </div>
+          <span class="card-cta cta-tool btn-clip">ACCESS DATA <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- Maintenance Log TEMPLATE -->
+        <a href="maintenance-log.html" class="mission-card card-clip"
+           aria-label="Tool — Maintenance Log Template: Fillable 8-section log with auto-save, quick-fill, and print support.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-tool">🗂 TEMPLATE</span>
+            </div>
+            <div class="card-icon-box dim" aria-hidden="true">🗂️</div>
+          </div>
+          <h3 class="card-title" style="margin-top:14px;">Maintenance Log Template</h3>
+          <p class="card-desc">
+            A professional, printable maintenance log covering all 8 required fields: fault description,
+            root cause, corrective action, parts, test results and sign-off. Quick-fill buttons for
+            every challenge. Auto-saves to your browser.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">8 Sections</span>
+              <span class="ptag">Auto-save</span>
+              <span class="ptag">Quick-fill</span>
+              <span class="ptag">Printable</span>
+            </div>
+          </div>
+          <span class="card-cta cta-tool btn-clip">DEPLOY TEMPLATE <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- L2: Tank Filling System -->
+        <a href="level2.html" class="mission-card card-clip"
+           aria-label="Level 2 — Tank Filling System: Two float switches, hysteresis loop, fault injection lab. Beginner.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-level">LEVEL</span>
+              <span class="card-lnum">L2</span>
+            </div>
+            <div class="card-icon-box"
+                 style="background:rgba(20,184,166,.15);border-color:rgba(20,184,166,.3);"
+                 aria-hidden="true">🛢</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 2 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 2</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg"></div><div class="tseg"></div><div class="tseg"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Tank Filling System</h3>
+          <p class="card-desc">
+            Two float switches, one pump, a two-setpoint hysteresis loop, and a fault injection lab.
+            Wire a sensor incorrectly and watch the fail-safe kick in — exactly as it does on a plant floor.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">Process Control</span>
+              <span class="ptag">Float Sensors</span>
+              <span class="ptag">Hysteresis</span>
+              <span class="ptag">Fail-Safe Design</span>
+            </div>
+          </div>
+          <span class="card-cta cta-mission btn-clip"
+                style="background:rgba(20,184,166,.12);color:#2dd4bf;border-color:rgba(20,184,166,.35);">
+            BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- L3: Modbus TCP Communication -->
+        <a href="level3.html" class="mission-card card-clip"
+           aria-label="Level 3 — Modbus TCP Communication: Build Modbus frames byte-by-byte, all 7 function codes. Intermediate.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-level">LEVEL</span>
+              <span class="card-lnum">L3</span>
+            </div>
+            <div class="card-icon-box"
+                 style="background:rgba(6,182,212,.12);border-color:rgba(6,182,212,.25);"
+                 aria-hidden="true">🌐</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 3 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 3</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg"></div><div class="tseg"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Modbus TCP Communication</h3>
+          <p class="card-desc">
+            Build real Modbus frames byte-by-byte, fire them across a simulated Ethernet network, and
+            read the protocol analyser log. All 7 function codes, a live register map, and animated
+            network packets.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">Modbus TCP</span>
+              <span class="ptag">MBAP Headers</span>
+              <span class="ptag">FC01–FC16</span>
+              <span class="ptag">Protocol Analysis</span>
+            </div>
+          </div>
+          <span class="card-cta cta-mission btn-clip">BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span></span>
+        </a>
+
+        <!-- L4: Safety Interlock — Drill Machine -->
+        <a href="level4.html" class="mission-card card-clip"
+           aria-label="Safety — Safety Interlock for a Drill Machine: Dual-channel E-Stop and gate guard per IEC 62061. Intermediate. 7 milestones.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-safety">⚠ SAFETY</span>
+              <span class="card-lnum">L4</span>
+            </div>
+            <div class="card-icon-box"
+                 style="background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.25);"
+                 aria-hidden="true">🔒</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 3 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 3</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg"></div><div class="tseg"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Safety Interlock — Drill Machine</h3>
+          <p class="card-desc">
+            A high-speed drill that cannot start unless the safety gate is closed AND a manual reset
+            has been pressed. Simulate wire breaks and watch the NC circuit shut down exactly as
+            IEC 62061 requires.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">IEC 62061</span>
+              <span class="ptag">Fail-Safe NC</span>
+              <span class="ptag">Manual Reset</span>
+              <span class="ptag">Two-Channel Safety</span>
+            </div>
+          </div>
+          <span class="card-cta btn-clip"
+                style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-d);font-size:18px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 16px;min-height:44px;margin-top:auto;transition:all .2s;position:relative;z-index:2;background:rgba(239,68,68,.12);color:#f87171;border:1px solid rgba(239,68,68,.35);">
+            BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- L5: Timed Conveyor — TON Instruction -->
+        <a href="level5.html" class="mission-card card-clip"
+           aria-label="Timer — Timed Conveyor with TON Instruction: Belt runs for 5 seconds. E-Stop resets timer. Intermediate. 7 milestones.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-timer">⏱ TIMER</span>
+              <span class="card-lnum">L5</span>
+            </div>
+            <div class="card-icon-box"
+                 style="background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);"
+                 aria-hidden="true">📦</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 2 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 2</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg lo"></div><div class="tseg lo"></div><div class="tseg"></div><div class="tseg"></div><div class="tseg"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Timed Conveyor — TON Instruction</h3>
+          <p class="card-desc">
+            When a box hits the sensor, the belt runs for exactly 5 seconds then stops. Press E-Stop
+            mid-cycle and the timer resets to zero — preventing a half-delivered box from jamming
+            the packing station.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">TON Timer</span>
+              <span class="ptag">T0.EN / TT / DN</span>
+              <span class="ptag">Process Timing</span>
+              <span class="ptag">Seal-In Latch</span>
+            </div>
+          </div>
+          <span class="card-cta btn-clip"
+                style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-d);font-size:18px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 16px;min-height:44px;margin-top:auto;transition:all .2s;position:relative;z-index:2;background:rgba(245,158,11,.12);color:var(--amber2);border:1px solid rgba(245,158,11,.35);">
+            BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+        <!-- L6: Sequential Batching — State Machine -->
+        <a href="level6.html" class="mission-card card-clip"
+           aria-label="Batch — Sequential Batching State Machine: Fill, mix, drain with ISA-88 step logic. Advanced. 7 milestones.">
+          <div class="card-top">
+            <div class="card-badges">
+              <span class="card-badge badge-batch">⚙ BATCH</span>
+              <span class="card-lnum">L6</span>
+            </div>
+            <div class="card-icon-box"
+                 style="background:rgba(139,92,246,.12);border-color:rgba(139,92,246,.25);"
+                 aria-hidden="true">🧪</div>
+          </div>
+          <div class="threat-wrap" role="group" aria-label="Complexity rating: Class 5 out of 5">
+            <div class="threat-row">
+              <span class="threat-lbl">THREAT LEVEL</span>
+              <span class="threat-cls">CLASS 5</span>
+            </div>
+            <div class="threat-segs" aria-hidden="true">
+              <div class="tseg hi"></div><div class="tseg hi"></div><div class="tseg hi"></div><div class="tseg hi"></div><div class="tseg hi"></div>
+            </div>
+          </div>
+          <h3 class="card-title">Sequential Batching — State Machine</h3>
+          <p class="card-desc">
+            A mixing plant that fills until LS_HIGH triggers, mixes for a timed cycle, then drains
+            until LS_LOW clears. Mutual exclusion, sensor-driven transitions, ISA-88 batch logic —
+            the heart of pharmaceutical and food manufacturing.
+          </p>
+          <div class="card-protocols">
+            <div class="proto-lbl">REQUIRED PROTOCOLS:</div>
+            <div class="proto-tags">
+              <span class="ptag">State Machine</span>
+              <span class="ptag">Step Logic</span>
+              <span class="ptag">ISA-88 Batch</span>
+              <span class="ptag">Sensor Transitions</span>
+            </div>
+          </div>
+          <span class="card-cta btn-clip"
+                style="display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-d);font-size:18px;letter-spacing:1.5px;text-transform:uppercase;padding:10px 16px;min-height:44px;margin-top:auto;transition:all .2s;position:relative;z-index:2;background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.35);">
+            BEGIN MISSION <span class="cta-arr2" aria-hidden="true">→</span>
+          </span>
+        </a>
+
+
+      </div><!-- /.missions-grid -->
+    </div>
+  </section>
+
+  <!-- ── TACTICAL PROGRESSION ── -->
+  <section class="prog-section hex-bg" aria-labelledby="prog-heading">
+    <div class="container">
+      <h2 class="prog-title" id="prog-heading">TACTICAL PROGRESSION</h2>
+      <p class="prog-sub">OPTIMAL COMPLETION PATHWAY</p>
+      <nav class="prog-track" aria-label="Curriculum path">
+
+        <div class="prog-step">
+          <a href="level1.html" class="prog-node node-clip"
+             style="border-color:rgba(59,130,246,.6);color:var(--blue2);"
+             aria-label="Level 1: Contacts &amp; Coils">1</a>
+          <div class="prog-label" style="color:var(--blue2);">Contacts &amp; Coils</div>
+          <div class="prog-topic">Seal-in latch</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="learn-your-log.html" class="prog-node node-clip"
+             style="border-color:rgba(245,158,11,.5);color:var(--amber2);"
+             aria-label="Documentation module — Learn Your Log">📋</a>
+          <div class="prog-label" style="color:var(--amber2);">Documentation</div>
+          <div class="prog-topic">Maintenance logs</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="level2.html" class="prog-node node-clip"
+             style="border-color:rgba(20,184,166,.5);color:#2dd4bf;"
+             aria-label="Level 2: Process Sensors">2</a>
+          <div class="prog-label" style="color:#2dd4bf;">Process Sensors</div>
+          <div class="prog-topic">Hysteresis control</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="level3.html" class="prog-node node-clip"
+             style="border-color:rgba(6,182,212,.5);color:var(--cyan2);"
+             aria-label="Level 3: Networking">3</a>
+          <div class="prog-label" style="color:var(--cyan2);">Networking</div>
+          <div class="prog-topic">Modbus TCP / MBAP</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="level4.html" class="prog-node node-clip"
+             style="border-color:rgba(239,68,68,.5);color:#f87171;"
+             aria-label="Level 4: Safety Systems">S</a>
+          <div class="prog-label" style="color:#f87171;">Safety Systems</div>
+          <div class="prog-topic">IEC 62061 / Manual reset</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="level5.html" class="prog-node node-clip"
+             style="border-color:rgba(245,158,11,.5);color:var(--amber2);"
+             aria-label="Level 5: Timers">T</a>
+          <div class="prog-label" style="color:var(--amber2);">Timers</div>
+          <div class="prog-topic">TON / T0.DN sequencing</div>
+        </div>
+
+        <div class="prog-step">
+          <a href="level6.html" class="prog-node node-clip"
+             style="border-color:rgba(139,92,246,.5);color:#a78bfa;"
+             aria-label="Level 6: Batch Control">B</a>
+          <div class="prog-label" style="color:#a78bfa;">Batch Control</div>
+          <div class="prog-topic">State machine / ISA-88</div>
+        </div>
+
+      </nav>
+    </div>
+  </section>
+
+  <!-- ── INTEL BREAKDOWN ── -->
+  <section class="topics-section" aria-labelledby="topics-heading">
+    <div class="container">
+      <h2 class="topics-title" id="topics-heading">INTEL BREAKDOWN</h2>
+      <p class="topics-sub">Concepts pulled directly from real industrial projects.</p>
+      <div class="topics-grid">
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">🔌</div>
+          <div>
+            <div class="topic-title">IEC 61131-3 Ladder Diagram</div>
+            <div class="topic-desc">Every challenge uses real LD notation — NO/NC contacts, output coils, TON blocks, and seal-in branches rendered exactly as they appear in Studio 5000 and TIA Portal.</div>
+          </div>
+        </div>
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">⚡</div>
+          <div>
+            <div class="topic-title">50 ms PLC Scan Cycle</div>
+            <div class="topic-desc">The simulation runs on a real 50 ms interval — inputs are sampled, logic executes, outputs are written, exactly matching the CPU cycle that runs on every real PLC in service.</div>
+          </div>
+        </div>
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">🛡</div>
+          <div>
+            <div class="topic-title">Fail-Safe &amp; Safety Standards</div>
+            <div class="topic-desc">Challenges 2 and 4 teach NC wiring, de-energise-to-trip philosophy, and the IEC 62061 manual-reset requirement — topics every automation engineer must know before going on-site.</div>
+          </div>
+        </div>
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">🌐</div>
+          <div>
+            <div class="topic-title">Industrial Networking</div>
+            <div class="topic-desc">Challenge 3 walks through a complete Modbus TCP frame at the byte level — Transaction ID, Protocol ID, Length, Unit ID, Function Code, and data payload — using a live protocol analyser.</div>
+          </div>
+        </div>
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">⏱</div>
+          <div>
+            <div class="topic-title">Timers, Counters &amp; Sequencing</div>
+            <div class="topic-desc">TON, TOF, and RTO are the backbone of process timing. Challenge 5 teaches the EN/TT/DN bit model and how an E-Stop mid-cycle correctly resets elapsed time to zero.</div>
+          </div>
+        </div>
+
+        <div class="topic-card">
+          <div class="topic-icon" aria-hidden="true">🧪</div>
+          <div>
+            <div class="topic-title">ISA-88 Batch Process Control</div>
+            <div class="topic-desc">The standard used in pharma, food, and chemical plants. Challenge 6 implements the Phase model (Fill → Mix → Drain) with sensor-driven transitions — not open-loop timers.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer role="contentinfo">
+  <div class="footer-inner">
+    <p class="footer-left">PLeC — Learn PLC Engineering. Built for engineers learning industrial automation from first principles.</p>
+
+    <!-- ── DONATION LINK ──────────────────────────────────────────────────────
+         Replace YOUR_STRIPE_PAYMENT_LINK_HERE with your Stripe Payment Link:
+         Dashboard → Payment Links → + New → Customer chooses price → Copy URL
+    ──────────────────────────────────────────────────────────────────────── -->
+    <a class="donate-btn"
+       href="YOUR_STRIPE_PAYMENT_LINK_HERE"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Support PLeC — opens Stripe donation page in new tab">
+      <span class="d-icon" aria-hidden="true">♡</span>
+      SUPPORT THIS PROJECT
+    </a>
+
+    <div class="footer-tags" role="list" aria-label="Technology stack">
+      <span class="ftag" role="listitem">HTML/CSS/JS</span>
+      <span class="ftag" role="listitem">SVG Ladder Diagrams</span>
+      <span class="ftag" role="listitem">50 ms Scan Loop</span>
+      <span class="ftag" role="listitem">IEC 61131-3</span>
+      <span class="ftag" role="listitem">IEC 62061</span>
+      <span class="ftag" role="listitem">ISA-88</span>
+    </div>
+    <div class="footer-ver" aria-hidden="true">v2.4.1 [BUILD 8902]</div>
+  </div>
+</footer>
+
+<script>
+// ── Theme toggle ──
+(function(){
+  var KEY = 'plc-theme';
+  var btn = document.getElementById('theme-toggle');
+  function apply(t) {
+    document.documentElement.dataset.theme = t;
+    if (btn) {
+      btn.textContent = t === 'light' ? '🌙' : '☀️';
+      btn.setAttribute('aria-label', t === 'light' ? 'Switch to dark mode' : 'Switch to light mode');
+      btn.setAttribute('aria-pressed', String(t === 'light'));
+    }
+  }
+  apply(localStorage.getItem(KEY) || 'dark');
+  if (btn) btn.addEventListener('click', function() {
+    var n = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem(KEY, n);
+    apply(n);
+  });
+})();
+
+// ── Staggered card mount animation ──
+(function() {
+  var cards = document.querySelectorAll('.mission-card');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) {
+          var idx = Array.prototype.indexOf.call(cards, e.target);
+          setTimeout(function() { e.target.classList.add('mounted'); }, idx * 80);
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+    cards.forEach(function(c) { io.observe(c); });
+  } else {
+    cards.forEach(function(c) { c.classList.add('mounted'); });
+  }
+})();
+
+</script>
+</body>
+</html>

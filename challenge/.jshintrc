@@ -1,0 +1,11 @@
+{
+  "esversion": 11,
+  "browser": true,
+  "globals": {
+    "svOpen": true,
+    "svClose": true
+  },
+  "undef": false,
+  "unused": false,
+  "multistr": true
+}

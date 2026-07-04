@@ -158,6 +158,26 @@
       .replace(/"/g, '&quot;');
   }
 
+  /* ── Persist result to server (best-effort, silent on failure) ──
+   * The server issues a signed, single-use `result_token` from /api/assess/
+   * that binds this exact scored outcome. The client cannot fabricate or
+   * alter score data here — it only relays the token the server already
+   * computed and vouched for. */
+  function saveResult(data) {
+    if (!data.result_token) return;
+    fetch('/api/results', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        result_token: data.result_token
+      })
+    }).then(function () {
+      if (typeof window.plecRefreshResults === 'function') {
+        window.plecRefreshResults();
+      }
+    }).catch(function () { /* server not available — result already shown in modal */ });
+  }
+
   /* ── Submit handler ── */
   document.addEventListener('click', function (e) {
     if (e.target && e.target.id === 'assess-btn') {
@@ -176,6 +196,7 @@
         })
         .then(function (data) {
           showModal(data);
+          saveResult(data);
           btn.disabled    = false;
           btn.innerHTML   = '&#128203; Get Manager\'s Review';
         })

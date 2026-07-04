@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maintenance Log Template — PLeC</title>
+  <style>
+    :root {
+      --bg:      #080a0e;
+      --surface: #0e1118;
+      --card:    #111520;
+      --border:  #1e2438;
+      --border2: #252d45;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --green:   #22c55e;
+      --amber:   #f59e0b;
+      --amber2:  #fbbf24;
+      --red:     #ef4444;
+      --blue:    #3b82f6;
+    }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; font-size:14px; min-height:100vh; }
+
+    /* ── Nav ── */
+    nav { display:flex; align-items:center; padding:10px 20px; background:rgba(8,10,14,.95); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; gap:12px; flex-wrap:wrap; }
+    .nav-logo { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; flex-shrink:0; }
+    .logo-icon { width:28px; height:28px; background:linear-gradient(135deg,#d97706,#f59e0b); border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:14px; color:#fff; font-weight:900; }
+    .nav-links { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+    .nav-links a { font-size:11px; color:#64748b; padding:4px 9px; border:1px solid #2e3350; border-radius:5px; font-weight:600; text-decoration:none; }
+    .nav-links a:hover { color:var(--text); border-color:#4b5a72; }
+    .nav-links a.active { color:var(--amber2); border-color:var(--amber); }
+    #theme-toggle { background:transparent; border:1px solid var(--border); color:var(--muted); font-size:15px; padding:3px 8px; border-radius:5px; cursor:pointer; }
+
+    /* ── Page layout ── */
+    .page-wrap { max-width:900px; margin:0 auto; padding:32px 24px 80px; }
+
+    /* ── Toolbar ── */
+    .toolbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:24px; }
+    .tb-title { font-size:20px; font-weight:800; flex:1; }
+    .tb-subtitle { font-size:11px; color:var(--muted); margin-top:3px; }
+    .tb-btn { padding:8px 16px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; border:none; transition:opacity .15s, transform .1s; display:inline-flex; align-items:center; gap:6px; }
+    .tb-btn:active { transform:scale(.97); }
+    .tb-btn-print  { background:linear-gradient(135deg,#1d4ed8,#3b82f6); color:#fff; }
+    .tb-btn-clear  { background:var(--card); border:1px solid var(--border); color:var(--muted); }
+    .tb-btn-save   { background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.3); color:#86efac; }
+    .tb-btn:hover { opacity:.85; }
+    .tb-btn:focus-visible { outline:2px solid var(--amber); outline-offset:3px; border-radius:6px; }
+
+    /* ── Scenario quick-fill ── */
+    .quickfill { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:24px; }
+    .qf-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:8px; }
+    .qf-btns { display:flex; gap:8px; flex-wrap:wrap; }
+    .qf-btn { padding:5px 12px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer; border:none; background:rgba(59,130,246,.12); border:1px solid rgba(59,130,246,.25); color:#93c5fd; }
+    .qf-btn:hover { background:rgba(59,130,246,.2); }
+    .qf-btn:focus-visible { outline:2px solid var(--blue); outline-offset:2px; border-radius:4px; }
+
+    /* ── Form sections ── */
+    .form-section { background:var(--card); border:1px solid var(--border); border-radius:10px; margin-bottom:16px; overflow:hidden; }
+    .fs-header { background:rgba(255,255,255,.03); border-bottom:1px solid var(--border); padding:10px 16px; display:flex; align-items:center; gap:10px; }
+    .fs-num { width:22px; height:22px; border-radius:50%; background:var(--amber); color:#000; font-size:10px; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .fs-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--text); }
+    .fs-body { padding:16px; display:flex; flex-direction:column; gap:12px; }
+    .field-row { display:grid; gap:12px; }
+    .field-row-2 { grid-template-columns:1fr 1fr; }
+    .field-row-3 { grid-template-columns:1fr 1fr 1fr; }
+    .field-group { display:flex; flex-direction:column; gap:4px; }
+    .field-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); }
+    .field-label .req { color:var(--red); }
+    .field-input, .field-textarea, .field-select {
+      background:var(--surface); border:1px solid var(--border);
+      border-radius:5px; color:var(--text); font-size:12px;
+      font-family:inherit; padding:7px 10px; width:100%;
+      transition:border-color .15s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus {
+      outline:none; border-color:var(--amber);
+    }
+    .field-textarea { resize:vertical; min-height:80px; line-height:1.65; }
+
+    /* ── Parts table ── */
+    .parts-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .parts-table th { text-align:left; padding:6px 8px; color:var(--muted); font-weight:700; font-size:10px; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); }
+    .parts-table td { padding:4px 4px; border-bottom:1px solid rgba(255,255,255,.04); }
+    .parts-table tr:last-child td { border-bottom:none; }
+    .part-input { background:var(--surface); border:1px solid transparent; border-radius:4px; color:var(--text); font-size:11px; font-family:inherit; padding:5px 7px; width:100%; }
+    .part-input:focus { outline:none; border-color:var(--amber); }
+    .part-remove { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; padding:2px 6px; border-radius:3px; }
+    .part-remove:hover { color:var(--red); background:rgba(239,68,68,.1); }
+    .add-row-btn { display:inline-flex; align-items:center; gap:5px; margin-top:8px; padding:5px 12px; background:rgba(255,255,255,.04); border:1px dashed var(--border2); border-radius:5px; font-size:11px; color:var(--muted); cursor:pointer; }
+    .add-row-btn:hover { background:rgba(255,255,255,.08); color:var(--text); }
+
+    /* ── Checklist ── */
+    .checklist { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .check-item { display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; }
+    .check-item input { accent-color:var(--amber); width:14px; height:14px; flex-shrink:0; }
+
+    /* ── Sign-off ── */
+    .signoff-row { display:grid; grid-template-columns:1fr auto 1fr; gap:16px; align-items:end; }
+    .sig-line { border-bottom:1px solid var(--border2); padding-bottom:4px; margin-top:20px; min-height:40px; display:flex; align-items:flex-end; }
+    .sig-label { font-size:10px; color:var(--muted); margin-top:4px; text-align:center; }
+    .sig-vs { text-align:center; color:var(--muted); font-size:18px; }
+
+    /* ── Status bar ── */
+    .status-bar { position:fixed; bottom:0; left:0; right:0; background:rgba(8,10,14,.97); border-top:1px solid var(--border); padding:8px 24px; display:flex; align-items:center; gap:16px; z-index:200; }
+    .sb-item { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+    .sb-dot { width:8px; height:8px; border-radius:50%; background:var(--green); }
+    .sb-dot.unsaved { background:var(--amber); }
+    #sb-saved { font-size:11px; color:var(--muted); }
+    #completion-pct { font-size:13px; font-weight:700; color:var(--amber); font-family:monospace; }
+
+    /* ── Accessibility ── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:#3b82f6;color:#fff;font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none}
+    .skip-link:focus{top:0}
+    :focus-visible{outline:2px solid var(--amber);outline-offset:3px;border-radius:3px}
+
+    /* ── Light mode ── */
+    [data-theme="light"]{--bg:#f0f4f8;--surface:#f8fafc;--card:#fff;--border:#cbd5e1;--border2:#94a3b8;--text:#0f172a;--muted:#64748b}
+    [data-theme="light"] nav{background:rgba(240,244,248,.97)}
+    [data-theme="light"] .field-input,[data-theme="light"] .field-textarea,[data-theme="light"] .field-select,[data-theme="light"] .part-input{background:#f8fafc;color:#0f172a;border-color:#cbd5e1}
+    [data-theme="light"] .status-bar{background:rgba(240,244,248,.97)}
+
+    /* ── Print styles ── */
+    @media print {
+      nav, .toolbar .tb-btn-print, .toolbar .tb-btn-clear, .toolbar .tb-btn-save, .quickfill, .status-bar, #theme-toggle, .part-remove, .add-row-btn { display:none !important; }
+      body { background:#fff; color:#000; font-size:11pt; }
+      .page-wrap { padding:0; max-width:100%; }
+      .form-section { border:1px solid #999; break-inside:avoid; }
+      .field-input, .field-textarea, .field-select, .part-input { background:#fff; color:#000; border:1px solid #ccc; }
+      .fs-header { background:#f0f0f0; }
+      .fs-num { background:#333; color:#fff; }
+    }
+
+    @media(max-width:700px){.field-row-2,.field-row-3{grid-template-columns:1fr}.checklist{grid-template-columns:1fr}.signoff-row{grid-template-columns:1fr}}
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<nav aria-label="Main navigation">
+  <div class="nav-logo">
+    <div class="logo-icon">📋</div>
+    <span>Maintenance Log</span>
+  </div>
+  <div class="nav-links">
+    <a href="index.html">⌂ Home</a>
+    <a href="learn-your-log.html">Log Module</a>
+    <a href="level1.html">L1</a>
+    <a href="level2.html">L2</a>
+    <a href="level3.html">L3</a>
+    <a href="level4.html">Safety</a>
+    <a href="level5.html">Timer</a>
+    <a href="level6.html">Batch</a>
+    <a href="maintenance-log.html" class="active">📋 Template</a>
+    <a href="/login/" style="border-color:#f5a623;color:#f5a623;font-weight:700;text-decoration:none;">Sign In</a>
+    <a href="/register/" style="border-color:#64748b;color:#64748b;font-weight:700;text-decoration:none;">Register</a>
+  </div>
+  <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" style="margin-left:8px;">☀️</button>
+</nav>
+
+<main id="main-content">
+<div class="page-wrap">
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div>
+      <div class="tb-title">Maintenance Log</div>
+      <div class="tb-subtitle">Ref: ISO 9001:2015 cl. 7.5 · IEC 62061 Annex C · PSSR 2000</div>
+    </div>
+    <button class="tb-btn tb-btn-save" id="btn-save" aria-label="Save form to browser">💾 Save</button>
+    <button class="tb-btn tb-btn-clear" id="btn-clear" aria-label="Clear all fields">↺ Clear</button>
+    <button class="tb-btn tb-btn-print" onclick="window.print()" aria-label="Print this log">🖨 Print</button>
+  </div>
+
+  <!-- Quick-fill -->
+  <div class="quickfill" role="region" aria-label="Quick-fill from challenge scenario">
+    <div class="qf-label">Quick-fill from Challenge Scenario</div>
+    <div class="qf-btns">
+      <button class="qf-btn" data-level="1">Level 1 — Conveyor Belt</button>
+      <button class="qf-btn" data-level="2">Level 2 — Tank Filling</button>
+      <button class="qf-btn" data-level="3">Level 3 — Modbus TCP</button>
+      <button class="qf-btn" data-level="4">Level 4 — Safety Interlock</button>
+      <button class="qf-btn" data-level="5">Level 5 — TON Timer</button>
+      <button class="qf-btn" data-level="6">Level 6 — Batch Process</button>
+    </div>
+  </div>
+
+  <form id="maint-form" novalidate autocomplete="off">
+
+    <!-- Section 1: Job Details -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">1</div>
+        <div class="fs-title">Job Details</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-row field-row-3">
+          <div class="field-group">
+            <label class="field-label" for="f-date">Date <span class="req">*</span></label>
+            <input class="field-input" type="text" id="f-date" name="date" placeholder="DD/MM/YYYY">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-start-time">Start Time <span class="req">*</span></label>
+            <input class="field-input" type="time" id="f-start-time" name="start-time">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-end-time">End Time <span class="req">*</span></label>
+            <input class="field-input" type="time" id="f-end-time" name="end-time">
+          </div>
+        </div>
+        <div class="field-row field-row-3">
+          <div class="field-group">
+            <label class="field-label" for="f-wo">Work Order # <span class="req">*</span></label>
+            <input class="field-input" type="text" id="f-wo" name="wo" placeholder="e.g. WO-0001">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-equip">Equipment Tag / Asset ID <span class="req">*</span></label>
+            <input class="field-input" type="text" id="f-equip" name="equip" placeholder="e.g. CONV-01-L1">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-location">Location / Area</label>
+            <input class="field-input" type="text" id="f-location" name="location" placeholder="e.g. Bay 3, Packing Line">
+          </div>
+        </div>
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-priority">Priority / Category <span class="req">*</span></label>
+            <select class="field-select" id="f-priority" name="priority">
+              <option value="">Select…</option>
+              <option>Breakdown — Production stopped</option>
+              <option>Urgent — Production impaired</option>
+              <option>Planned — Scheduled PM</option>
+              <option>Proactive — Condition-based</option>
+              <option>Project — Modification / upgrade</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-reported">Reported By / Source</label>
+            <input class="field-input" type="text" id="f-reported" name="reported" placeholder="e.g. Operator call / SCADA Alarm F-47">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Fault Description -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">2</div>
+        <div class="fs-title">Fault Description</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-group">
+          <label class="field-label" for="f-fault">What failed and how was it reported? Include any error codes, alarm numbers or observed symptoms. <span class="req">*</span></label>
+          <textarea class="field-textarea" id="f-fault" name="fault" placeholder="Describe the failure mode, symptoms observed, and how the fault was first reported. Include SCADA alarm IDs or PLC fault codes verbatim." style="min-height:90px;"></textarea>
+        </div>
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-error-code">Error Code / Alarm ID</label>
+            <input class="field-input" type="text" id="f-error-code" name="error-code" placeholder="e.g. F-47, E:08:01">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-downtime-type">Downtime Type</label>
+            <select class="field-select" id="f-downtime-type" name="downtime-type">
+              <option value="">Select…</option>
+              <option>Unplanned — Equipment failure</option>
+              <option>Unplanned — Process fault</option>
+              <option>Planned — Scheduled PM</option>
+              <option>No downtime — Running repair</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Root Cause -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">3</div>
+        <div class="fs-title">Root Cause Analysis</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-group">
+          <label class="field-label" for="f-cause">What was the actual technical cause of the failure? <span class="req">*</span></label>
+          <textarea class="field-textarea" id="f-cause" name="cause" placeholder="State the root cause — not the symptom. 'Motor tripped' is a symptom. 'Bearing failure due to missed lubrication at scheduled PM' is a root cause." style="min-height:90px;"></textarea>
+        </div>
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-cause-category">Cause Category</label>
+            <select class="field-select" id="f-cause-category" name="cause-category">
+              <option value="">Select…</option>
+              <option>Wear / End of Life</option>
+              <option>Incorrect Installation</option>
+              <option>Operator Error</option>
+              <option>Software / Configuration</option>
+              <option>Design / Specification</option>
+              <option>Environmental / External</option>
+              <option>PM Missed / Overdue</option>
+              <option>Unknown — Further investigation required</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-repeat">Is this a Repeat Failure?</label>
+            <select class="field-select" id="f-repeat" name="repeat">
+              <option value="">Select…</option>
+              <option>No — First occurrence</option>
+              <option>Yes — 2nd occurrence</option>
+              <option>Yes — 3rd or more</option>
+              <option>Unknown</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Corrective Action -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">4</div>
+        <div class="fs-title">Corrective Action Taken</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-group">
+          <label class="field-label" for="f-action">Step-by-step description of what was done. <span class="req">*</span></label>
+          <textarea class="field-textarea" id="f-action" name="action" placeholder="Describe exactly what was done to fix the fault. Write as if someone who was not present needs to verify or reverse your work." style="min-height:110px;"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="f-preventive">Preventive Action (if applicable)</label>
+          <textarea class="field-textarea" id="f-preventive" name="preventive" placeholder="Any changes to PM schedule, procedures, or design to prevent recurrence?" style="min-height:60px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: Parts Used -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">5</div>
+        <div class="fs-title">Parts / Materials Used</div>
+      </div>
+      <div class="fs-body">
+        <table class="parts-table" aria-label="Parts used">
+          <thead>
+            <tr>
+              <th scope="col" style="width:20%">Part Number</th>
+              <th scope="col" style="width:35%">Description</th>
+              <th scope="col" style="width:10%">Qty</th>
+              <th scope="col" style="width:25%">Serial / Batch</th>
+              <th scope="col" style="width:10%"></th>
+            </tr>
+          </thead>
+          <tbody id="parts-tbody">
+            <tr>
+              <td><input class="part-input" type="text" placeholder="e.g. 6204-2RS"></td>
+              <td><input class="part-input" type="text" placeholder="Deep groove ball bearing"></td>
+              <td><input class="part-input" type="number" min="1" style="width:50px;" placeholder="1"></td>
+              <td><input class="part-input" type="text" placeholder="Batch / serial no."></td>
+              <td><button type="button" class="part-remove" aria-label="Remove row" title="Remove">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <button type="button" class="add-row-btn" id="add-part-row" aria-label="Add parts row">+ Add Row</button>
+        <div class="field-group" style="margin-top:12px;">
+          <label class="field-label" for="f-no-parts">If no parts were replaced, state here</label>
+          <input class="field-input" id="f-no-parts" name="no-parts" placeholder='e.g. "Software-only change — no physical parts replaced. Program backup saved to \\SERVER\PLCBackups\"'>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 6: Test & Verification -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">6</div>
+        <div class="fs-title">Test &amp; Verification Results</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-group">
+          <label class="field-label" for="f-test">What tests were performed to confirm the fix? Include pass/fail criteria and actual readings. <span class="req">*</span></label>
+          <textarea class="field-textarea" id="f-test" name="test" placeholder="e.g. Ran 5 complete start-run-stop cycles. Motor current: 4.2 A (rated 4.5 A max). Seal-in contact verified on ladder trace. PASS." style="min-height:90px;"></textarea>
+        </div>
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-test-result">Overall Test Result <span class="req">*</span></label>
+            <select class="field-select" id="f-test-result" name="test-result">
+              <option value="">Select…</option>
+              <option>PASS — Equipment returned to service</option>
+              <option>PASS WITH OBSERVATIONS — Monitor closely</option>
+              <option>FAIL — Further work required</option>
+              <option>INCONCLUSIVE — Test could not be completed</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-return-service">Equipment Returned to Service At</label>
+            <input class="field-input" type="time" id="f-return-service" name="return-service">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 7: Safety Checks -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">7</div>
+        <div class="fs-title">Safety Checks &amp; Compliance</div>
+      </div>
+      <div class="fs-body">
+        <div class="checklist" role="group" aria-label="Safety checks">
+          <label class="check-item"><input type="checkbox" name="chk-loto"> LOTO / Isolation procedure followed and locked out</label>
+          <label class="check-item"><input type="checkbox" name="chk-ppe"> Appropriate PPE worn throughout the job</label>
+          <label class="check-item"><input type="checkbox" name="chk-permit"> Permit to Work issued and correctly closed out</label>
+          <label class="check-item"><input type="checkbox" name="chk-risk"> Risk assessment reviewed prior to work start</label>
+          <label class="check-item"><input type="checkbox" name="chk-guards"> All guards and covers reinstated before energising</label>
+          <label class="check-item"><input type="checkbox" name="chk-area"> Work area cleaned and clear of tools / debris</label>
+          <label class="check-item"><input type="checkbox" name="chk-tbt"> Toolbox talk or task briefing completed</label>
+          <label class="check-item"><input type="checkbox" name="chk-energise"> Controlled re-energisation procedure followed</label>
+        </div>
+        <div class="field-group" style="margin-top:12px;">
+          <label class="field-label" for="f-safety-notes">Additional Safety Notes</label>
+          <input class="field-input" id="f-safety-notes" name="safety-notes" placeholder="Any deviations from standard procedure, near misses, or observations to report">
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 8: Sign-off -->
+    <div class="form-section">
+      <div class="fs-header">
+        <div class="fs-num">8</div>
+        <div class="fs-title">Authorisation &amp; Sign-off</div>
+      </div>
+      <div class="fs-body">
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-tech-name">Technician Name &amp; Grade <span class="req">*</span></label>
+            <input class="field-input" id="f-tech-name" name="tech-name" placeholder="e.g. A. Kowalski — Grade 2 Maintenance Tech">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-tech-date">Technician Sign-off Date / Time</label>
+            <input class="field-input" type="datetime-local" id="f-tech-date" name="tech-date">
+          </div>
+        </div>
+        <div class="field-row field-row-2">
+          <div class="field-group">
+            <label class="field-label" for="f-supervisor-name">Supervisor / Authorising Engineer <span class="req">*</span></label>
+            <input class="field-input" id="f-supervisor-name" name="supervisor-name" placeholder="e.g. P. Osei — Maintenance Supervisor">
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="f-supervisor-date">Supervisor Approval Date / Time</label>
+            <input class="field-input" type="datetime-local" id="f-supervisor-date" name="supervisor-date">
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="f-notes">Any Additional Notes or Follow-up Actions Required</label>
+          <textarea class="field-textarea" id="f-notes" name="notes" placeholder="Raise work orders for follow-up actions, note any equipment observations, or flag items for the next PM." style="min-height:60px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+  </form>
+
+</div>
+</main>
+
+<!-- Status bar -->
+<div class="status-bar" aria-live="polite" aria-atomic="false">
+  <div class="sb-item">
+    <div class="sb-dot" id="save-dot"></div>
+    <span id="sb-saved">Auto-saved</span>
+  </div>
+  <div class="sb-item">Completion: <strong id="completion-pct">0%</strong></div>
+  <div class="sb-item" style="margin-left:auto; font-size:10px; color:var(--muted);">PLeC · ISO 9001:2015 · IEC 62061</div>
+</div>
+
+<script>
+// ── Quick-fill data ──
+var SCENARIOS = {
+  '1': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L1-001',
+    'f-equip': 'CONV-01-L1 (Training Rig — Seal-in Circuit)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Breakdown — Production stopped',
+    'f-reported': 'Operator reported: conveyor belt motor would not latch ON after pressing START',
+    'f-fault': 'Conveyor belt motor Q0 failed to latch ON after momentary START button (I0) was released. Motor ran only while START button was held. No SCADA alarm. Observed on PLC ladder trace: seal-in branch absent from rung 1.',
+    'f-error-code': 'No alarm code — observed during commissioning test',
+    'f-downtime-type': 'Unplanned — Process fault',
+    'f-cause': 'Missing seal-in contact in the ladder program. Output coil Q0 was wired to the START contact only, with no parallel seal-in branch connecting Q0 back through the rung. The motor could only energise while the START pushbutton was physically held — correct seal-in latch logic had not been programmed.',
+    'f-cause-category': 'Software / Configuration',
+    'f-repeat': 'No — First occurrence',
+    'f-action': '1. Opened RSLogix 5000 and navigated to Rung 1 of the main program.\n2. Added a normally-open (NO) Q0 contact in parallel with the I0 (START) contact to create the seal-in branch.\n3. Downloaded updated program to PLC in RUN mode.\n4. Confirmed ladder trace showed Q0 seal-in contact energising after START release.\n5. Verified STOP (I1 NC) de-energises Q0 as expected.',
+    'f-no-parts': 'Software-only change — no physical parts replaced. Program backup saved.',
+    'f-test': 'Ran 5 complete start-run-stop cycles:\n• Press START → Q0 energises, seal-in contact closes, START released, Q0 stays ON ✓\n• Press STOP → I1 (NC) opens, Q0 de-energises ✓\n• Seal-in branch confirmed active on ladder trace in all 5 cycles. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  },
+  '2': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L2-001',
+    'f-equip': 'TANK-01-L2 (Training Rig — Tank Filling)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Breakdown — Production stopped',
+    'f-reported': 'Process alarm: pump failing to stop at high-level setpoint',
+    'f-fault': 'Pump Q0 failing to stop when high-level float switch LS_HIGH (I1) closed. Tank overflowing. Fault injection test also revealed LS_LOW (I0) wiring issue causing fail-safe not to engage.',
+    'f-cause': 'Fail-safe NC wiring on LS_LOW (I0) was connected as NO, defeating the de-energise-to-trip philosophy. Additionally, pump seal-in logic was missing hysteresis — high-level shutdown was not latching correctly.',
+    'f-cause-category': 'Incorrect Installation',
+    'f-action': '1. Corrected LS_LOW wiring from NO to NC.\n2. Added two-setpoint hysteresis logic in ladder rung.\n3. Tested fault injection (wire-break on LS_LOW) — confirmed fail-safe shutdown.\n4. Verified pump cycles correctly between low and high setpoints.',
+    'f-test': 'Ran 3 complete fill-drain cycles. Pump starts at LS_LOW, holds via seal-in, stops at LS_HIGH. Fail-safe tested — wire-break on LS_LOW causes immediate pump shutdown. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  },
+  '3': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L3-001',
+    'f-equip': 'NET-HMI-L3 (Training Rig — Modbus TCP)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Planned — Scheduled PM',
+    'f-reported': 'Commissioning task: verify all Modbus TCP function codes and MBAP header structure',
+    'f-fault': 'Modbus TCP communications not established. Device not responding to FC03 (Read Holding Registers) polls.',
+    'f-cause': 'MBAP Transaction ID was not being incremented between frames, causing slave device to reject duplicate requests. Unit ID was also misconfigured (set to 0 instead of 1).',
+    'f-action': '1. Corrected Unit ID from 0 to 1 in Modbus master configuration.\n2. Implemented Transaction ID auto-increment in polling routine.\n3. Verified all 7 function codes (FC01, FC03, FC04, FC05, FC06, FC16) and MBAP header on protocol analyser.\n4. Confirmed live register map updating correctly.',
+    'f-test': 'All 7 FC codes tested and passing. Protocol analyser confirmed correct MBAP header on 10+ consecutive frames. Register map R0–R12 reading/writing correctly. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  },
+  '4': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L4-001',
+    'f-equip': 'DRILL-01-L4 (Training Rig — Safety Interlock)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Breakdown — Production stopped',
+    'f-reported': 'Safety system not resetting after E-Stop — drill cannot be restarted',
+    'f-fault': 'Machine would not restart after E-Stop event even after E-Stop button was released. Safety relay remained de-energised. Manual RESET sequence was not documented on operator panel.',
+    'f-cause': 'IEC 62061 manual reset requirement not being met. Operator releasing E-Stop alone without pressing dedicated RESET pushbutton. Safety relay requires deliberate RESET acknowledgement per IEC 62061 cl. 6.2.7.',
+    'f-action': '1. Verified dual-channel E-Stop (I0 + I1) wiring — NC contacts confirmed.\n2. Labelled RESET pushbutton on operator panel.\n3. Tested E-Stop trip, release, RESET sequence — safety relay re-energised correctly.\n4. Simulated wire break on E-Stop channel 2 — fail-safe shutdown confirmed.',
+    'f-test': 'Tested E-Stop trip: drill stops immediately. Released E-Stop, pressed RESET — drill available to start. Gate guard open: drill stops. Wire break fault: fail-safe shutdown. All 7 milestones verified. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  },
+  '5': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L5-001',
+    'f-equip': 'CONV-02-L5 (Training Rig — TON Timer)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Planned — Scheduled PM',
+    'f-reported': 'Commissioning: verify TON instruction and E-Stop timer reset behaviour',
+    'f-fault': 'Timed conveyor failing to reset elapsed time (T0.ACC) to zero on E-Stop. Box detected by sensor but conveyor running indefinitely — timer DN bit not firing correctly.',
+    'f-cause': 'T0.EN bit not gated through E-Stop condition in ladder rung. Timer was running even when E-Stop was active, preventing correct accumulated time reset to zero.',
+    'f-action': '1. Added E-Stop (I1 NC) contact in series with T0.EN enabling rung.\n2. Verified T0.ACC resets to 0 on E-Stop.\n3. Tested preset modification (changed from 5000ms to 3000ms) and re-tested cycle.\n4. Confirmed 5 boxes packed successfully through full auto-cycle.',
+    'f-test': 'Timer DN bit fires at correct preset. E-Stop mid-cycle: T0.ACC resets to 0 — confirmed on HMI. 5 boxes packed in 5 complete cycles. Preset change from 5000ms to 3000ms verified. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  },
+  '6': {
+    'f-date': new Date().toLocaleDateString('en-GB'),
+    'f-wo': 'WO-L6-001',
+    'f-equip': 'BATCH-01-L6 (Training Rig — ISA-88 State Machine)',
+    'f-location': 'Training Lab — PLeC Platform',
+    'f-priority': 'Planned — Scheduled PM',
+    'f-reported': 'Commissioning: verify full ISA-88 Fill–Mix–Drain batch cycle and E-Stop abort',
+    'f-fault': 'Batch process failing to transition from MIXING to DRAINING state. Mix timer (T0) DN bit firing but state transition not occurring. DRAINING state never entered.',
+    'f-cause': 'State transition condition from MIXING to DRAINING incorrectly coded — T0.DN check was in the wrong rung branch. State variable not updating on T0.DN, leaving machine in MIXING indefinitely.',
+    'f-action': '1. Corrected MIXING → DRAINING transition rung to check T0.DN on correct branch.\n2. Verified all four state transitions: IDLE→FILL, FILL→MIX, MIX→DRAIN, DRAIN→IDLE.\n3. Tested E-Stop mid-batch: confirmed state returns to IDLE and outputs de-energise.\n4. Completed 3 full auto-cycle batches.',
+    'f-test': 'Full ISA-88 IDLE→FILL→MIX→DRAIN→IDLE cycle completed 3 times. Mix timer correct. E-Stop abort in MIXING state: returns to IDLE within one scan. All state transitions verified on PLC trace. PASS.',
+    'f-test-result': 'PASS — Equipment returned to service',
+  }
+};
+
+// Quick-fill buttons
+document.querySelectorAll('.qf-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var level = this.getAttribute('data-level');
+    var data  = SCENARIOS[level];
+    if (!data) return;
+    Object.keys(data).forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = data[id];
+    });
+    updateCompletion();
+    markUnsaved();
+  });
+});
+
+// Add parts row
+document.getElementById('add-part-row').addEventListener('click', function() {
+  var tbody = document.getElementById('parts-tbody');
+  var tr = document.createElement('tr');
+  tr.innerHTML =
+    '<td><input class="part-input" type="text" placeholder="Part number"></td>' +
+    '<td><input class="part-input" type="text" placeholder="Description"></td>' +
+    '<td><input class="part-input" type="number" min="1" style="width:50px;" placeholder="1"></td>' +
+    '<td><input class="part-input" type="text" placeholder="Serial / Batch"></td>' +
+    '<td><button type="button" class="part-remove" aria-label="Remove row">✕</button></td>';
+  tbody.appendChild(tr);
+  tr.querySelector('.part-input').focus();
+});
+
+// Remove parts row
+document.getElementById('parts-tbody').addEventListener('click', function(e) {
+  if (e.target.classList.contains('part-remove')) {
+    var row = e.target.closest('tr');
+    if (document.querySelectorAll('#parts-tbody tr').length > 1) row.remove();
+  }
+});
+
+// Completion meter
+var TRACKED_FIELDS = ['f-date','f-wo','f-equip','f-priority','f-fault','f-cause','f-action','f-test','f-test-result','f-tech-name','f-supervisor-name'];
+
+function updateCompletion() {
+  var filled = TRACKED_FIELDS.filter(function(id) {
+    var el = document.getElementById(id);
+    return el && el.value && el.value.trim().length > 0;
+  }).length;
+  var pct = Math.round(filled / TRACKED_FIELDS.length * 100);
+  document.getElementById('completion-pct').textContent = pct + '%';
+}
+
+TRACKED_FIELDS.forEach(function(id) {
+  var el = document.getElementById(id);
+  if (el) el.addEventListener('input', function() { updateCompletion(); markUnsaved(); });
+  if (el) el.addEventListener('change', function() { updateCompletion(); markUnsaved(); });
+});
+
+// Auto-save to localStorage
+var SAVE_KEY = 'plc-maint-log-v1';
+var saveTimer = null;
+
+function markUnsaved() {
+  document.getElementById('save-dot').className = 'sb-dot unsaved';
+  document.getElementById('sb-saved').textContent = 'Unsaved changes…';
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(autoSave, 1500);
+}
+
+function autoSave() {
+  var data = {};
+  document.querySelectorAll('#maint-form input, #maint-form textarea, #maint-form select').forEach(function(el) {
+    if (el.name) data[el.name] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+    document.getElementById('save-dot').className = 'sb-dot';
+    document.getElementById('sb-saved').textContent = 'Saved ' + new Date().toLocaleTimeString();
+  } catch(e) {}
+}
+
+function loadSaved() {
+  try {
+    var raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return;
+    var data = JSON.parse(raw);
+    document.querySelectorAll('#maint-form input, #maint-form textarea, #maint-form select').forEach(function(el) {
+      if (el.name && data[el.name] !== undefined) {
+        if (el.type === 'checkbox') el.checked = data[el.name];
+        else el.value = data[el.name];
+      }
+    });
+    updateCompletion();
+    document.getElementById('sb-saved').textContent = 'Loaded saved draft';
+  } catch(e) {}
+}
+loadSaved();
+
+// Manual save
+document.getElementById('btn-save').addEventListener('click', function() { autoSave(); });
+
+// Clear
+document.getElementById('btn-clear').addEventListener('click', function() {
+  if (!confirm('Clear all fields? This cannot be undone.')) return;
+  document.querySelectorAll('#maint-form input, #maint-form textarea, #maint-form select').forEach(function(el) {
+    if (el.type === 'checkbox') el.checked = false;
+    else el.value = '';
+  });
+  try { localStorage.removeItem(SAVE_KEY); } catch(e) {}
+  document.getElementById('completion-pct').textContent = '0%';
+  document.getElementById('sb-saved').textContent = 'Cleared';
+});
+
+// Track textarea/select changes
+document.querySelectorAll('#maint-form textarea, #maint-form select').forEach(function(el) {
+  el.addEventListener('change', function() { updateCompletion(); markUnsaved(); });
+});
+
+// ── Theme toggle ──
+(function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
+</script>
+</body>
+</html>

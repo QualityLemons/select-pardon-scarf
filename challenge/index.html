@@ -517,6 +517,113 @@
       .header-tag { display: none; }
       .status-badge span { display: none; }
     }
+
+    /* ── Results History / CRUD section ── */
+    .results-section {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 56px 24px;
+    }
+    .results-inner { max-width: 1100px; margin: 0 auto; }
+    .results-header {
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap; margin-bottom: 6px;
+    }
+    .results-title {
+      font-family: var(--font-h); font-size: 26px; font-weight: 700;
+      letter-spacing: .04em; color: var(--cyan); margin: 0;
+      text-transform: uppercase;
+    }
+    .results-count-badge {
+      font-family: var(--font-m); font-size: 11px; letter-spacing: .08em;
+      color: var(--muted); background: rgba(6,182,212,.08);
+      border: 1px solid rgba(6,182,212,.2); border-radius: 99px;
+      padding: 3px 10px; white-space: nowrap;
+    }
+    .results-subtitle {
+      font-size: 13px; color: var(--muted); margin: 0 0 24px;
+    }
+    .results-empty {
+      display: none;
+      font-size: 14px; color: var(--muted); font-style: italic;
+      padding: 32px; text-align: center;
+      border: 1px dashed rgba(6,182,212,.2); border-radius: 8px;
+    }
+    .results-table-wrap { overflow-x: auto; }
+    .results-table {
+      width: 100%; border-collapse: collapse;
+      font-size: 13px; color: var(--text);
+    }
+    .results-table th {
+      font-family: var(--font-m); font-size: 10px; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 12px; text-align: left; white-space: nowrap;
+    }
+    .results-table td {
+      padding: 10px 12px; border-bottom: 1px solid rgba(30,58,76,.4);
+      vertical-align: middle;
+    }
+    .results-table tr { transition: background .15s; }
+    .results-table tbody tr:hover { background: rgba(6,182,212,.04); }
+    .rl-lvl-badge {
+      display: inline-block; font-family: var(--font-m); font-size: 10px;
+      letter-spacing: .06em; background: rgba(59,130,246,.15);
+      border: 1px solid rgba(59,130,246,.3); border-radius: 4px;
+      padding: 2px 6px; color: var(--blue2); margin-right: 6px;
+      white-space: nowrap;
+    }
+    .rl-lvl-name { color: var(--text); }
+    .rl-score-num {
+      font-family: var(--font-m); font-size: 17px; font-weight: 700;
+      color: var(--cyan);
+    }
+    .rl-score-denom { font-size: 11px; color: var(--muted); }
+    .rl-grade-badge {
+      display: inline-block; font-family: var(--font-m); font-size: 14px;
+      font-weight: 700; width: 28px; height: 28px; line-height: 28px;
+      text-align: center; border-radius: 6px; border: 1px solid currentColor;
+    }
+    .assess-grade-A { color: #4ade80; border-color: rgba(74,222,128,.4); background: rgba(74,222,128,.08); }
+    .assess-grade-B { color: #60a5fa; border-color: rgba(96,165,250,.4); background: rgba(96,165,250,.08); }
+    .assess-grade-C { color: #fbbf24; border-color: rgba(251,191,36,.4);  background: rgba(251,191,36,.08); }
+    .assess-grade-D { color: #fb923c; border-color: rgba(251,146,60,.4);  background: rgba(251,146,60,.08); }
+    .assess-grade-F { color: #f87171; border-color: rgba(248,113,113,.4); background: rgba(248,113,113,.08); }
+    .rl-miles { font-family: var(--font-m); font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .rl-date { font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .rl-note { min-width: 160px; }
+    .rl-note-text { font-size: 12px; color: var(--text); }
+    .rl-no-note { color: var(--muted); font-style: italic; font-size: 11px; }
+    .rl-note-input {
+      width: 100%; min-width: 140px; background: rgba(15,23,42,.6);
+      border: 1px solid rgba(6,182,212,.4); border-radius: 4px;
+      color: var(--text); font-size: 12px; padding: 4px 6px;
+      resize: vertical; font-family: inherit; display: block; margin-bottom: 4px;
+    }
+    .rl-actions { white-space: nowrap; }
+    .rl-btn {
+      background: none; border: 1px solid rgba(6,182,212,.25); border-radius: 4px;
+      color: var(--muted); cursor: pointer; font-size: 12px;
+      padding: 3px 8px; margin-left: 4px;
+      transition: color .15s, border-color .15s, background .15s;
+    }
+    .rl-btn:first-child { margin-left: 0; }
+    .rl-btn:hover { color: var(--cyan); border-color: var(--cyan); background: rgba(6,182,212,.06); }
+    .rl-del-btn:hover { color: #f87171; border-color: rgba(248,113,113,.5); background: rgba(248,113,113,.06); }
+    .rl-save-btn { color: #4ade80; border-color: rgba(74,222,128,.4); }
+    .rl-save-btn:hover { background: rgba(74,222,128,.06); }
+    .rl-save-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+    [data-theme="light"] .results-section { background: #f0f4f8; border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .results-table td { border-color: rgba(148,163,184,.3); }
+    [data-theme="light"] .results-table th { border-color: rgba(148,163,184,.4); }
+    [data-theme="light"] .results-table tbody tr:hover { background: rgba(6,182,212,.06); }
+    [data-theme="light"] .rl-note-input { background: #fff; border-color: rgba(6,182,212,.5); color: #0f172a; }
+    [data-theme="light"] .rl-btn { border-color: rgba(148,163,184,.5); }
+    @media (max-width: 640px) {
+      .rl-lvl-name { display: none; }
+      .results-title { font-size: 20px; }
+    }
   </style>
 
   <!-- FOUC prevention -->
@@ -548,6 +655,8 @@
         <div class="status-dot pulse" aria-hidden="true"></div>
         <span>SYSTEM STATUS: ONLINE</span>
       </div>
+      <a href="/login/" style="font-size:11px;color:#f5a623;text-decoration:none;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Sign In</a>
+    <a href="/register/" style="font-size:11px;color:#64748b;text-decoration:none;padding:5px 14px;border:1px solid #64748b;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Register</a>
       <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
     </div>
   </div>
@@ -578,6 +687,18 @@
          aria-label="Start training — begin with PLC Boot Camp foundations">
         ACCEPT MISSION <span class="cta-arr" aria-hidden="true">→</span>
       </a>
+      <div style="display:flex;gap:1.25rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;">
+        <a href="/register/" style="font-size:0.78rem;color:#f5a623;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);border-bottom:1px solid rgba(245,166,35,0.4);padding-bottom:1px;transition:color 0.2s;"
+           onmouseover="this.style.borderBottomColor='#f5a623'"
+           onmouseout="this.style.borderBottomColor='rgba(245,166,35,0.4)'">
+          Create Account →
+        </a>
+        <a href="/login/" style="font-size:0.78rem;color:#64748b;text-decoration:none;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);border-bottom:1px solid rgba(100,116,139,0.4);padding-bottom:1px;transition:color 0.2s;"
+           onmouseover="this.style.color='#f5a623';this.style.borderBottomColor='#f5a623'"
+           onmouseout="this.style.color='#64748b';this.style.borderBottomColor='rgba(100,116,139,0.4)'">
+          Already have an account? Sign In
+        </a>
+      </div>
     </div>
   </section>
 
@@ -1140,14 +1261,55 @@
 </main>
 
 <!-- ══════════════════════════════════════
+     RESULTS HISTORY (CRUD)
+══════════════════════════════════════ -->
+<section id="results-section" class="results-section" aria-labelledby="results-title">
+  <div class="results-inner">
+    <div class="results-header">
+      <h2 class="results-title" id="results-title">&#128200; Mission Performance Log</h2>
+      <span class="results-count-badge" aria-live="polite">
+        <span id="results-count">0</span> saved results
+      </span>
+    </div>
+    <p class="results-subtitle">
+      Every Manager's Review is recorded here automatically.
+      Add a personal reflection, edit your note, or delete old attempts — changes save instantly.
+    </p>
+    <div id="results-empty" class="results-empty" role="status">
+      No results yet — complete any challenge and click <strong>Get Manager's Review</strong> to record your first attempt.
+    </div>
+    <div class="results-table-wrap">
+      <table class="results-table" aria-label="Saved assessment results">
+        <thead>
+          <tr>
+            <th scope="col">Mission</th>
+            <th scope="col">Score</th>
+            <th scope="col">Grade</th>
+            <th scope="col">Milestones</th>
+            <th scope="col">Submitted</th>
+            <th scope="col">Reflection / Note</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody id="results-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
      FOOTER
 ══════════════════════════════════════ -->
-<footer role="contentinfo">
+<footer>
   <div class="footer-inner">
     <p class="footer-left">PLeC — Learn PLC Engineering. Built for engineers learning industrial automation from first principles.</p>
 
+    <!-- ── DONATION LINK ──────────────────────────────────────────────────────
+         Replace YOUR_STRIPE_PAYMENT_LINK_HERE with your Stripe Payment Link:
+         Dashboard → Payment Links → + New → Customer chooses price → Copy URL
+    ──────────────────────────────────────────────────────────────────────── -->
     <a class="donate-btn"
-       href="https://buy.stripe.com/test_28E8wR0gtgvkdRv8m57Re01"
+       href="YOUR_STRIPE_PAYMENT_LINK_HERE"
        target="_blank"
        rel="noopener noreferrer"
        aria-label="Support PLeC — opens Stripe donation page in new tab">
@@ -1206,6 +1368,172 @@
     cards.forEach(function(c) { c.classList.add('mounted'); });
   }
 })();
+
+// ── Mission Performance Log — CRUD ──
+(function () {
+  'use strict';
+
+  var tbody   = document.getElementById('results-tbody');
+  var countEl = document.getElementById('results-count');
+  var emptyEl = document.getElementById('results-empty');
+
+  var LEVEL_LABELS = {
+    level1: 'Start/Stop Latching',
+    level2: 'Tank Filling',
+    level3: 'Modbus TCP',
+    level4: 'Safety Interlock',
+    level5: 'TON Timer',
+    level6: 'Sequential Batch'
+  };
+
+  function escHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function fmtDate(iso) {
+    var d = new Date(iso + (iso.indexOf('Z') === -1 ? 'Z' : ''));
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
+           ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderRow(r) {
+    var tr = document.createElement('tr');
+    tr.setAttribute('data-rid', r.id);
+    var lvlBadge = r.level_key.replace('level', 'L');
+    var lvlName  = LEVEL_LABELS[r.level_key] || r.level_key;
+    var noteHtml = r.note
+      ? '<span class="rl-note-text">' + escHtml(r.note) + '</span>'
+      : '<span class="rl-note-text"><em class="rl-no-note">— add reflection —</em></span>';
+    tr.innerHTML =
+      '<td class="rl-level">' +
+        '<span class="rl-lvl-badge">' + escHtml(lvlBadge) + '</span>' +
+        '<span class="rl-lvl-name">' + escHtml(lvlName) + '</span>' +
+      '</td>' +
+      '<td class="rl-score">' +
+        '<span class="rl-score-num">' + r.score + '</span>' +
+        '<span class="rl-score-denom">/100</span>' +
+      '</td>' +
+      '<td class="rl-grade">' +
+        '<span class="rl-grade-badge assess-grade-' + escHtml(r.grade) + '">' + escHtml(r.grade) + '</span>' +
+      '</td>' +
+      '<td class="rl-miles">' + r.milestones_done + '&thinsp;/&thinsp;' + r.milestones_total + '</td>' +
+      '<td class="rl-date">' + escHtml(fmtDate(r.created_at)) + '</td>' +
+      '<td class="rl-note">' + noteHtml + '</td>' +
+      '<td class="rl-actions">' +
+        '<button class="rl-btn rl-edit-btn" data-rid="' + r.id + '" aria-label="Edit reflection" title="Edit reflection">&#9998;</button>' +
+        '<button class="rl-btn rl-del-btn"  data-rid="' + r.id + '" aria-label="Delete result"    title="Delete result">&#128465;</button>' +
+      '</td>';
+    return tr;
+  }
+
+  /* ── READ: load all results ── */
+  function loadResults() {
+    fetch('/api/results')
+      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function (data) {
+        var results = data.results || [];
+        tbody.innerHTML = '';
+        countEl.textContent = results.length;
+        if (results.length === 0) {
+          emptyEl.style.display = 'block';
+        } else {
+          emptyEl.style.display = 'none';
+          results.forEach(function (r) { tbody.appendChild(renderRow(r)); });
+        }
+      })
+      .catch(function () { /* server not running — section stays empty */ });
+  }
+
+  /* ── UPDATE: inline note editing ── */
+  function startEdit(rid, tr) {
+    var noteCell = tr.querySelector('.rl-note');
+    var cur = tr.querySelector('.rl-note-text');
+    var curText = (cur && cur.querySelector('em')) ? '' : (cur ? cur.textContent : '');
+    noteCell.innerHTML =
+      '<textarea class="rl-note-input" rows="2" aria-label="Reflection note">' +
+        escHtml(curText) +
+      '</textarea>' +
+      '<button class="rl-btn rl-save-btn"   data-rid="' + rid + '">Save</button>' +
+      '<button class="rl-btn rl-cancel-btn" data-rid="' + rid + '">Cancel</button>';
+    var ta = noteCell.querySelector('.rl-note-input');
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+    var editBtn = tr.querySelector('.rl-edit-btn');
+    if (editBtn) editBtn.style.display = 'none';
+  }
+
+  function saveNote(rid, tr) {
+    var ta      = tr.querySelector('.rl-note-input');
+    var newNote = ta ? ta.value.trim() : '';
+    var saveBtn = tr.querySelector('.rl-save-btn');
+    if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = '\u2026'; }
+
+    fetch('/api/results/' + rid, {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ note: newNote })
+    })
+      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function () {
+        var noteCell = tr.querySelector('.rl-note');
+        noteCell.innerHTML = newNote
+          ? '<span class="rl-note-text">' + escHtml(newNote) + '</span>'
+          : '<span class="rl-note-text"><em class="rl-no-note">— add reflection —</em></span>';
+        var editBtn = tr.querySelector('.rl-edit-btn');
+        if (editBtn) editBtn.style.display = '';
+      })
+      .catch(function () {
+        if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save'; }
+      });
+  }
+
+  function cancelEdit(tr) {
+    loadResults();
+  }
+
+  /* ── DELETE ── */
+  function deleteResult(rid, tr) {
+    if (!confirm('Delete this result? This cannot be undone.')) return;
+    tr.style.transition = 'opacity .25s';
+    tr.style.opacity    = '0.35';
+
+    fetch('/api/results/' + rid, { method: 'DELETE' })
+      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+      .then(function () {
+        setTimeout(function () {
+          if (tr.parentNode) tr.parentNode.removeChild(tr);
+          var remaining = tbody.querySelectorAll('tr').length;
+          countEl.textContent = remaining;
+          if (remaining === 0) emptyEl.style.display = 'block';
+        }, 250);
+      })
+      .catch(function () { tr.style.opacity = '1'; });
+  }
+
+  /* ── Event delegation ── */
+  tbody.addEventListener('click', function (e) {
+    var btn = e.target.closest ? e.target.closest('button') : e.target;
+    if (!btn || btn.tagName !== 'BUTTON') return;
+    var rid = btn.getAttribute('data-rid');
+    var tr  = btn.parentNode;
+    while (tr && tr.tagName !== 'TR') tr = tr.parentNode;
+    if (!tr) return;
+
+    if (btn.classList.contains('rl-edit-btn'))   startEdit(rid, tr);
+    else if (btn.classList.contains('rl-del-btn'))    deleteResult(rid, tr);
+    else if (btn.classList.contains('rl-save-btn'))   saveNote(rid, tr);
+    else if (btn.classList.contains('rl-cancel-btn')) cancelEdit(tr);
+  });
+
+  /* Load on page load */
+  loadResults();
+
+  /* Called by assess.js after a new result is saved */
+  window.plecRefreshResults = loadResults;
+
+}());
 
 </script>
 </body>

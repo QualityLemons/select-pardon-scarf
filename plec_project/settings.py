@@ -63,6 +63,24 @@ TEMPLATES = [
 WSGI_APPLICATION = 'plec_project.wsgi.application'
 
 _database_url = os.environ.get('DATABASE_URL', '')
+if not _database_url:
+    # Heroku sometimes attaches the Postgres add-on under a colored name
+    # (e.g. HEROKU_POSTGRESQL_SILVER_URL) without promoting it to
+    # DATABASE_URL. Fall back to the first such variable found.
+    for _key, _value in sorted(os.environ.items()):
+        if _key.startswith('HEROKU_POSTGRESQL_') and _key.endswith('_URL') and _value:
+            _database_url = _value
+            break
+if _database_url:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            _database_url,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
+    }
+
+_database_url = os.environ.get('DATABASE_URL', '')
 if _database_url:
     DATABASES = {
         'default': dj_database_url.parse(

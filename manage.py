@@ -3,13 +3,10 @@
 import os
 import sys
 
-<<<<<<< HEAD
 # Ensure the project root is on sys.path so that 'plec_project' is importable
 # regardless of which directory the process is launched from (e.g. Heroku build).
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-=======
->>>>>>> 828a06737e044b9c055920d75b3f4b36ea8af480
 
 def main():
     """Run administrative tasks."""

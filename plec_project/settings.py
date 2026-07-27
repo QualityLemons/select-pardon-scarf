@@ -71,17 +71,21 @@ if _database_url:
             ssl_require=not DEBUG,
         )
     }
-elif not DEBUG:
-    raise RuntimeError(
-        'DATABASE_URL is not set. A persistent PostgreSQL database is '
-        'required outside of local development — SQLite does not survive '
-        'container restarts/redeploys and cannot handle concurrent writes.'
-    )
-else:
+elif DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': BASE_DIR / 'plec.db',
+        }
+    }
+else:
+    # Production without DATABASE_URL. Do NOT raise at import time — build
+    # steps like `collectstatic` (e.g. Heroku's build phase) import settings
+    # without database access. Instead, configure a dummy backend so any
+    # actual database operation fails loudly at runtime with a clear error.
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.dummy',
         }
     }
 

@@ -62,23 +62,47 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'plec_project.wsgi.application'
 
-__database_url = os.environ.get('DATABASE_URL', '')
-if not _database_url:
-    # Heroku sometimes attaches the Postgres add-on under a colored name
-    # (e.g. HEROKU_POSTGRESQL_SILVER_URL) without promoting it to
-    # DATABASE_URL. Fall back to the first such variable found.
-    for _key, _value in sorted(os.environ.items()):
-        if _key.startswith('HEROKU_POSTGRESQL_') and _key.endswith('_URL') and _value:
-            _database_url = _value
-            break
-if _database_url:
-    DATABASES = {
-        'default': dj_database_url.parse(
-            _database_url,
-            conn_max_age=600,
-            ssl_require=not DEBUG,
+# Candidate database URLs, in order of preference. DATABASE_URL first, then
+# any Heroku colored attachment vars (e.g. HEROKU_POSTGRESQL_SILVER_URL),
+# since Heroku sometimes attaches the add-on without promoting it to
+# DATABASE_URL. A candidate is only accepted if it parses to a complete
+# config (has a database NAME) — this skips empty or stub values like a
+# bare "postgres://".
+_db_config = None
+_db_candidates = [('DATABASE_URL', os.environ.get('DATABASE_URL', ''))]
+_heroku_pg_keys = sorted(
+    _key for _key in os.environ
+    if _key.startswith('HEROKU_POSTGRESQL_') and _key.endswith('_URL')
+       and os.environ[_key]
+)
+if not _db_candidates[0][1] and len(_heroku_pg_keys) > 1:
+    raise RuntimeError(
+        'DATABASE_URL is not set and multiple HEROKU_POSTGRESQL_*_URL '
+        'variables exist (%s). Refusing to guess which database to use — '
+        'promote the correct one to DATABASE_URL.' % ', '.join(_heroku_pg_keys)
+    )
+_db_candidates += [(_key, os.environ[_key]) for _key in _heroku_pg_keys]
+for _source_key, _candidate in _db_candidates:
+    if not _candidate:
+        continue
+    _parsed = dj_database_url.parse(
+        _candidate,
+        conn_max_age=600,
+        ssl_require=not DEBUG,
+    )
+    if not (_parsed.get('ENGINE') and _parsed.get('NAME')):
+        continue  # empty or stub value like a bare "postgres://"
+    if not DEBUG and 'postgresql' not in _parsed['ENGINE']:
+        raise RuntimeError(
+            '%s points at a non-PostgreSQL database (%s), which is not '
+            'allowed in production.' % (_source_key, _parsed['ENGINE'])
         )
-    }
+    _db_config = _parsed
+    print('Database configured from %s' % _source_key)
+    break
+
+if _db_config:
+    DATABASES = {'default': _db_config}
 elif DEBUG:
     DATABASES = {
         'default': {

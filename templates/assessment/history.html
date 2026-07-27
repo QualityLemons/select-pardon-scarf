@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLeC — My Results</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0d0d0d;
+      font-family: 'Courier New', Courier, monospace;
+      color: #e0e0e0;
+    }
+
+    header {
+      background: #141414;
+      border-bottom: 2px solid #f5a623;
+      padding: 0.9rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header .brand {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f5a623;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    header nav {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    header nav a {
+      color: #888;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    header nav a:hover { color: #f5a623; }
+
+    header nav .sign-out-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      color: #888;
+      font-size: 0.72rem;
+      font-family: inherit;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    header nav .sign-out-btn:hover { color: #f5a623; }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    h2 {
+      font-size: 1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #f5a623;
+      margin-bottom: 0.4rem;
+    }
+
+    .sub {
+      font-size: 0.72rem;
+      color: #555;
+      letter-spacing: 0.08em;
+      margin-bottom: 2rem;
+    }
+
+    .empty {
+      border: 1px dashed #2a2a2a;
+      padding: 3rem 2rem;
+      text-align: center;
+      color: #444;
+      font-size: 0.82rem;
+      letter-spacing: 0.06em;
+    }
+
+    .empty a {
+      color: #f5a623;
+      text-decoration: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+
+    thead tr {
+      background: #141414;
+      border-bottom: 2px solid #2a2a2a;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 0.65rem 0.75rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #666;
+      font-weight: 400;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #1c1c1c;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover { background: #141414; }
+
+    tbody td {
+      padding: 0.7rem 0.75rem;
+      vertical-align: middle;
+    }
+
+    .grade-badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      border-radius: 2px;
+    }
+
+    .grade-A  { background: #0f3020; color: #4caf8a; }
+    .grade-B  { background: #1a2e10; color: #8bc34a; }
+    .grade-C  { background: #2a2a10; color: #cddc39; }
+    .grade-D  { background: #2e1e08; color: #ff9800; }
+    .grade-F  { background: #2e0a0a; color: #e57373; }
+    .grade-default { background: #1e1e1e; color: #888; }
+
+    .score-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .score-bar {
+      flex: 1;
+      height: 4px;
+      background: #1e1e1e;
+      border-radius: 2px;
+      overflow: hidden;
+      max-width: 80px;
+    }
+
+    .score-fill {
+      height: 100%;
+      background: #f5a623;
+      border-radius: 2px;
+    }
+
+    .score-num {
+      width: 2.5em;
+      text-align: right;
+      color: #ccc;
+    }
+
+    .level-id {
+      color: #f5a623;
+      font-size: 0.78rem;
+    }
+
+    .tier {
+      color: #888;
+      font-size: 0.75rem;
+    }
+
+    .date {
+      color: #555;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .pagination {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 2rem;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+    }
+
+    .pagination a, .pagination span {
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #2a2a2a;
+      color: #888;
+      text-decoration: none;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .pagination a:hover { border-color: #f5a623; color: #f5a623; }
+    .pagination .current { border-color: #f5a623; color: #f5a623; }
+  </style>
+</head>
+<body>
+
+<header>
+  <a class="brand" href="/challenge/">PLeC</a>
+  <nav>
+    <a href="/challenge/">Challenges</a>
+    <a href="/profile/" style="color:#f5a623;">My Results</a>
+    <a href="/password-change/">Change Password</a>
+    <form method="post" action="/logout/" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="sign-out-btn">Sign Out</button>
+    </form>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>My Submission History</h2>
+  <p class="sub">Signed in as {{ request.user.email }}</p>
+
+  {% if results %}
+    <table>
+      <thead>
+        <tr>
+          <th>Level</th>
+          <th>Grade</th>
+          <th>Score</th>
+          <th>Tier</th>
+          <th>Milestones</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td class="level-id">{{ r.level_key }}</td>
+          <td>
+            <span class="grade-badge grade-{% if r.grade in 'ABCDF' %}{{ r.grade }}{% else %}default{% endif %}">
+              {{ r.grade }}
+            </span>
+          </td>
+          <td>
+            <div class="score-bar-wrap">
+              <div class="score-bar">
+                <div class="score-fill" style="width:{{ r.score }}%"></div>
+              </div>
+              <span class="score-num">{{ r.score }}</span>
+            </div>
+          </td>
+          <td class="tier">{{ r.tier_label }}</td>
+          <td>{{ r.milestones_done }} / {{ r.milestones_total }}</td>
+          <td class="date">{{ r.created_at|date:"d M Y, H:i" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+      {% endif %}
+      <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+      {% endif %}
+    </div>
+    {% endif %}
+
+  {% else %}
+    <div class="empty">
+      <p>No submissions yet.</p>
+      <p style="margin-top:0.75rem;">
+        Complete a <a href="/challenge/">challenge</a> to see your results here.
+      </p>
+    </div>
+  {% endif %}
+</div>
+
+</body>
+</html>

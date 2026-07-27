@@ -1,0 +1,675 @@
+═══════════════════════════════════════════════════════════════
+  PLeC — CHANGELOG
+  All changes since zip import, oldest → newest
+  Format: [HASH] COMMIT MESSAGE
+           └─ file/path — description of change
+═══════════════════════════════════════════════════════════════
+
+───────────────────────────────────────────────────────────────
+[a410556] Create a new project landing page and reorganize challenge structure
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Full redesign: mission grid layout, hero section,
+                                     intel bar, progress tracker, footer
+  └─ challenge/level1.html         — Created: Start/Stop Latching Circuit challenge
+                                     (ladder diagram, I/O table, fault injection, learn panel)
+  └─ challenge/level2.html         — Nav links updated to reflect new structure
+  └─ challenge/level3.html         — Nav links updated
+  └─ challenge/level4.html         — Nav links updated
+  └─ challenge/level5.html         — Nav links updated
+  └─ challenge/level6.html         — Nav links updated
+
+───────────────────────────────────────────────────────────────
+[c16b682] Enhance website accessibility with ARIA attributes and keyboard support
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Added role, aria-label, aria-current, skip link
+  └─ challenge/level1.html         — ARIA roles on SVG, buttons, live regions
+  └─ challenge/level2.html         — ARIA on simulation panel, fault injection buttons
+  └─ challenge/level3.html         — ARIA on request builder, protocol log
+  └─ challenge/level4.html         — ARIA on safety interlock controls
+  └─ challenge/level5.html         — ARIA on conveyor simulation
+  └─ challenge/level6.html         — ARIA on state machine, batch controls
+
+───────────────────────────────────────────────────────────────
+[b62eb29] Add a theme toggle for light and dark mode to all pages
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Theme toggle button + localStorage persistence
+  └─ challenge/level1.html         — Theme toggle wired to CSS data-theme attribute
+  └─ challenge/level2.html         — Theme toggle
+  └─ challenge/level3.html         — Theme toggle
+  └─ challenge/level4.html         — Theme toggle
+  └─ challenge/level5.html         — Theme toggle
+  └─ challenge/level6.html         — Theme toggle
+
+───────────────────────────────────────────────────────────────
+[ded83e3] Add a performance review system for user assessments
+───────────────────────────────────────────────────────────────
+  └─ apps/__init__.py              — Created: Python package marker
+  └─ apps/assessment/__init__.py   — Created: assessment package marker
+  └─ apps/assessment/gold_standards.py — Created: milestone definitions per level
+  └─ apps/assessment/scorer.py     — Created: scoring logic (milestones, timing, bonus)
+  └─ apps/assessment/reviewer.py   — Created: AI-style feedback generator
+  └─ challenge/assess.css          — Created: assessment panel styles
+  └─ challenge/assess.js           — Created: milestone tracker, score display
+  └─ challenge/level1.html         — Linked assess.css + assess.js, added learn panel
+  └─ challenge/level2.html         — Linked assess.css + assess.js
+  └─ challenge/level3.html         — Linked assess.css + assess.js
+  └─ challenge/level4.html         — Linked assess.css + assess.js
+  └─ challenge/level5.html         — Linked assess.css + assess.js
+  └─ challenge/level6.html         — Linked assess.css + assess.js
+  └─ serve.py                      — Added /api/assess POST endpoint, CORS headers,
+                                     imports scorer + reviewer
+
+───────────────────────────────────────────────────────────────
+[3f9449d] Add a "Maintenance Log" module and template to enhance documentation skills
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Added Learn Your Log + Maintenance Log cards
+                                     to mission grid
+  └─ challenge/learn-your-log.html — Created: 4-section lesson (why logs matter,
+                                     8 fields, spot-the-mistakes quiz, practice form)
+  └─ challenge/maintenance-log.html — Created: full structured log template with
+                                      8 sections, parts table, safety checklist, print
+  └─ challenge/level1.html         — Added nav link to maintenance log
+  └─ challenge/level2.html         — Added nav link
+  └─ challenge/level3.html         — Added nav link
+  └─ challenge/level4.html         — Added nav link
+  └─ challenge/level5.html         — Added nav link
+  └─ challenge/level6.html         — Added nav link
+
+───────────────────────────────────────────────────────────────
+[9761aa7] Update website design to an arcade-style theme
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Full visual overhaul to arcade/mission theme:
+                                     Teko + Share Tech Mono fonts, cyan/blue palette,
+                                     chamfered clip-path cards, grid background,
+                                     scanline overlay, hero glitch animation
+
+───────────────────────────────────────────────────────────────
+[c448b46] Add three distinct design styles for the PLC trainer application
+  (design exploration — Arcade, SaasBold, Terminal variants in mockup sandbox;
+   removed in 65f8c09 cleanup)
+───────────────────────────────────────────────────────────────
+  └─ artifacts/mockup-sandbox/*    — Created full Vite/React mockup sandbox with
+                                     three design variants (75 files, later removed)
+
+───────────────────────────────────────────────────────────────
+[87287e0] Add interactive multimeter tool and lesson page for PLC training
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Added DMM Tool and Multimeter Lesson mission cards
+  └─ challenge/multimeter.html     — Created: interactive DMM simulator with rotary
+                                     dial, LCD display, 4 measurement scenarios,
+                                     probe placement
+  └─ challenge/multimeter-lesson.html — Created: 7-section lesson covering meter parts,
+                                        dial modes, DC procedure, safety, fault-finding,
+                                        5-question quiz
+
+───────────────────────────────────────────────────────────────
+[24d2fb2] Create a detailed task log with commit messages for each file
+───────────────────────────────────────────────────────────────
+  └─ TASKS.txt                     — Created: internal task tracking document
+                                     (later removed in 65f8c09)
+  └─ .agents/agent_assets_metadata.toml — Created: agent metadata file
+
+───────────────────────────────────────────────────────────────
+[e6858b3] Update tool name and subheading across all application files
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Renamed tool label to "PLeC"
+  └─ challenge/level1.html         — Updated header branding
+  └─ challenge/level2.html         — Updated header branding
+  └─ challenge/level3.html         — Updated header branding
+  └─ challenge/level4.html         — Updated header branding
+  └─ challenge/level5.html         — Updated header branding
+  └─ challenge/level6.html         — Updated header branding
+  └─ challenge/maintenance-log.html — Updated branding
+  └─ challenge/multimeter-lesson.html — Updated branding
+  └─ challenge/multimeter.html     — Updated branding
+  └─ serve.py                      — Updated startup print message
+
+───────────────────────────────────────────────────────────────
+[e37f227] Move digital multimeter and lesson to the start of the challenge grid
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Reordered mission cards: DMM Tool + DMM Lesson
+                                     moved to positions 1–2 before level challenges
+
+───────────────────────────────────────────────────────────────
+[f485cd9] Add helpful tips to guide users through lessons and tools
+───────────────────────────────────────────────────────────────
+  └─ challenge/learn-your-log.html — Added Supervisor widget (👷 6-tip panel)
+  └─ challenge/level1.html         — Added Supervisor widget
+  └─ challenge/level2.html         — Added Supervisor widget
+  └─ challenge/level3.html         — Added Supervisor widget
+  └─ challenge/level4.html         — Added Supervisor widget
+  └─ challenge/level5.html         — Added Supervisor widget
+  └─ challenge/level6.html         — Added Supervisor widget
+  └─ challenge/multimeter-lesson.html — Added Supervisor widget
+  └─ challenge/multimeter.html     — Added Supervisor widget
+
+───────────────────────────────────────────────────────────────
+[db676b6] Improve website accessibility and fix various coding errors
+───────────────────────────────────────────────────────────────
+  └─ README.md                     — Created: full project docs with Mermaid ERD,
+                                     mission table, tech stack, WCAG table,
+                                     OpenPLC comparison
+  └─ challenge/.jshintrc           — Created: JSHint config (esversion: 11)
+  └─ challenge/supervisor.css      — Created: shared supervisor widget stylesheet
+  └─ challenge/index.html          — W3C validation fixes, ARIA tightening
+  └─ challenge/learn-your-log.html — W3C fixes, duplicate ID removal
+  └─ challenge/level1.html         — W3C + JSHint fixes
+  └─ challenge/level2.html         — W3C + JSHint fixes
+  └─ challenge/level3.html         — W3C + JSHint fixes
+  └─ challenge/level4.html         — W3C + JSHint fixes
+  └─ challenge/level5.html         — W3C + JSHint fixes
+  └─ challenge/level6.html         — W3C + JSHint fixes
+  └─ challenge/multimeter-lesson.html — W3C + JSHint fixes
+  └─ challenge/multimeter.html     — W3C + JSHint fixes
+
+───────────────────────────────────────────────────────────────
+[09f4e11] Create a comprehensive text file documenting all project changes
+───────────────────────────────────────────────────────────────
+  └─ CHANGELOG.txt                 — Created: initial changelog (v1)
+
+───────────────────────────────────────────────────────────────
+[65f8c09] Clean up project files and add contribution guidelines
+───────────────────────────────────────────────────────────────
+  └─ .gitignore                    — Created: ignores __pycache__, .env, node_modules,
+                                     *.pyc, .DS_Store, dist/
+  └─ CONTRIBUTING.md               — Created: contribution guide covering setup,
+                                     code style, W3C validation, PR process
+  └─ .github/workflows/w3c-validate.yml  — Created: CI workflow — W3C Nu validation
+                                            on push/PR for all HTML pages
+  └─ .github/workflows/deploy-pages.yml  — Created: GitHub Pages deploy on push to main
+  └─ TASKS.txt                     — Removed
+  └─ artifacts/mockup-sandbox/*    — Removed (75 files — design exploration)
+  └─ apps/enterprise/*             — Removed (unused Django enterprise app)
+  └─ apps/simulator/static/*       — Removed (unused simulator static assets)
+  └─ apps/templates/*              — Removed (unused Django templates)
+  └─ attached_assets/*             — Removed (screenshot assets)
+  └─ zipFile.zip                   — Removed (original import zip)
+
+───────────────────────────────────────────────────────────────
+[4dcb010] Add a donation button to the website footer
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Added ♡ SUPPORT THIS PROJECT button in footer
+                                     with Stripe Payment Link placeholder URL and
+                                     chamfered clip-path arcade styling
+
+───────────────────────────────────────────────────────────────
+[e9f173a] Add a PLC engineering foundations learning module
+───────────────────────────────────────────────────────────────
+  └─ challenge/plc-primer.html     — Created: PLC Boot Camp page — 25-term filterable
+                                     glossary (Hardware/Logic/Comms/Safety), 6 tool
+                                     cards (Factory I/O, OpenPLC, Codesys, etc.),
+                                     6 YouTube video cards, Supervisor widget,
+                                     learning path breadcrumb, CTA to DMM lesson
+  └─ challenge/index.html          — PLC Boot Camp added as position-1 mission card
+                                     with START HERE badge; hero CTA updated to link
+                                     to plc-primer.html
+
+───────────────────────────────────────────────────────────────
+[20b1878] Remove the animated drop-in effect for mission cards on page load
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Removed CSS opacity/translateY from .mission-card;
+                                     removed IntersectionObserver stagger JS block
+
+───────────────────────────────────────────────────────────────
+[51054a8] Restore mission card entrance animation to staggered drop-in
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Reverted: restored CSS opacity/transform initial
+                                     state and IntersectionObserver stagger animation
+
+───────────────────────────────────────────────────────────────
+[4ac16b3] Remove decorative scanline effect from the homepage
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Removed @keyframes scanline, .scanline-bar CSS
+                                     rule, and <div class="scanline-bar"> HTML element
+                                     and stale HTML comment
+
+───────────────────────────────────────────────────────────────
+[d978092] Add a mission log feature to track progress on each level
+───────────────────────────────────────────────────────────────
+  └─ challenge/mission-log.css     — Created: shared collapsible log panel styles
+                                     (toggle header, star rating, entry list, toast)
+  └─ challenge/mission-log.js      — Created: shared JS — localStorage per level key,
+                                     toggle open/close, star rating hover/select,
+                                     save entry, delete single, clear all, toast
+  └─ challenge/level2.html         — Mission Log panel added before </main>;
+                                     mission-log.css + mission-log.js linked
+                                     (data-level="l2", hint: fail-safe sensor wiring)
+  └─ challenge/level3.html         — Mission Log added
+                                     (data-level="l3", hint: Modbus register mapping)
+  └─ challenge/level4.html         — Mission Log added
+                                     (data-level="l4", hint: E-Stop NC wiring)
+  └─ challenge/level5.html         — Mission Log added
+                                     (data-level="l5", hint: TON timer bits)
+  └─ challenge/level6.html         — Mission Log added
+                                     (data-level="l6", hint: ISA-88 batch logic)
+
+───────────────────────────────────────────────────────────────
+[255c587] Add functionality to create, read, update, and delete assessment results
+───────────────────────────────────────────────────────────────
+  └─ serve.py                      — Added /api/results CRUD endpoints (GET list,
+                                     GET single, POST create, PUT update note,
+                                     DELETE); _ensure_results_table() migration guard
+  └─ challenge/assess.js           — Client-side auto-save of assessment result after
+                                     scoring; result ID stored in localStorage
+  └─ challenge/index.html          — Result history panel on homepage showing saved
+                                     scores with grade badges and delete controls
+  └─ create_db.py                  — Added assessment_results table schema
+  └─ tests/test_plec.py            — 165 lines of new CRUD API tests via live
+                                     http.server thread (list, create, get, update,
+                                     delete, 404 paths)
+
+───────────────────────────────────────────────────────────────
+[9ff1092] Add a button to proceed to the multimeter lesson page
+[1d1211d] Add a button to proceed to the next level from the multimeter tool
+[8586caf] Remove the "Proceed to Lesson" button from the multimeter page
+[5186c4b] Remove the "Proceed to Lesson" button from the multimeter page
+[9c424ab] Remove the "Proceed to Level 1" button from the multimeter lesson page
+[1ccc847] Remove the next level prompt from the multimeter lesson
+[422d621] Add a button to proceed to the next level after completing the multimeter lesson
+───────────────────────────────────────────────────────────────
+  └─ challenge/multimeter.html     — Iterated "next level" CTA: added, moved,
+                                     restyled, and removed proceed buttons as
+                                     UX was refined; settled on no auto-advance prompt
+
+───────────────────────────────────────────────────────────────
+[092a1d9] Fix visual error in ladder logic for wire coloring
+───────────────────────────────────────────────────────────────
+  └─ challenge/level1.html         — Corrected SVG wire stroke colour on the seal-in
+                                     rung (energised vs de-energised state)
+
+───────────────────────────────────────────────────────────────
+[573c7ee] Fix issue where stop functionality does not trigger completion milestones
+───────────────────────────────────────────────────────────────
+  └─ challenge/level1.html         — Fixed milestone m4 (motor dropout on STOP) not
+                                     firing when STOP was pressed; milestone now
+                                     checked inside the stop handler
+
+───────────────────────────────────────────────────────────────
+[101eeff] Fix issue preventing users from completing the FC16 lesson
+───────────────────────────────────────────────────────────────
+  └─ challenge/level3.html         — Corrected FC16 multi-register write response
+                                     parsing so milestone m6 triggers correctly
+
+───────────────────────────────────────────────────────────────
+[5443c58] Rearrange lesson content to display key concepts before simulation
+───────────────────────────────────────────────────────────────
+  └─ challenge/level4.html         — Moved theory/concept panels (IEC 62061, dual-
+                                     channel safety, PSSR 2000) to appear above the
+                                     interactive simulation rather than below it
+
+───────────────────────────────────────────────────────────────
+[6435701] Fix E-stop timer reset and recovery logic for conveyor exercise
+───────────────────────────────────────────────────────────────
+  └─ challenge/level5.html         — Fixed TON timer not resetting accumulated value
+                                     to 0 on E-Stop; recovery start now correctly
+                                     re-enables the EN bit and restarts TT counting
+
+───────────────────────────────────────────────────────────────
+[053ffdf] Fix server startup to immediately reuse network ports
+───────────────────────────────────────────────────────────────
+  └─ serve.py                      — Added allow_reuse_address = True and
+                                     allow_reuse_port = True to ReusableTCPServer
+                                     subclass; eliminates "Address already in use"
+                                     error on rapid restarts
+
+───────────────────────────────────────────────────────────────
+[d3466e0] Prepare application for Heroku deployment
+[3d17aa8] Add comprehensive testing procedures and improve server stability
+[6821f05] Add validation badges and screenshots to the README
+[beaff89] Expand testing documentation with detailed results and bug information
+[f43558c] Add attributions section to the project README file
+[afd5df7] Add a downloadable zip file of the project
+[8471507] Add a database for storing and retrieving project content
+[ccf157e] Add wireframe images and descriptions to the project documentation
+[6b9378e] Update documentation explaining the application's purpose and deployment
+───────────────────────────────────────────────────────────────
+  └─ README.md                     — Major expansion: Heroku deployment guide,
+                                     Procfile/requirements notes, W3C/JSHint badge
+                                     links, wireframe images, attributions section,
+                                     comprehensive testing procedures with expected
+                                     results and known bug log
+  └─ Procfile                      — Created: web: python serve.py (Heroku entry)
+  └─ requirements.txt              — Created/updated: pinned Flask, gunicorn
+                                     (pre-Django era dependencies)
+
+───────────────────────────────────────────────────────────────
+[88d0cc4] Migrate backend from stdlib HTTP server to Django with auth + admin
+───────────────────────────────────────────────────────────────
+  └─ manage.py                     — Created: Django management entry point
+  └─ plec_project/__init__.py      — Created: project package marker
+  └─ plec_project/settings.py      — Created: full Django settings — installed apps,
+                                     DATABASES (SQLite), static files, email,
+                                     ADMINS, Whitenoise, session config
+  └─ plec_project/urls.py          — Created: root URL conf — admin, accounts,
+                                     assessment API, challenge static, homepage
+  └─ plec_project/wsgi.py          — Created: WSGI entry point
+  └─ plec_project/asgi.py          — Created: ASGI entry point
+  └─ apps/accounts/__init__.py     — Created: accounts package
+  └─ apps/accounts/admin.py        — Created: CustomUser registered in Django admin
+  └─ apps/accounts/apps.py         — Created: AccountsConfig
+  └─ apps/accounts/migrations/     — Created: initial accounts migration
+  └─ apps/accounts/models.py       — Created: CustomUser (email-based auth,
+                                     AbstractBaseUser + PermissionsMixin)
+  └─ apps/accounts/views.py        — Created: login, logout, homepage views
+  └─ apps/assessment/admin.py      — Created: Module, Milestone, AssessmentResult
+                                     registered; results listed with learner email,
+                                     score, grade, created_at
+  └─ apps/assessment/api_views.py  — Created: DRF-free JSON API — /api/modules,
+                                     /api/tips/<id>, /api/assess, /api/results CRUD
+  └─ apps/assessment/apps.py       — Created: AssessmentConfig
+  └─ apps/assessment/management/   — Created: load_seed_data command (Django-native
+                                     replacement for create_db.py, seeds all content
+                                     tables via the ORM)
+  └─ apps/assessment/migrations/   — Created: initial assessment migration (Module,
+                                     Milestone, EfficiencyThreshold, BonusCategory,
+                                     SupervisorTip, GradeDescriptor,
+                                     AssessmentResult)
+  └─ apps/assessment/models.py     — Expanded: full Django ORM models replacing raw
+                                     SQLite schema
+  └─ apps/assessment/urls.py       — Created: assessment API URL patterns
+  └─ requirements.txt              — Updated: django, whitenoise, psycopg2
+  └─ templates/accounts/login.html — Created: styled login form (dark arcade theme)
+
+───────────────────────────────────────────────────────────────
+[340a079] Add password change and password reset flows for admin users
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — Added EMAIL_BACKEND, LOGIN_REDIRECT_URL,
+                                     PASSWORD_RESET_TIMEOUT settings
+  └─ plec_project/urls.py          — Wired django.contrib.auth password_change and
+                                     password_reset URL groups
+  └─ templates/accounts/
+       password_change.html         — Created: change-password form (current + new)
+       password_change_done.html    — Created: success confirmation page
+  └─ templates/registration/
+       password_reset_form.html     — Created: enter-email reset request form
+       password_reset_done.html     — Created: "check your email" confirmation
+       password_reset_confirm.html  — Created: new-password entry form (token link)
+       password_reset_email.txt     — Created: reset link email body template
+       password_reset_subject.txt   — Created: email subject line template
+  └─ requirements.txt              — Added: django-axes (brute-force protection)
+
+───────────────────────────────────────────────────────────────
+[eeaeda4] Protect admin panel from brute-force login attempts via django-axes
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — Added AXES_* configuration: failure limit 5,
+                                     cooloff 1 hour, lockout by IP+username,
+                                     AxesStandaloneBackend in AUTHENTICATION_BACKENDS
+  └─ apps/accounts/views.py        — Integrated axes_dispatch decorator on login view
+  └─ templates/accounts/lockout.html — Created: styled lockout page with wait time
+                                     and support contact
+
+───────────────────────────────────────────────────────────────
+[721c3fb] Link assessment results to learner accounts for admin visibility
+───────────────────────────────────────────────────────────────
+  └─ apps/assessment/models.py     — Added ForeignKey(CustomUser) on
+                                     AssessmentResult; results now owned by a user
+  └─ apps/assessment/api_views.py  — /api/results POST now binds result to
+                                     request.user automatically
+  └─ apps/assessment/admin.py      — Results admin list now shows learner email
+
+───────────────────────────────────────────────────────────────
+[97d369e] Add learner submission history page at /profile/
+───────────────────────────────────────────────────────────────
+  └─ apps/assessment/views.py      — Replaced placeholder view with per-user result
+                                     history queryset ordered by date desc
+  └─ plec_project/urls.py          — Added /profile/ URL route
+  └─ templates/assessment/
+       history.html                 — Created: full result history table with grade
+                                     badges, scores, efficiency labels, date, and
+                                     delete controls; login-required
+
+───────────────────────────────────────────────────────────────
+[d3634c2] Make app production-safe before deploying
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — Set DEBUG=False guard, ALLOWED_HOSTS,
+                                     STATIC_ROOT, WhiteNoise middleware order,
+                                     SECURE_* headers for HTTPS
+  └─ plec_project/urls.py          — Static file serving path tidied for production
+  └─ staticfiles/                  — Created: collectstatic output — all 18 challenge
+                                     HTML/CSS/JS pages collected into staticfiles/
+
+───────────────────────────────────────────────────────────────
+[a6cd4d3] Email admins when an account is locked out by django-axes
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/signals.py      — Created: user_locked_out signal handler —
+                                     sends mail_admins() alert on every lockout event
+  └─ apps/accounts/apps.py         — Registered signals in AccountsConfig.ready()
+  └─ plec_project/settings.py      — Added ADMINS list and MANAGERS settings
+
+───────────────────────────────────────────────────────────────
+[e114380] Add direct "Change password" link for every user in admin panel
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/admin.py        — Added change_password_link method to
+                                     CustomUserAdmin; displays in user list as a
+                                     clickable "Change password" admin URL per user
+
+───────────────────────────────────────────────────────────────
+[272c1ea] Security scan — 6 findings identified
+[ddcb3ba] Fix account lockout vulnerabilities (Task #23)
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — Tightened AXES_LOCKOUT_PARAMETERS to lock on
+                                     username+ip combination (not ip-only) to prevent
+                                     accidental DoS of shared IPs
+
+───────────────────────────────────────────────────────────────
+[f45ade3] Fix assessment results API access control (Task #24)
+───────────────────────────────────────────────────────────────
+  └─ apps/assessment/api_views.py  — /api/results GET, PUT, DELETE now filter by
+                                     request.user; users can only read/modify their
+                                     own records; unauthenticated requests → 401;
+                                     cross-user access → 404 (not 403)
+
+───────────────────────────────────────────────────────────────
+[f08307b] Fix authentication flow abuse vulnerabilities (Task #25)
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/views.py        — Login redirect validated against ALLOWED_HOSTS
+                                     to prevent open-redirect abuse; post-login
+                                     redirect default set to /profile/
+  └─ templates/assessment/
+       history.html                 — CSRF token added to all AJAX delete requests
+
+───────────────────────────────────────────────────────────────
+[8d69205] Fix: username-only lockout to prevent IP-rotation bypass
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — Added username-only lockout parameter alongside
+                                     ip+username so attackers can't bypass lockout
+                                     by rotating IP addresses
+
+───────────────────────────────────────────────────────────────
+[fa299ba] Prevent locked-out users from seeing a confusing error instead of the lockout page
+[6ae3efb] Show actual remaining lockout time instead of hardcoded "1 hour"
+[3d92c68] Add live countdown timer to the lockout page
+[bd1d118] Add CooldownDisplayTests to verify _cooldown_display accuracy mid-countdown
+[01ba3a9] Add tests confirming lockout page shows correct wait time across all AXES_COOLOFF_TIME shapes
+[1cb0f49] Task #31: Confirm lockout countdown survives server restart mid-cooldown
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/views.py        — Added _cooldown_remaining() helper reading
+                                     attempt_time fresh from DB on each request;
+                                     lockout view calculates and passes remaining
+                                     seconds to template; handles all AXES_COOLOFF_TIME
+                                     shapes (int seconds, timedelta, float hours)
+  └─ templates/accounts/lockout.html — Replaced hardcoded "1 hour" with dynamic
+                                     countdown timer (MM:SS) driven by remaining
+                                     seconds from server; auto-refreshes on expiry
+  └─ apps/accounts/tests.py        — Added CooldownDisplayTests: verifies remaining
+                                     time is accurate immediately after lockout,
+                                     mid-countdown, and after restart
+
+───────────────────────────────────────────────────────────────
+[c62ada0] Prevent lockout page from leaking whether an account exists (Task #36)
+[20ead5c] Prevent locked-account timing from revealing which accounts exist
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/views.py        — Login failure response time normalised so
+                                     "account not found" and "wrong password" return
+                                     in equal time; lockout page shows generic message
+                                     regardless of whether the username is valid
+
+───────────────────────────────────────────────────────────────
+[bbcc27e] Add easily discoverable sign-in options throughout the website
+───────────────────────────────────────────────────────────────
+  └─ challenge/index.html          — Added "Sign In / My Results" CTA button in header
+  └─ challenge/level1–6.html
+     challenge/multimeter*.html
+     challenge/plc-primer.html
+     challenge/learn-your-log.html
+     challenge/maintenance-log.html — Sign-in link added to navigation bar on
+                                      all 13 challenge/lesson pages
+  └─ plec_project/urls.py          — Ensured /login/ is reachable from all pages
+
+───────────────────────────────────────────────────────────────
+[0236df5] Add a self-registration feature for users to create their own accounts
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/forms.py        — Created: RegistrationForm (email, password1,
+                                     password2; duplicate-email rejection;
+                                     Django password validators)
+  └─ apps/accounts/views.py        — Added register() view (GET renders form,
+                                     POST creates CustomUser and logs in)
+  └─ plec_project/urls.py          — Added /register/ URL
+  └─ templates/accounts/register.html — Created: styled registration form page
+  └─ challenge/index.html + all
+     13 challenge/lesson pages      — "Create an account" link added to nav
+
+───────────────────────────────────────────────────────────────
+[6796df6] Update platform documentation to reflect current architecture and features
+───────────────────────────────────────────────────────────────
+  └─ README.md                     — Full rewrite for Django architecture: updated
+                                     tech stack table, folder tree, API reference,
+                                     deployment notes, testing guide, security
+                                     summary, and dependency table
+
+───────────────────────────────────────────────────────────────
+[6ec3aad] Security scan — 3 additional findings identified
+[302324c] Add registration links to various challenge pages (staticfiles sync)
+───────────────────────────────────────────────────────────────
+  └─ staticfiles/challenge/*       — collectstatic output refreshed to include
+                                     sign-in and register links on all pages
+
+───────────────────────────────────────────────────────────────
+[9a3c36c] Task #42: Fix assessment integrity — server no longer trusts client-supplied scores
+───────────────────────────────────────────────────────────────
+  └─ apps/assessment/api_views.py  — /api/assess now returns a signed result_token
+                                     (HMAC-SHA256) covering score + grade + milestones;
+                                     /api/results POST requires a valid token and
+                                     recomputes the score server-side — client-supplied
+                                     score/grade values are ignored
+  └─ apps/assessment/models.py     — Added result_token field on AssessmentResult
+  └─ challenge/assess.js           — Updated to pass result_token from /api/assess
+                                     response through to /api/results save call;
+                                     removed client-side score editing
+
+───────────────────────────────────────────────────────────────
+[9890b9a] Task #43: Authentication and Recovery Issues
+───────────────────────────────────────────────────────────────
+  └─ apps/accounts/forms.py        — Registration form now normalises email to
+                                     lowercase; duplicate-email check is
+                                     case-insensitive
+  └─ apps/accounts/views.py        — Fixed open-redirect in password-reset confirm
+                                     flow; login view uses is_safe_url() guard
+  └─ plec_project/settings.py      — Added AXES_LOCKOUT_PARAMETERS scoped to
+                                     [username, ip_address] (not ip-only);
+                                     PASSWORD_RESET_TIMEOUT set to 3600 s
+  └─ templates/registration/
+       password_reset_email.txt     — Reset link now uses HTTPS scheme when
+                                     request.is_secure() is True
+
+───────────────────────────────────────────────────────────────
+[b6a5229] Switch production database from SQLite to PostgreSQL (Task #15)
+───────────────────────────────────────────────────────────────
+  └─ plec_project/settings.py      — DATABASES now reads DATABASE_URL via
+                                     dj-database-url; falls back to SQLite only
+                                     when DATABASE_URL is unset AND DEBUG=True;
+                                     raises RuntimeError at startup if DEBUG=False
+                                     and DATABASE_URL is missing (prevents silent
+                                     SQLite use in production)
+  └─ requirements.txt              — Added: dj-database-url, psycopg2-binary
+  └─ README.md                     — Updated architecture tree, tech stack table,
+                                     deployment note, and licensing section to
+                                     describe PostgreSQL as the production database
+
+───────────────────────────────────────────────────────────────
+[4c22a4b] Clean up SQLite database artifacts after PostgreSQL migration
+───────────────────────────────────────────────────────────────
+  └─ tests/test_plec.db-shm/wal    — Removed: stale SQLite WAL sidecar files that
+                                     were previously tracked in git
+  └─ tests/test_plec.py            — Fixed tearDownClass to also remove -shm/-wal/
+                                     -journal sidecar files so they never reappear
+                                     after a test run
+  └─ .gitignore                    — Added *.db-shm, *.db-wal, *.sqlite3-shm,
+                                     *.sqlite3-wal patterns; added explanatory
+                                     comment noting production data lives in Postgres
+  └─ create_db.py                  — Added LEGACY/DEV-ONLY header docstring
+  └─ serve.py                      — Added LEGACY/DEV-ONLY header comment
+  └─ threat_model.md               — Updated Project Overview and "Application to
+                                     database" trust boundary to describe PostgreSQL
+                                     as the production data store
+
+───────────────────────────────────────────────────────────────
+[2d791d8] Update documentation to clarify legacy script usage and database changes
+───────────────────────────────────────────────────────────────
+  └─ README.md                     — Architecture tree: plec.db noted as not
+                                     committed to git; create_db.py labelled
+                                     legacy/dev-only, disconnected from Postgres
+                                   — Legacy test suite section: noted tests/test_plec.py
+                                     only touches a throwaway local SQLite file,
+                                     cleaned up automatically including -shm/-wal
+                                   — Legacy backend table: create_db.py and serve.py
+                                     entries updated; load_seed_data listed as the
+                                     Django/Postgres-native equivalent
+
+═══════════════════════════════════════════════════════════════
+  FILE TOUCH SUMMARY (cumulative — all commits)
+═══════════════════════════════════════════════════════════════
+
+  challenge/index.html              14 commits
+  challenge/level1.html             10 commits
+  challenge/level2.html             10 commits
+  challenge/level3.html             10 commits
+  challenge/level4.html             10 commits
+  challenge/level5.html             10 commits
+  challenge/level6.html             10 commits
+  challenge/multimeter.html          8 commits
+  challenge/multimeter-lesson.html   6 commits
+  challenge/learn-your-log.html      5 commits
+  challenge/maintenance-log.html     4 commits
+  challenge/plc-primer.html          3 commits
+  challenge/assess.js                3 commits
+  staticfiles/challenge/*           multiple commits (collectstatic syncs)
+  serve.py                           5 commits (legacy — superseded by Django)
+  create_db.py                       3 commits (legacy — superseded by load_seed_data)
+  tests/test_plec.py                 3 commits (legacy SQLite test suite)
+  apps/accounts/models.py            2 commits
+  apps/accounts/views.py             6 commits
+  apps/accounts/forms.py             2 commits  (created)
+  apps/accounts/admin.py             2 commits
+  apps/accounts/signals.py           1 commit   (created)
+  apps/accounts/tests.py             3 commits
+  apps/assessment/api_views.py       4 commits
+  apps/assessment/models.py          3 commits
+  apps/assessment/admin.py           2 commits
+  apps/assessment/views.py           2 commits
+  apps/assessment/management/
+    commands/load_seed_data.py       1 commit   (created)
+  plec_project/settings.py           8 commits
+  plec_project/urls.py               4 commits
+  templates/accounts/login.html      2 commits
+  templates/accounts/lockout.html    2 commits
+  templates/accounts/register.html   1 commit   (created)
+  templates/accounts/
+    password_change.html             1 commit   (created)
+    password_change_done.html        1 commit   (created)
+  templates/registration/
+    password_reset_form.html         1 commit   (created)
+    password_reset_done.html         1 commit   (created)
+    password_reset_confirm.html      1 commit   (created)
+    password_reset_email.txt         2 commits
+  templates/assessment/history.html  2 commits
+  requirements.txt                   5 commits
+  README.md                          6 commits
+  .gitignore                         2 commits
+  threat_model.md                    1 commit   (created)
+  CHANGELOG.txt                      3 commits  (created + 2 updates)
+  CONTRIBUTING.md                    1 commit
+
+═══════════════════════════════════════════════════════════════
+  ~85 commits total · 50+ active files tracked
+═══════════════════════════════════════════════════════════════

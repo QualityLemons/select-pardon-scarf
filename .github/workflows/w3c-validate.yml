@@ -1,0 +1,35 @@
+name: W3C HTML Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'challenge/**.html'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'challenge/**.html'
+
+jobs:
+  validate:
+    name: Validate HTML (W3C Nu)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install html5validator
+        run: pip install html5validator
+
+      - name: Run W3C Nu validation on all challenge pages
+        run: |
+          html5validator \
+            --root challenge/ \
+            --match "*.html" \
+            --log INFO

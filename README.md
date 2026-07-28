@@ -127,7 +127,8 @@ plec/
 ├── plec.db                    ← SQLite database (local dev fallback only; created automatically if DATABASE_URL is unset — not committed to git)
 ├── create_db.py                ← Legacy, dev-only script — builds a standalone local SQLite file, unrelated to production Postgres
 ├── requirements.txt
-├── Procfile                    ← Heroku process: `web: python manage.py runserver 0.0.0.0:5000`
+├── Procfile                    ← Heroku processes: release-phase migrations + gunicorn web server
+├── .python-version              ← Pins Python 3.11 for the Heroku buildpack
 ├── scripts/
 │   └── post-merge.sh           ← Runs on every merge: pip install, migrate, collectstatic
 ├── plec_project/                ← Django project package
@@ -178,6 +179,7 @@ plec/
 
 | Method | Endpoint | Description |
 |---|---|---|
+| `GET` | `/api/me` | Returns the current session's auth state (`{authenticated, email, is_staff}`) — used by the static challenge pages to swap the header between Sign In/Register and email + Sign Out |
 | `GET` | `/api/modules` | Returns all 11 modules with metadata and milestone counts |
 | `GET` | `/api/tips/:module_id` | Returns Supervisor tips for a given module |
 | `POST` | `/api/assess` | Scores a challenge attempt and returns grade, review paragraphs, and breakdown |
@@ -210,9 +212,9 @@ PLeC accounts are backed by a **custom email-based user model** (`apps.accounts.
 
 | Capability | URL | Notes |
 |---|---|---|
-| Self-registration | `/register/` | Anyone can create an account with an email + password. Auto-logs-in on success and redirects to the challenge homepage |
-| Sign in | `/login/` | "Sign In" and "Register" links appear on every challenge page and the homepage |
-| Sign out | `/logout/` (POST) | |
+| Self-registration | `/register/` | Anyone can create an account with an email + password. Every valid submission redirects to the login page without establishing a session (deliberate — prevents account-existence probing) |
+| Sign in | `/login/` | Staff are sent to `/admin/`; regular learners are sent to the challenge homepage |
+| Sign out | `/logout/` (POST) | The challenge homepage header shows the signed-in email and a Sign Out button (backed by `/api/me`) |
 | Forgot password | `/password-reset/` | Standard Django email-based reset flow |
 | Change password | `/password-change/` | For logged-in users |
 | Learner result history | `/profile/` | Shows the current user's saved assessment results |
@@ -446,7 +448,9 @@ PLeC requires a `DJANGO_SECRET_KEY` to start. All other variables have safe defa
 |---|---|---|---|
 | `DJANGO_SECRET_KEY` | ✅ | — | Django cryptographic signing key; the app refuses to start without it |
 | `DJANGO_DEBUG` | | `False` | `True` enables live-reload serving of `challenge/` and Django's debug pages |
+| `DATABASE_URL` | prod | *(unset)* | PostgreSQL connection URL. If unset, the app also checks Heroku's `HEROKU_POSTGRESQL_*_URL` attachment variables; in local development (`DJANGO_DEBUG=True`) it falls back to SQLite |
 | `ALLOWED_HOSTS` | | *(empty)* | Comma-separated list of allowed hostnames in production |
+| `CSRF_TRUSTED_ORIGINS` | prod | *(empty)* | Comma-separated origins allowed to POST forms, e.g. `https://your-app.herokuapp.com` |
 | `DJANGO_ADMINS` | | *(empty)* | Comma-separated `Name:email@example.com` list — receives lockout alert emails |
 | `EMAIL_BACKEND` / `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` / `EMAIL_USE_TLS` | | console backend | SMTP settings for password-reset and admin-alert emails |
 | `DEFAULT_FROM_EMAIL` | | `noreply@plec.local` | From-address on outgoing email |
@@ -480,37 +484,35 @@ PLeC is a Django application and needs a Python host capable of running `manage.
 
 ### Heroku (or any Python buildpack host)
 
-The included `Procfile` runs the Django dev server directly for simplicity:
+The included `Procfile` runs migrations in Heroku's release phase and serves the app with gunicorn:
 
 ```
-web: python manage.py runserver 0.0.0.0:5000
+release: python manage.py migrate --noinput
+web: gunicorn plec_project.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 60
 ```
 
-For a real production deployment, replace this with a proper WSGI server:
+`.python-version` pins Python 3.11 for the buildpack, and `requirements.txt` already includes gunicorn.
 
-```
-web: gunicorn plec_project.wsgi --bind 0.0.0.0:$PORT
-```
-
-```bash
-pip install gunicorn
-```
+Static files are collected automatically during Heroku's **build** phase (do **not** set `DISABLE_COLLECTSTATIC` — release-phase dynos have a throwaway filesystem, so files collected there never reach the web dyno). `settings.py` is written so `collectstatic` works without a database connection, which is exactly the situation during a Heroku build.
 
 ### Required production configuration
 
-1. Set `DJANGO_SECRET_KEY` to a long random string (never reuse the development value).
-2. Set `DJANGO_DEBUG=False`.
-3. Set `ALLOWED_HOSTS` to your production domain(s).
-4. Run migrations and collect static files on every deploy — the project's `scripts/post-merge.sh` already does this:
+1. Attach a PostgreSQL database. On Heroku, add the **Heroku Postgres** add-on (Resources tab) — it sets `DATABASE_URL` automatically. The app also accepts Heroku's colored attachment variables (e.g. `HEROKU_POSTGRESQL_SILVER_URL`) when `DATABASE_URL` is missing, refuses to guess if several are present, and rejects non-PostgreSQL databases in production. The release log prints which variable it connected from.
+2. Set `DJANGO_SECRET_KEY` to a long random string (never reuse the development value).
+3. Set `DJANGO_DEBUG=False` (or leave unset — `False` is the default).
+4. Set `ALLOWED_HOSTS` to your production domain(s), e.g. `your-app.herokuapp.com`.
+5. Set `CSRF_TRUSTED_ORIGINS` to the full origin(s), e.g. `https://your-app.herokuapp.com`.
+6. Configure SMTP `EMAIL_*` variables so password-reset links and admin lockout alerts are actually delivered (the default console backend only prints emails to the server log).
+7. Optionally set `DJANGO_ADMINS` so staff are notified by email when an account is locked out.
+8. One-time, after the first deploy (Heroku dashboard → More → Run console):
    ```bash
-   pip install -r requirements.txt
-   python manage.py migrate --noinput
-   python manage.py collectstatic --noinput
+   python manage.py load_seed_data     # modules, milestones, supervisor tips
+   python manage.py createsuperuser    # your admin account
    ```
-5. Configure SMTP `EMAIL_*` variables so password-reset links and admin lockout alerts are actually delivered (the default console backend only prints emails to the server log).
-6. Optionally set `DJANGO_ADMINS` so staff are notified by email when an account is locked out.
 
-> **Database:** The app uses PostgreSQL in production, configured entirely through the `DATABASE_URL` environment variable (parsed via `dj-database-url`). This is required on any host with an ephemeral filesystem (e.g. container restarts, redeploys) — a file-based SQLite database would silently lose all user accounts and saved results on every restart, and cannot safely handle concurrent writes. If `DATABASE_URL` is not set, the app falls back to the local `plec.db` SQLite file for convenience in throwaway local development only; this fallback must never be relied on in a deployed environment.
+> **Reverse-proxy SSL:** Heroku terminates HTTPS at its router and forwards plain HTTP to the dyno. `settings.py` sets `SECURE_PROXY_SSL_HEADER` so Django trusts `X-Forwarded-Proto`, preventing redirect loops with `SECURE_SSL_REDIRECT`.
+
+> **Database:** The app uses PostgreSQL in production, configured entirely through the `DATABASE_URL` environment variable (parsed via `dj-database-url`). This is required on any host with an ephemeral filesystem (e.g. container restarts, redeploys) — a file-based SQLite database would silently lose all user accounts and saved results on every restart, and cannot safely handle concurrent writes. The SQLite fallback (`plec.db`) only activates in local development with `DJANGO_DEBUG=True`; in production, a missing database is caught at first use (build steps like `collectstatic` still work), and the release-phase `migrate` fails loudly rather than silently writing to an ephemeral file.
 
 ### CI — W3C validation on every push
 

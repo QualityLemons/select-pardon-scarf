@@ -14,6 +14,21 @@ from django.views import View
 from .forms import RegistrationForm
 
 
+def _post_login_url(user):
+    """Staff go to the Django admin; regular learners go to the training game."""
+    return '/admin/' if user.is_staff else '/'
+
+    In LoginView.get, replace return redirect('admin:index') with:
+
+return redirect(_post_login_url(request.user))
+
+    In LoginView.post, replace return redirect('/admin/') with:
+
+return redirect(_post_login_url(user))
+
+plec_project/settings.py — one line:
+LOGIN_REDIRECT_URL = '/'   # was '/admin/'
+
 def _get_cooloff_timedelta():
     """Return AXES_COOLOFF_TIME as a timedelta regardless of how it is configured."""
     raw = getattr(settings, 'AXES_COOLOFF_TIME', 1)

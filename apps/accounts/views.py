@@ -13,6 +13,7 @@ from django.views import View
 
 from .forms import RegistrationForm
 
+
 def _post_login_url(user):
     """Staff go to the Django admin; regular learners go to the training game."""
     return '/admin/' if user.is_staff else '/'
@@ -82,7 +83,7 @@ class LoginView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            return redirect('admin:index')
+            return redirect(_post_login_url(request.user))
         form = AuthenticationForm()
         return render(request, self.template_name, {'form': form})
 
@@ -105,7 +106,7 @@ class LoginView(View):
                 require_https=request.is_secure(),
             ):
                 return redirect(next_url)
-            return redirect('/admin/')
+            return redirect(_post_login_url(user))
 
         form = AuthenticationForm(request, data=request.POST)
         return render(request, self.template_name, {'form': form, 'error': 'Invalid email or password.'})

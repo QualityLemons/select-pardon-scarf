@@ -168,7 +168,7 @@ AXES_LOCKOUT_URL = '/lockout/'
 AXES_VERBOSE = False
 
 LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/admin/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
 _admins_raw = os.environ.get('DJANGO_ADMINS', '')

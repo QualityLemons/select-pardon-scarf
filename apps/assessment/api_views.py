@@ -3,7 +3,7 @@ import uuid
 from django.core import signing
 from django.http import JsonResponse
 from django.views import View
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from .models import Module, SupervisorTip, AssessmentResult
 from .scorer import score_attempt
@@ -25,6 +25,59 @@ def cors_json(data, status=200):
     return _cors_headers(r)
 
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class MeView(View):
+    """Report the current session's auth state to the static game pages.
+
+    ensure_csrf_cookie guarantees the csrftoken cookie is set so the static
+    header can POST to /logout/ with a valid CSRF token.
+    """
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return JsonResponse({
+                'authenticated': True,
+                'email': request.user.get_username(),
+                'is_staff': request.user.is_staff,
+            })
+        return JsonResponse({'authenticated': False})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ModulesView(View):
+    ...  # rest of the file unchanged
+
+RESULT_TOKEN_SALT = 'plec.assessment.result_token'
+RESULT_TOKEN_MAX_AGE = 600  # seconds — window in which a scored attempt may be persisted
+
+
+def _cors_headers(response):
+    response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+    response['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
+
+
+def cors_json(data, status=200):
+    r = JsonResponse(data, status=status)
+    return _cors_headers(r)
+
+@method_decorator(ensure_csrf_cookie, name='dispatch')
+class MeView(View):
+    """Report the current session's auth state to the static game pages.
+
+    ensure_csrf_cookie guarantees the csrftoken cookie is set so the static
+    header can POST to /logout/ with a valid CSRF token.
+    """
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return JsonResponse({
+                'authenticated': True,
+                'email': request.user.get_username(),
+                'is_staff': request.user.is_staff,
+            })
+        return JsonResponse({'authenticated': False})
 @method_decorator(csrf_exempt, name='dispatch')
 class ModulesView(View):
     def get(self, request):

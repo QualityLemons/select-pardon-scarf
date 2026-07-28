@@ -655,9 +655,44 @@
         <div class="status-dot pulse" aria-hidden="true"></div>
         <span>SYSTEM STATUS: ONLINE</span>
       </div>
-      <a href="/login/" style="font-size:11px;color:#f5a623;text-decoration:none;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Sign In</a>
-    <a href="/register/" style="font-size:11px;color:#64748b;text-decoration:none;padding:5px 14px;border:1px solid #64748b;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Register</a>
-      <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
+     <span id="auth-signed-out">
+  <a href="/login/" style="font-size:11px;color:#f5a623;text-decoration:none;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Sign In</a>
+  <a href="/register/" style="font-size:11px;color:#64748b;text-decoration:none;padding:5px 14px;border:1px solid #64748b;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Register</a>
+</span>
+<span id="auth-signed-in" style="display:none;align-items:center;gap:10px;flex-shrink:0;">
+  <span id="auth-email" style="font-size:11px;color:#64748b;letter-spacing:0.05em;font-family:var(--font-m);white-space:nowrap;"></span>
+  <button id="auth-signout" type="button" style="font-size:11px;color:#f5a623;background:none;cursor:pointer;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;white-space:nowrap;">Sign Out</button>
+</span>
+<script>
+(function () {
+  function getCookie(name) {
+    var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return m ? decodeURIComponent(m.pop()) : '';
+  }
+  fetch('/api/me', { credentials: 'same-origin' })
+    .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+    .then(function (me) {
+      if (!me.authenticated) return;
+      document.getElementById('auth-signed-out').style.display = 'none';
+      var signedIn = document.getElementById('auth-signed-in');
+      signedIn.style.display = 'inline-flex';
+      document.getElementById('auth-email').textContent = me.email || '';
+      document.getElementById('auth-signout').addEventListener('click', function () {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/logout/';
+        var token = document.createElement('input');
+        token.type = 'hidden';
+        token.name = 'csrfmiddlewaretoken';
+        token.value = getCookie('csrftoken');
+        form.appendChild(token);
+        document.body.appendChild(form);
+        form.submit();
+      });
+    })
+    .catch(function () { /* leave signed-out header on any error */ });
+})();
+</script>
     </div>
   </div>
 </header>

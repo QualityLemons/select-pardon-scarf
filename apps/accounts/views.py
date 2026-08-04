@@ -1,17 +1,21 @@
 import datetime
+import time
 
 from axes.helpers import get_lockout_response
 from axes.models import AccessAttempt
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import views as auth_views
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 
-from .forms import RegistrationForm
+from .forms import EditProfileForm, RegistrationForm
 
 
 def _post_login_url(user):
@@ -152,3 +156,77 @@ class LogoutView(View):
     def post(self, request):
         logout(request)
         return redirect('/login/')
+
+
+class RateLimitedPasswordResetView(auth_views.PasswordResetView):
+    """
+    Wraps Django's built-in PasswordResetView with email-keyed rate limiting.
+
+    Uses the same failure limit and cooloff window as the login lockout
+    (AXES_FAILURE_LIMIT / AXES_COOLOFF_TIME) so the policy is consistent
+    across all authentication-related endpoints.  The counter is keyed on
+    the submitted email address rather than IP address, matching the intent
+    of the login lockout policy.
+    """
+
+    def _rate_limit_config(self):
+        limit = getattr(settings, 'AXES_FAILURE_LIMIT', 5)
+        window = int(_get_cooloff_timedelta().total_seconds())
+        return limit, window
+
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email', '').lower().strip()
+        limit, window = self._rate_limit_config()
+
+        if email:
+            attempts_key = f'pwd_reset_attempts:{email}'
+            start_key = f'pwd_reset_start:{email}'
+
+            # cache.add only writes when the key is absent — this anchors the
+            # window start time and initialises the counter atomically.
+            cache.add(attempts_key, 0, window)
+            cache.add(start_key, time.time(), window)
+
+            count = cache.incr(attempts_key)
+
+            if count > limit:
+                start = cache.get(start_key, time.time() - window)
+                elapsed = time.time() - start
+                remaining_secs = max(0, int(window - elapsed))
+                remaining_display = _format_timedelta(
+                    datetime.timedelta(seconds=remaining_secs)
+                )
+                return render(
+                    request,
+                    'registration/password_reset_rate_limited.html',
+                    {
+                        'cooldown_display': remaining_display,
+                        'cooldown_seconds': remaining_secs,
+                    },
+                    status=429,
+                )
+
+        return super().post(request, *args, **kwargs)
+
+
+class EditProfileView(LoginRequiredMixin, View):
+    template_name = 'accounts/edit_profile.html'
+    login_url = '/login/'
+
+    def get(self, request):
+        form = EditProfileForm(
+            user=request.user,
+            initial={
+                'first_name': request.user.first_name,
+                'last_name':  request.user.last_name,
+                'email':      request.user.email,
+            },
+        )
+        return render(request, self.template_name, {'form': form})
+
+    def post(self, request):
+        form = EditProfileForm(request.POST, user=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('/profile/edit/?saved=1')
+        return render(request, self.template_name, {'form': form})

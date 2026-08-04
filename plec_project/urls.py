@@ -1,10 +1,32 @@
 from django.contrib import admin
-from django.conf import settings
 from django.urls import path, include
-from django.views.generic import RedirectView
+from django.views.generic import TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import views as auth_views
 from apps.accounts import views as account_views
-from apps.assessment.views import ResultHistoryView
+from apps.assessment.views import (
+    ResultHistoryView, ReflectionCreateView, ReflectionListView,
+    ReflectionUpdateView, ReflectionDeleteView,
+)
+
+
+class LoginRequiredTemplateView(LoginRequiredMixin, TemplateView):
+    """A TemplateView that redirects to /login/ when the user is not authenticated."""
+
+# Sub-pages served under /challenge/<slug>/
+_challenge_pages = [
+    path('plc-primer/',        TemplateView.as_view(template_name='challenge/plc-primer.html'),        name='challenge_plc_primer'),
+    path('multimeter/',        TemplateView.as_view(template_name='challenge/multimeter.html'),        name='challenge_multimeter'),
+    path('multimeter-lesson/', TemplateView.as_view(template_name='challenge/multimeter-lesson.html'), name='challenge_multimeter_lesson'),
+    path('level1/',            TemplateView.as_view(template_name='challenge/level1.html'),            name='challenge_level1'),
+    path('level2/',            TemplateView.as_view(template_name='challenge/level2.html'),            name='challenge_level2'),
+    path('level3/',            TemplateView.as_view(template_name='challenge/level3.html'),            name='challenge_level3'),
+    path('level4/',            TemplateView.as_view(template_name='challenge/level4.html'),            name='challenge_level4'),
+    path('level5/',            TemplateView.as_view(template_name='challenge/level5.html'),            name='challenge_level5'),
+    path('level6/',            TemplateView.as_view(template_name='challenge/level6.html'),            name='challenge_level6'),
+    path('learn-your-log/',    TemplateView.as_view(template_name='challenge/learn-your-log.html'),    name='challenge_learn_your_log'),
+    path('maintenance-log/',   TemplateView.as_view(template_name='challenge/maintenance-log.html'),   name='challenge_maintenance_log'),
+]
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,7 +43,7 @@ urlpatterns = [
         template_name='accounts/password_change_done.html',
     ), name='password_change_done'),
 
-    path('password-reset/', auth_views.PasswordResetView.as_view(
+    path('password-reset/', account_views.RateLimitedPasswordResetView.as_view(
         template_name='registration/password_reset_form.html',
         email_template_name='registration/password_reset_email.txt',
         subject_template_name='registration/password_reset_subject.txt',
@@ -39,18 +61,19 @@ urlpatterns = [
     ), name='password_reset_complete'),
 
     path('profile/', ResultHistoryView.as_view(), name='profile'),
+    path('profile/edit/', account_views.EditProfileView.as_view(), name='profile_edit'),
+    path('reflect/', ReflectionCreateView.as_view(), name='reflect'),
+    path('reflect/all/', ReflectionListView.as_view(), name='reflect_list'),
+    path('reflect/<int:pk>/edit/', ReflectionUpdateView.as_view(), name='reflect_edit'),
+    path('reflect/<int:pk>/delete/', ReflectionDeleteView.as_view(), name='reflect_delete'),
     path('api/', include('apps.assessment.urls')),
-]
 
-if settings.DEBUG:
-    from django.views.static import serve
-    urlpatterns += [
-        path('challenge/<path:path>', serve, {'document_root': settings.CHALLENGE_DIR}),
-        path('challenge/', serve, {'document_root': settings.CHALLENGE_DIR, 'path': 'index.html'}),
-        path('', serve, {'document_root': settings.CHALLENGE_DIR, 'path': 'index.html'}),
-    ]
-else:
-    urlpatterns += [
-        path('challenge/', RedirectView.as_view(url='/static/challenge/index.html', permanent=False)),
-        path('', RedirectView.as_view(url='/static/challenge/index.html', permanent=False)),
-    ]
+    # Donation page — login required; shown after completing the final mission
+    path('donate/', LoginRequiredTemplateView.as_view(template_name='challenge/donate.html'), name='donate'),
+
+    # Game home
+    path('', TemplateView.as_view(template_name='challenge/index.html'), name='home'),
+
+    # Individual challenge/lesson pages
+    path('challenge/', include(_challenge_pages)),
+]

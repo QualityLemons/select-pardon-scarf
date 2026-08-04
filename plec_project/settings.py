@@ -18,6 +18,35 @@ DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 _allowed_hosts = os.environ.get('ALLOWED_HOSTS', '')
 ALLOWED_HOSTS = [h.strip() for h in _allowed_hosts.split(',') if h.strip()]
 
+# Replit injects REPLIT_DOMAINS at runtime with the exact domain(s) for this
+# deployment (e.g. "my-app.username.replit.app") — never wildcards.  In
+# non-DEBUG mode, when this variable is present, we discard every entry that
+# was built from the env var and replace the list with only those exact
+# domains.  This prevents the app from accepting requests addressed to other
+# subdomains, even if the ALLOWED_HOSTS env var still carries a legacy
+# wildcard like ".replit.app".
+_replit_domains = [d.strip() for d in os.environ.get('REPLIT_DOMAINS', '').split(',') if d.strip()]
+_DEBUG_LOCAL = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+if _replit_domains and not _DEBUG_LOCAL:
+    # Production with REPLIT_DOMAINS: lock to the exact deployed domain(s) only.
+    ALLOWED_HOSTS = list(_replit_domains)
+else:
+    # No REPLIT_DOMAINS: development mode, pre-deployment, or a non-Replit
+    # host.  Warn loudly if wildcards are present in a non-DEBUG deployment
+    # so the operator knows the list needs narrowing.
+    if not _DEBUG_LOCAL:
+        _wildcard_hosts = [h for h in ALLOWED_HOSTS if h.startswith('.') or '*' in h]
+        if _wildcard_hosts:
+            import warnings
+            warnings.warn(
+                'SECURITY WARNING: ALLOWED_HOSTS contains wildcard patterns '
+                '(%s) in a non-DEBUG deployment. Lock this down to the exact '
+                'production domain (e.g. "my-plec-app.replit.app") via the '
+                'ALLOWED_HOSTS environment variable to prevent this application '
+                'from accepting requests intended for other apps.' % ', '.join(_wildcard_hosts),
+                stacklevel=1,
+            )
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -138,10 +167,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-CHALLENGE_DIR = BASE_DIR / 'challenge'
-
+# The challenge/ directory contains the CSS and JS used by the game pages.
+# HTML files live in templates/challenge/ and are served by Django views.
 STATICFILES_DIRS = [
-    ('challenge', CHALLENGE_DIR),
+    ('challenge', BASE_DIR / 'challenge'),
 ]
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
@@ -210,3 +239,9 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 #   CSRF_TRUSTED_ORIGINS=https://your-app.herokuapp.com,https://your-custom-domain.com
 _csrf_origins = os.environ.get('CSRF_TRUSTED_ORIGINS', '')
 CSRF_TRUSTED_ORIGINS = [o.strip() for o in _csrf_origins.split(',') if o.strip()]
+
+# Mirror the ALLOWED_HOSTS lock-down for CSRF: in non-DEBUG mode when
+# REPLIT_DOMAINS is present, discard any wildcard origins from the env var and
+# replace the list with the exact deployed origins only.
+if _replit_domains and not _DEBUG_LOCAL:
+    CSRF_TRUSTED_ORIGINS = ['https://' + rd for rd in _replit_domains]

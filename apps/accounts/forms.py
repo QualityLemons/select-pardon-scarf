@@ -5,6 +5,46 @@ from django.contrib.auth.password_validation import validate_password
 User = get_user_model()
 
 
+class EditProfileForm(forms.Form):
+    first_name = forms.CharField(
+        label='First Name',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'autocomplete': 'given-name'}),
+    )
+    last_name = forms.CharField(
+        label='Last Name',
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={'autocomplete': 'family-name'}),
+    )
+    email = forms.EmailField(
+        label='Email Address',
+        widget=forms.EmailInput(attrs={'autocomplete': 'email'}),
+    )
+
+    def __init__(self, *args, user=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._user = user
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        qs = User.objects.filter(email=email)
+        if self._user:
+            qs = qs.exclude(pk=self._user.pk)
+        if qs.exists():
+            raise forms.ValidationError('That email address is already in use.')
+        return email
+
+    def save(self):
+        if not self._user:
+            return
+        self._user.first_name = self.cleaned_data['first_name']
+        self._user.last_name  = self.cleaned_data['last_name']
+        self._user.email      = self.cleaned_data['email']
+        self._user.save(update_fields=['first_name', 'last_name', 'email'])
+
+
 class RegistrationForm(forms.Form):
     email = forms.EmailField(
         label='Email Address',

@@ -423,8 +423,33 @@
     <a href="/challenge/level4/" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Safety</a>
     <a href="/challenge/level5/" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Timer</a>
     <a href="/challenge/level6/" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Batch</a>
-    <a href="/login/" style="font-size:12px;color:#f5a623;text-decoration:none;padding:4px 10px;border:1px solid #f5a623;border-radius:6px;font-weight:700;">Sign In</a>
-    <a href="/register/" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #64748b;border-radius:6px;font-weight:700;">Register</a>
+    <span id="plec-auth-out" style="display:inline-flex;align-items:center;gap:6px;">
+      <a href="/login/" style="font-size:12px;color:#f5a623;text-decoration:none;padding:4px 10px;border:1px solid #f5a623;border-radius:6px;font-weight:700;">Sign In</a>
+      <a href="/register/" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #64748b;border-radius:6px;font-weight:700;">Register</a>
+    </span>
+    <span id="plec-auth-in" style="display:none;align-items:center;gap:6px;">
+      <span id="plec-auth-email" style="font-size:11px;color:#64748b;font-family:monospace;white-space:nowrap;"></span>
+      <button id="plec-auth-signout" type="button" style="font-size:12px;color:#f5a623;background:none;cursor:pointer;padding:4px 10px;border:1px solid #f5a623;border-radius:6px;font-weight:700;">Sign Out</button>
+    </span>
+    <script>
+    (function(){
+      fetch('/api/me',{credentials:'same-origin'})
+        .then(function(r){return r.ok?r.json():{authenticated:false};})
+        .then(function(me){
+          if(!me.authenticated)return;
+          document.getElementById('plec-auth-out').style.display='none';
+          var si=document.getElementById('plec-auth-in');si.style.display='inline-flex';
+          document.getElementById('plec-auth-email').textContent=me.email||'';
+          document.getElementById('plec-auth-signout').addEventListener('click',function(){
+            var f=document.createElement('form');f.method='POST';f.action='/logout/';
+            var t=document.createElement('input');t.type='hidden';t.name='csrfmiddlewaretoken';
+            var m=document.cookie.match('(^|;)\\s*csrftoken\\s*=\\s*([^;]+)');
+            t.value=m?decodeURIComponent(m.pop()):'';
+            f.appendChild(t);document.body.appendChild(f);f.submit();
+          });
+        }).catch(function(){});
+    })();
+    </script>
   </nav>
   <div class="scan-counter" style="margin-left:0" aria-hidden="true">SCAN #<span id="scan-num">0</span> &nbsp;|&nbsp; Cycle: <span id="cycle-time">50</span>ms</div>
   <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>

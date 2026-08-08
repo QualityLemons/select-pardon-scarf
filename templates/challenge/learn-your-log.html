@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -146,7 +147,7 @@
     @media(max-width:800px){.workspace{grid-template-columns:1fr}.sidebar{display:none}.log-compare{grid-template-columns:1fr}.fields-grid{grid-template-columns:1fr}.pf-grid{grid-template-columns:1fr}}
   </style>
   <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
-  <link rel="stylesheet" href="supervisor.css">
+  <link rel="stylesheet" href="{% static 'challenge/supervisor.css' %}">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -157,15 +158,15 @@
     <span>Learn Your Log</span>
   </div>
   <nav class="nav-links" aria-label="Challenge navigation">
-    <a href="index.html">⌂ Home</a>
-    <a href="level1.html">L1</a>
-    <a href="learn-your-log.html" class="active">Log</a>
-    <a href="level2.html">L2</a>
-    <a href="level3.html">L3</a>
-    <a href="level4.html">Safety</a>
-    <a href="level5.html">Timer</a>
-    <a href="level6.html">Batch</a>
-    <a href="maintenance-log.html" style="border-color:#d97706;color:#fbbf24;">📋 Template</a>
+    <a href="/">⌂ Home</a>
+    <a href="/challenge/level1/">L1</a>
+    <a href="/challenge/learn-your-log/" class="active">Log</a>
+    <a href="/challenge/level2/">L2</a>
+    <a href="/challenge/level3/">L3</a>
+    <a href="/challenge/level4/">Safety</a>
+    <a href="/challenge/level5/">Timer</a>
+    <a href="/challenge/level6/">Batch</a>
+    <a href="/challenge/maintenance-log/" style="border-color:#d97706;color:#fbbf24;">📋 Template</a>
     <a href="/login/" style="border-color:#f5a623;color:#f5a623;font-weight:700;">Sign In</a>
     <a href="/register/" style="border-color:#64748b;color:#64748b;font-weight:700;">Register</a>
   </nav>
@@ -391,9 +392,9 @@
         Use the <strong>Maintenance Log Template</strong> after every challenge (and every real job) to build the discipline from day one.
       </div>
       <div class="cb-links">
-        <a href="maintenance-log.html" class="cb-link cb-link-primary">Open Log Template →</a>
-        <a href="level2.html" class="cb-link cb-link-secondary">Next: Level 2 →</a>
-        <a href="index.html" class="cb-link cb-link-secondary">⌂ Home</a>
+        <a href="/challenge/maintenance-log/" class="cb-link cb-link-primary">Open Log Template →</a>
+        <a href="/challenge/level2/" class="cb-link cb-link-secondary">Next: Level 2 →</a>
+        <a href="/" class="cb-link cb-link-secondary">⌂ Home</a>
       </div>
     </div>
 
@@ -426,7 +427,7 @@
 
     <div class="sidebar-info">
       <div class="si-title">🔗 After This Lesson</div>
-      <div class="si-body">Open the <a href="maintenance-log.html" style="color:var(--amber);">Maintenance Log Template</a> and fill it out for real after completing each challenge. Build the habit now — it will be automatic on the plant floor.</div>
+      <div class="si-body">Open the <a href="/challenge/maintenance-log/" style="color:var(--amber);">Maintenance Log Template</a> and fill it out for real after completing each challenge. Build the habit now — it will be automatic on the plant floor.</div>
     </div>
   </aside>
 

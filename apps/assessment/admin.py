@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Module, Milestone, EfficiencyThreshold, BonusCategory, SupervisorTip, GradeDescriptor, AssessmentResult
+from .models import Module, Milestone, EfficiencyThreshold, BonusCategory, SupervisorTip, GradeDescriptor, AssessmentResult, PrereqDismissal
 
 
 class MilestoneInline(admin.TabularInline):
@@ -64,3 +64,16 @@ class EfficiencyThresholdAdmin(admin.ModelAdmin):
 @admin.register(BonusCategory)
 class BonusCategoryAdmin(admin.ModelAdmin):
     list_display = ('module', 'bonus_key', 'label', 'points')
+
+
+@admin.register(PrereqDismissal)
+class PrereqDismissalAdmin(admin.ModelAdmin):
+    list_display = ('id', 'get_user_email', 'level_key', 'dismissed_at')
+    list_filter = ('level_key',)
+    search_fields = ('user__email', 'user__username', 'level_key')
+    readonly_fields = ('dismissed_at',)
+    autocomplete_fields = ('user',)
+
+    @admin.display(description='User', ordering='user__email')
+    def get_user_email(self, obj):
+        return obj.user.email or obj.user.username

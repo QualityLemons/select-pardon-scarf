@@ -95,6 +95,43 @@ class GradeDescriptor(models.Model):
         return f'Grade {self.grade}: {self.label}'
 
 
+class MissionLogEntry(models.Model):
+    """A personal learning-journal entry recorded from the mission-log panel on a level page."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='mission_log_entries',
+    )
+    level = models.CharField(max_length=64)
+    skill = models.CharField(max_length=200, blank=True)
+    notes = models.TextField()
+    rating = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['id']
+
+    def __str__(self):
+        return f'{self.user} — {self.level} ({self.rating}★)'
+
+
+class PrereqDismissal(models.Model):
+    """Records that an authenticated learner has dismissed the prerequisite notice for a level."""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='prereq_dismissals',
+    )
+    level_key = models.CharField(max_length=64)
+    dismissed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'level_key')
+
+    def __str__(self):
+        return f'{self.user} dismissed prereq for {self.level_key}'
+
+
 class AssessmentResult(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

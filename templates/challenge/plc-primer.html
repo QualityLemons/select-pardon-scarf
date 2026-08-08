@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
@@ -7,7 +8,7 @@
   <script>(function(){var t=localStorage.getItem('plc-theme')||'dark';document.documentElement.dataset.theme=t;})()</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="supervisor.css">
+  <link rel="stylesheet" href="{% static 'challenge/supervisor.css' %}">
   <link href="https://fonts.googleapis.com/css2?family=Teko:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
   /* ── TOKENS ── */
@@ -379,7 +380,7 @@
 
 <!-- ── HEADER ── -->
 <header>
-  <a href="index.html" class="back-link" aria-label="Back to mission select">← BACK</a>
+  <a href="/" class="back-link" aria-label="Back to mission select">← BACK</a>
   <div class="hdr-div"></div>
   <div class="hdr-title">PLC <em>BOOT CAMP</em></div>
   <span class="hdr-badge">FOUNDATIONS</span>
@@ -1136,7 +1137,7 @@
       <div class="cta-h">PICK UP YOUR MULTIMETER.</div>
       <div class="cta-sub">The digital multimeter is the first tool every field engineer reaches for. Learn it before your first fault.</div>
     </div>
-    <a href="multimeter-lesson.html" class="cta-btn" aria-label="Proceed to Multimeter Lesson">
+    <a href="/challenge/multimeter-lesson/" class="cta-btn" aria-label="Proceed to Multimeter Lesson">
       START LESSON 02
       <span class="cta-arr" aria-hidden="true">→</span>
     </a>
@@ -1149,8 +1150,8 @@
   <div class="foot-inner">
     <p class="foot-left">PLeC — Learn PLC Engineering · Mission 01: Foundations</p>
     <nav class="foot-nav" aria-label="Quick navigation">
-      <a href="index.html">Mission Select</a>
-      <a href="multimeter-lesson.html">Next: DMM Lesson →</a>
+      <a href="/">Mission Select</a>
+      <a href="/challenge/multimeter-lesson/">Next: DMM Lesson →</a>
     </nav>
   </div>
 </footer>

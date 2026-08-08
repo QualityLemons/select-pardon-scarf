@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.utils.decorators import method_decorator
-from .models import Module, SupervisorTip, AssessmentResult
+from .models import Module, SupervisorTip, AssessmentResult, MissionLogEntry, PrereqDismissal
 from .scorer import score_attempt
 from .reviewer import generate_review
 
@@ -43,41 +43,6 @@ class MeView(View):
         return JsonResponse({'authenticated': False})
 
 
-@method_decorator(csrf_exempt, name='dispatch')
-class ModulesView(View):
-    ...  # rest of the file unchanged
-
-RESULT_TOKEN_SALT = 'plec.assessment.result_token'
-RESULT_TOKEN_MAX_AGE = 600  # seconds — window in which a scored attempt may be persisted
-
-
-def _cors_headers(response):
-    response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
-    response['Access-Control-Allow-Headers'] = 'Content-Type'
-    return response
-
-
-def cors_json(data, status=200):
-    r = JsonResponse(data, status=status)
-    return _cors_headers(r)
-
-@method_decorator(ensure_csrf_cookie, name='dispatch')
-class MeView(View):
-    """Report the current session's auth state to the static game pages.
-
-    ensure_csrf_cookie guarantees the csrftoken cookie is set so the static
-    header can POST to /logout/ with a valid CSRF token.
-    """
-
-    def get(self, request):
-        if request.user.is_authenticated:
-            return JsonResponse({
-                'authenticated': True,
-                'email': request.user.get_username(),
-                'is_staff': request.user.is_staff,
-            })
-        return JsonResponse({'authenticated': False})
 @method_decorator(csrf_exempt, name='dispatch')
 class ModulesView(View):
     def get(self, request):
@@ -172,6 +137,115 @@ class AssessView(View):
     def options(self, request):
         r = JsonResponse({})
         return _cors_headers(r)
+
+
+def _log_entry_to_dict(e):
+    return {
+        'id': e.id,
+        'level': e.level,
+        'skill': e.skill,
+        'notes': e.notes,
+        'rating': e.rating,
+        'created_at': e.created_at.strftime('%Y-%m-%dT%H:%M:%S'),
+    }
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MissionLogView(View):
+    """List and create mission log entries for a level."""
+
+    def get(self, request, level):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        entries = MissionLogEntry.objects.filter(user=request.user, level=level)
+        return JsonResponse({'entries': [_log_entry_to_dict(e) for e in entries]})
+
+    def post(self, request, level):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        notes = str(body.get('notes', '')).strip()
+        if not notes:
+            return JsonResponse({'error': 'notes is required'}, status=400)
+        entry = MissionLogEntry.objects.create(
+            user=request.user,
+            level=level,
+            skill=str(body.get('skill', ''))[:200],
+            notes=notes[:2000],
+            rating=max(0, min(5, int(body.get('rating', 0)))),
+        )
+        return JsonResponse(_log_entry_to_dict(entry), status=201)
+
+    def options(self, request, level):
+        return JsonResponse({})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class MissionLogEntryView(View):
+    """Delete a single mission log entry."""
+
+    def delete(self, request, level, eid):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        try:
+            entry = MissionLogEntry.objects.get(pk=eid, user=request.user, level=level)
+        except MissionLogEntry.DoesNotExist:
+            return JsonResponse({'error': 'Not found'}, status=404)
+        entry.delete()
+        return JsonResponse({'deleted': eid})
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class PrereqDismissalView(View):
+    """Record and query per-user, per-level prerequisite-notice dismissals.
+
+    GET  /api/prereq-dismissals/          → {dismissed: ['level2', 'level4', ...]}
+    POST /api/prereq-dismissals/          → body {level_key: 'level3'} → {dismissed: true}
+    Both require authentication; unauthenticated callers receive 401.
+    """
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        keys = list(
+            PrereqDismissal.objects.filter(user=request.user)
+            .values_list('level_key', flat=True)
+        )
+        return JsonResponse({'dismissed': keys})
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        level_key = str(body.get('level_key', '')).strip()
+        if not level_key:
+            return JsonResponse({'error': 'level_key is required'}, status=400)
+        PrereqDismissal.objects.get_or_create(user=request.user, level_key=level_key)
+        return JsonResponse({'dismissed': True})
+
+    def delete(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'Authentication required'}, status=401)
+        try:
+            body = json.loads(request.body)
+        except Exception:
+            return JsonResponse({'error': 'Invalid JSON'}, status=400)
+        level_key = str(body.get('level_key', '')).strip()
+        if not level_key:
+            return JsonResponse({'error': 'level_key is required'}, status=400)
+        deleted_count, _ = PrereqDismissal.objects.filter(
+            user=request.user, level_key=level_key
+        ).delete()
+        return JsonResponse({'undismissed': deleted_count > 0})
+
+    def options(self, request):
+        return JsonResponse({})
 
 
 def _result_to_dict(r):

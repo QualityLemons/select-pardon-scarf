@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -385,7 +386,7 @@
     }
   </style>
   <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
-  <link rel="stylesheet" href="supervisor.css">
+  <link rel="stylesheet" href="{% static 'challenge/supervisor.css' %}">
 </head>
 <body>
 
@@ -393,12 +394,12 @@
 
 <!-- ── HEADER ── -->
 <header>
-  <a href="index.html" class="back-link" aria-label="Back to mission select">← BACK</a>
+  <a href="/" class="back-link" aria-label="Back to mission select">← BACK</a>
   <div style="width:1px;height:24px;background:rgba(30,41,59,.8);flex-shrink:0;"></div>
   <div class="header-title">DIGITAL <em>MULTIMETER</em></div>
   <span class="header-badge">TOOL</span>
-  <a href="multimeter-lesson.html" class="lesson-link">📖 READ LESSON →</a>
-  <a href="level1.html" class="lesson-link" style="border-color:rgba(59,130,246,.4);color:var(--blue);">▶ LEVEL 1 →</a>
+  <a href="/challenge/multimeter-lesson/" class="lesson-link">📖 READ LESSON →</a>
+  <a href="/challenge/level1/" class="lesson-link" style="border-color:rgba(59,130,246,.4);color:var(--blue);">▶ LEVEL 1 →</a>
   <a href="/login/" class="lesson-link" style="border-color:#f5a623;color:#f5a623;font-weight:700;margin-left:auto;">Sign In</a>
     <a href="/register/" class="lesson-link" style="border-color:#64748b;color:#64748b;font-weight:700;margin-left:0.5rem;text-decoration:none;padding:4px 10px;border:1px solid #64748b;border-radius:6px;">Register</a>
 </header>

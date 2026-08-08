@@ -1,0 +1,460 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mission Complete — PLeC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  <noscript>
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  </noscript>
+  <style>
+    :root {
+      --bg:      #0a0e1a;
+      --surface: #0d1117;
+      --card:    rgba(15,23,42,.6);
+      --border:  rgba(30,58,76,.8);
+      --text:    #cbd5e1;
+      --muted:   #64748b;
+      --cyan:    #06b6d4;
+      --cyan2:   #22d3ee;
+      --amber:   #f59e0b;
+      --amber2:  #fbbf24;
+      --emerald: #10b981;
+      --purple:  #a855f7;
+      --font-d:  'Teko', 'Impact', sans-serif;
+      --font-m:  'Share Tech Mono', 'Courier New', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-m);
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* ── Grid overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(59,130,246,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Animations ── */
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse-glow {
+      0%,100% { box-shadow: 0 0 20px rgba(16,185,129,.3), 0 0 60px rgba(16,185,129,.1); }
+      50%      { box-shadow: 0 0 40px rgba(16,185,129,.5), 0 0 80px rgba(16,185,129,.2); }
+    }
+    @keyframes shimmer {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+      to   { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+    }
+    @keyframes counter-orbit {
+      from { transform: rotate(0deg) translateX(90px) rotate(0deg); }
+      to   { transform: rotate(-360deg) translateX(90px) rotate(360deg); }
+    }
+
+    /* ── Header bar ── */
+    .site-header {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,.8);
+      backdrop-filter: blur(6px);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: inherit;
+    }
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 8px var(--emerald);
+      flex-shrink: 0;
+    }
+    .logo-text {
+      font-family: var(--font-d);
+      font-size: 22px; letter-spacing: .05em; line-height: 1;
+    }
+    .logo-text em { color: var(--cyan); font-style: normal; }
+    .logo-sub { font-size: 9px; color: var(--muted); letter-spacing: .15em; text-transform: uppercase; }
+    .nav-return {
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      padding: 6px 14px; border: 1px solid var(--border); border-radius: 4px;
+      transition: color .15s, border-color .15s;
+    }
+    .nav-return:hover { color: var(--cyan); border-color: rgba(6,182,212,.4); }
+
+    /* ── Main wrapper ── */
+    main {
+      position: relative; z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px 80px;
+      gap: 0;
+    }
+
+    /* ── Mission-complete badge ── */
+    .mission-badge {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 28px;
+      animation: fade-up .5s ease both;
+    }
+    .badge-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--emerald);
+      box-shadow: 0 0 6px var(--emerald);
+    }
+
+    /* ── Trophy icon cluster ── */
+    .trophy-wrap {
+      position: relative;
+      width: 200px; height: 200px;
+      margin-bottom: 36px;
+      animation: fade-up .5s .1s ease both;
+    }
+    .trophy-core {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 72px;
+      filter: drop-shadow(0 0 16px rgba(16,185,129,.5));
+    }
+    .trophy-ring {
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      border: 1px solid rgba(16,185,129,.15);
+    }
+    .orbit-dot {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin: -4px 0 0 -4px;
+      animation: orbit 6s linear infinite;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .orbit-dot-2 {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      margin: -3px 0 0 -3px;
+      animation: counter-orbit 9s linear infinite;
+      background: var(--amber);
+      box-shadow: 0 0 6px var(--amber);
+    }
+
+    /* ── Headline ── */
+    .headline {
+      font-family: var(--font-d);
+      font-size: clamp(36px, 8vw, 64px);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      line-height: 1;
+      text-align: center;
+      margin-bottom: 8px;
+      animation: fade-up .5s .15s ease both;
+    }
+    .headline .accent { color: var(--emerald); }
+
+    .sub-headline {
+      font-size: 13px; letter-spacing: .12em; text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 48px;
+      animation: fade-up .5s .2s ease both;
+    }
+
+    /* ── Card ── */
+    .message-card {
+      max-width: 680px; width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--emerald);
+      border-radius: 2px;
+      padding: 40px 48px;
+      margin-bottom: 36px;
+      animation: fade-up .5s .25s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+    .message-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(16,185,129,.6), transparent);
+    }
+
+    .card-eyebrow {
+      font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--emerald);
+      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .card-eyebrow::before {
+      content: '';
+      display: inline-block; width: 20px; height: 1px;
+      background: var(--emerald);
+    }
+
+    .card-byline {
+      font-family: var(--font-d);
+      font-size: 22px; letter-spacing: .04em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .card-byline span { color: var(--amber); }
+
+    .card-body {
+      font-size: 14px; line-height: 1.9;
+      color: var(--text);
+      font-family: var(--font-m);
+    }
+    .card-body p + p { margin-top: 14px; }
+    .card-body strong { color: var(--cyan2); }
+
+    .card-sig {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .card-sig-name {
+      font-family: var(--font-d);
+      font-size: 18px; letter-spacing: .05em;
+      color: var(--text);
+    }
+    .card-sig-role { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+    /* ── Donate button ── */
+    .donate-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      max-width: 680px; width: 100%;
+      animation: fade-up .5s .35s ease both;
+    }
+
+    .btn-donate {
+      display: inline-flex; align-items: center; gap: 12px;
+      padding: 16px 40px;
+      font-family: var(--font-d);
+      font-size: 20px; letter-spacing: .1em; text-transform: uppercase;
+      color: #0a0e1a;
+      background: linear-gradient(135deg, var(--emerald), #059669);
+      border: none; border-radius: 2px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform .15s, box-shadow .15s, filter .15s;
+      animation: pulse-glow 2.5s ease-in-out infinite;
+      width: 100%;
+      justify-content: center;
+    }
+    .btn-donate:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+      animation: none;
+      box-shadow: 0 8px 30px rgba(16,185,129,.4);
+    }
+    .btn-donate:active { transform: translateY(0); }
+    .btn-donate-icon { font-size: 22px; }
+
+    .donate-note {
+      font-size: 11px; color: var(--muted); text-align: center;
+      letter-spacing: .06em; line-height: 1.6;
+    }
+    .donate-note a { color: var(--muted); text-decoration: underline; }
+    .donate-note a:hover { color: var(--text); }
+
+    /* ── Return link ── */
+    .return-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-decoration: none;
+      margin-top: 12px;
+      transition: color .15s;
+      animation: fade-up .5s .45s ease both;
+    }
+    .return-link:hover { color: var(--cyan); }
+
+    /* ── Stats row ── */
+    .stats-row {
+      display: flex; gap: 1px;
+      max-width: 680px; width: 100%;
+      margin-bottom: 36px;
+      animation: fade-up .5s .3s ease both;
+    }
+    .stat-cell {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .stat-cell:first-child { border-radius: 2px 0 0 2px; }
+    .stat-cell:last-child  { border-radius: 0 2px 2px 0; }
+    .stat-num {
+      font-family: var(--font-d);
+      font-size: 28px; color: var(--cyan);
+      letter-spacing: .04em; line-height: 1;
+    }
+    .stat-label {
+      font-size: 9px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); margin-top: 4px;
+    }
+
+    @media (max-width: 600px) {
+      .message-card { padding: 28px 24px; }
+      .btn-donate { font-size: 17px; padding: 14px 28px; }
+      .stats-row { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/" class="logo" aria-label="PLeC — Home">
+    <div class="logo-dot"></div>
+    <div>
+      <div class="logo-text">PL<em>eC</em></div>
+      <div class="logo-sub">Learn PLC Engineering</div>
+    </div>
+  </a>
+  <a href="/" class="nav-return">← Return to missions</a>
+</header>
+
+<main>
+
+  <div class="mission-badge">
+    <div class="badge-dot"></div>
+    All 6 Missions Complete
+    <div class="badge-dot"></div>
+  </div>
+
+  <div class="trophy-wrap" aria-hidden="true">
+    <div class="trophy-ring"></div>
+    <div class="trophy-core">🏆</div>
+    <div class="orbit-dot"></div>
+    <div class="orbit-dot-2"></div>
+  </div>
+
+  <h1 class="headline">Mission <span class="accent">Complete</span></h1>
+  <p class="sub-headline">// ISA-88 Sequential Batch — final stage cleared //</p>
+
+  <div class="stats-row" aria-label="Course statistics">
+    <div class="stat-cell">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Missions</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">18+</div>
+      <div class="stat-label">Skills Loaded</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">50ms</div>
+      <div class="stat-label">Scan Cycle</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num">IEC&nbsp;61131</div>
+      <div class="stat-label">Compliant</div>
+    </div>
+  </div>
+
+  <div class="message-card">
+    <div class="card-eyebrow">A message from the developer</div>
+    <div class="card-byline">Hi — my name is <span>John</span>.</div>
+    <div class="card-body">
+      <p>
+        PLeC exists because of a survey I ran at work.
+      </p>
+      <p>
+        I asked manufacturers across the region a simple question: do you struggle to find
+        entry-level staff with PLC engineering skills? <strong>10 out of 11 said yes.</strong>
+        Not occasionally — consistently. The skills gap is real, it is well-documented by the
+        people hiring, and it starts before anyone ever touches real hardware.
+      </p>
+      <p>
+        That is why I built this. PLeC is my attempt to lower the barrier — real ladder logic,
+        real scan-cycle behaviour, real fault-injection, all in a browser, all completely free.
+        No hardware required. No prior experience assumed. Just a genuine on-ramp into
+        industrial automation for anyone who wants one.
+      </p>
+      <p>
+        If you found it useful, please consider making a small donation. It goes directly toward
+        hosting costs and keeps me motivated to build more missions, more simulations, and more
+        of the practical content that the industry actually needs.
+      </p>
+      <p>
+        <strong>Thank you</strong> for your time and your curiosity. It means a great deal.
+      </p>
+    </div>
+    <div class="card-sig">
+      <div>
+        <div class="card-sig-name">John</div>
+        <div class="card-sig-role">Developer — PLeC &nbsp;·&nbsp; Dudley College of Technology</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="donate-wrap">
+    <a class="btn-donate"
+       href="https://buy.stripe.com/test_5kQdR111x4otddjcPO6J200"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Support PLeC — opens donation page in new tab">
+      <span class="btn-donate-icon" aria-hidden="true">♡</span>
+      Support This Project
+    </a>
+    <p class="donate-note">
+      Secure payment via Stripe. Any amount is appreciated and goes directly toward
+      hosting and future development.<br>
+      <a href="/">No thanks — return to missions</a>
+    </p>
+  </div>
+
+  <a href="/" class="return-link" aria-label="Return to the PLeC mission board">
+    ← Back to mission board
+  </a>
+
+</main>
+
+<script>
+(function () {
+  /* Restore theme preference */
+  var t = localStorage.getItem('plc-theme') || 'dark';
+  document.documentElement.dataset.theme = t;
+}());
+</script>
+</body>
+</html>

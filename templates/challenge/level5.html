@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -241,9 +242,9 @@
     [data-theme="light"] code{background:#f1f5f9;border-color:#cbd5e1;color:#0369a1}
   </style>
   <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
-  <link rel="stylesheet" href="assess.css">
-  <link rel="stylesheet" href="mission-log.css">
-  <link rel="stylesheet" href="supervisor.css">
+  <link rel="stylesheet" href="{% static 'challenge/assess.css' %}">
+  <link rel="stylesheet" href="{% static 'challenge/mission-log.css' %}">
+  <link rel="stylesheet" href="{% static 'challenge/supervisor.css' %}">
 </head>
 <body>
 <a class="skip-link" href="#main-content">Skip to main content</a>
@@ -254,14 +255,14 @@
   <span class="badge badge-timer">⏱ TIMER</span>
   <h1>Timed Conveyor — TON (Timer On-Delay) Instruction</h1>
   <nav class="nav-links" aria-label="Challenge navigation">
-    <a href="index.html"  class="nav-link">⌂ Home</a>
-    <a href="level1.html" class="nav-link">L1</a>
-    <a href="learn-your-log.html" class="nav-link" style="color:#f59e0b;border-color:#d97706;">📋 Log</a>
-    <a href="level2.html" class="nav-link">L2</a>
-    <a href="level3.html" class="nav-link">L3</a>
-    <a href="level4.html" class="nav-link">Safety</a>
-    <a href="level5.html" class="nav-link active">Timer</a>
-    <a href="level6.html" class="nav-link">Batch →</a>
+    <a href="/"  class="nav-link">⌂ Home</a>
+    <a href="/challenge/level1/" class="nav-link">L1</a>
+    <a href="/challenge/learn-your-log/" class="nav-link" style="color:#f59e0b;border-color:#d97706;">📋 Log</a>
+    <a href="/challenge/level2/" class="nav-link">L2</a>
+    <a href="/challenge/level3/" class="nav-link">L3</a>
+    <a href="/challenge/level4/" class="nav-link">Safety</a>
+    <a href="/challenge/level5/" class="nav-link active">Timer</a>
+    <a href="/challenge/level6/" class="nav-link">Batch →</a>
     <a href="/login/" class="nav-link" style="color:#f5a623;border-color:#f5a623;font-weight:700;">Sign In</a>
     <a href="/register/" class="nav-link" style="color:#64748b;border-color:#64748b;font-weight:700;">Register</a>
   </nav>
@@ -269,7 +270,7 @@
   <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
 </header>
 
-<main id="main-content"><div class="main">
+<main id="main-content"><div id="prereq-notice-wrap"></div><div class="main">
 
   <!-- ══ LADDER LOGIC ══ -->
   <div class="panel" id="ladder-panel">
@@ -1188,8 +1189,9 @@ setInterval(() => {
 (function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
 </script>
 <script>window.PLC_LEVEL='level5';</script>
-<script src="assess.js"></script>
-<script src="mission-log.js"></script>
+<script src="{% static 'challenge/prereq-notice.js' %}"></script>
+<script src="{% static 'challenge/assess.js' %}"></script>
+<script src="{% static 'challenge/mission-log.js' %}"></script>
 
 <!-- ── SUPERVISOR WIDGET ── -->
 <div id="sv-bd" class="sv-bd" onclick="svClose()"></div>

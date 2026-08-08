@@ -1,0 +1,29 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "> **PLeC** is a browser-based PLC training platform designed to grow awareness and understanding of industrial automation *before* learners interact with real hardware or professional software. Learners create their own free account and progress at their own pace. > > *Project 4 — Level 5 Diploma in Web Application Development, Dudley College of Technology (2025–2026)* > *Author: John E. Parman — [github.com/QualityLemons](https://github.com/QualityLemons)*",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "jest": {
+    "testEnvironment": "jest-environment-jsdom",
+    "testMatch": [
+      "**/challenge/tests/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/staticfiles/"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1"
+  }
+}

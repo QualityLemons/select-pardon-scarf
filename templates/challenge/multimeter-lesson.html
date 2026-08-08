@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -226,7 +227,7 @@
     }
   </style>
   <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
-  <link rel="stylesheet" href="supervisor.css">
+  <link rel="stylesheet" href="{% static 'challenge/supervisor.css' %}">
 </head>
 <body>
 
@@ -234,11 +235,11 @@
 
 <!-- HEADER -->
 <header>
-  <a href="index.html" class="back-link">← BACK</a>
+  <a href="/" class="back-link">← BACK</a>
   <div style="width:1px;height:24px;background:rgba(30,41,59,.8);"></div>
   <div class="header-title">MULTIMETER <em>LESSON</em></div>
   <span class="hbadge">MODULE</span>
-  <a href="multimeter.html" class="tool-link">🔧 OPEN TOOL →</a>
+  <a href="/challenge/multimeter/" class="tool-link">🔧 OPEN TOOL →</a>
   <a href="/login/" class="tool-link" style="border-color:#f5a623;color:#f5a623;font-weight:700;margin-left:auto;">Sign In</a>
     <a href="/register/" class="tool-link" style="border-color:#64748b;color:#64748b;font-weight:700;margin-left:0.5rem;text-decoration:none;padding:4px 10px;border:1px solid #64748b;border-radius:6px;">Register</a>
 </header>
@@ -735,7 +736,7 @@
   <div class="lesson-cta">
     <div class="cta-h">READY TO PRACTISE?</div>
     <p class="cta-p">Open the interactive multimeter tool and work through the four measurement scenarios.</p>
-    <a href="multimeter.html" class="cta-btn">OPEN MULTIMETER TOOL →</a>
+    <a href="/challenge/multimeter/" class="cta-btn">OPEN MULTIMETER TOOL →</a>
   </div>
 
 </div><!-- /page -->

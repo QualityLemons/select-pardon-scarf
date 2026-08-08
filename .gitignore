@@ -45,7 +45,7 @@ yarn-error.log*
 .npm/
 .pnpm-debug.log*
 
-# ── Internals ──────────────────────────────────────────────────────────
+# ── Replit internals ──────────────────────────────────────────────────────────
 .cache/
 .config/
 .local/

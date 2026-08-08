@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -231,6 +232,21 @@
       font-family: var(--font-d); font-size: 38px;
       color: #e2e8f0; letter-spacing: 1px; line-height: 1;
     }
+
+    /* ── Intel bar progress bar ── */
+    .intel-prog-track {
+      height: 4px;
+      background: rgba(30,41,59,.8);
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .intel-prog-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--emerald), var(--cyan));
+      transition: width .9s cubic-bezier(.25,.46,.45,.94);
+    }
+    [data-theme="light"] .intel-prog-track { background: rgba(148,163,184,.3); }
 
     /* ══════════════════════════════════
        MISSION GRID
@@ -549,6 +565,20 @@
       padding: 32px; text-align: center;
       border: 1px dashed rgba(6,182,212,.2); border-radius: 8px;
     }
+    .results-signin {
+      display: none;
+      align-items: flex-start; gap: 14px;
+      padding: 20px 24px;
+      background: rgba(6,182,212,.06);
+      border: 1px solid rgba(6,182,212,.25);
+      border-radius: 8px;
+      font-size: 13px; color: var(--text);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+    .results-signin-icon { font-size: 20px; flex-shrink: 0; line-height: 1.5; }
+    .results-signin-link { color: var(--cyan); font-weight: 700; text-decoration: underline; }
+    .results-signin-link:hover { color: var(--cyan2); }
     .results-table-wrap { overflow-x: auto; }
     .results-table {
       width: 100%; border-collapse: collapse;
@@ -641,7 +671,7 @@
 ══════════════════════════════════════ -->
 <header>
   <div class="header-inner">
-    <a href="index.html" class="nav-logo" aria-label="PLeC — Home">
+    <a href="/" class="nav-logo" aria-label="PLeC — Home">
       <div class="logo-pulse pulse" aria-hidden="true"></div>
       <div>
         <div class="logo-text">PL<em>eC</em></div>
@@ -655,44 +685,45 @@
         <div class="status-dot pulse" aria-hidden="true"></div>
         <span>SYSTEM STATUS: ONLINE</span>
       </div>
-     <span id="auth-signed-out">
-  <a href="/login/" style="font-size:11px;color:#f5a623;text-decoration:none;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Sign In</a>
-  <a href="/register/" style="font-size:11px;color:#64748b;text-decoration:none;padding:5px 14px;border:1px solid #64748b;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Register</a>
-</span>
-<span id="auth-signed-in" style="display:none;align-items:center;gap:10px;flex-shrink:0;">
-  <span id="auth-email" style="font-size:11px;color:#64748b;letter-spacing:0.05em;font-family:var(--font-m);white-space:nowrap;"></span>
-  <button id="auth-signout" type="button" style="font-size:11px;color:#f5a623;background:none;cursor:pointer;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;white-space:nowrap;">Sign Out</button>
-</span>
-<script>
-(function () {
-  function getCookie(name) {
-    var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
-    return m ? decodeURIComponent(m.pop()) : '';
-  }
-  fetch('/api/me', { credentials: 'same-origin' })
-    .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
-    .then(function (me) {
-      if (!me.authenticated) return;
-      document.getElementById('auth-signed-out').style.display = 'none';
-      var signedIn = document.getElementById('auth-signed-in');
-      signedIn.style.display = 'inline-flex';
-      document.getElementById('auth-email').textContent = me.email || '';
-      document.getElementById('auth-signout').addEventListener('click', function () {
-        var form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '/logout/';
-        var token = document.createElement('input');
-        token.type = 'hidden';
-        token.name = 'csrfmiddlewaretoken';
-        token.value = getCookie('csrftoken');
-        form.appendChild(token);
-        document.body.appendChild(form);
-        form.submit();
-      });
-    })
-    .catch(function () { /* leave signed-out header on any error */ });
-})();
-</script>
+      <span id="auth-signed-out">
+        <a href="/login/" style="font-size:11px;color:#f5a623;text-decoration:none;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Sign In</a>
+        <a href="/register/" style="font-size:11px;color:#64748b;text-decoration:none;padding:5px 14px;border:1px solid #64748b;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;flex-shrink:0;white-space:nowrap;">Register</a>
+      </span>
+      <span id="auth-signed-in" style="display:none;align-items:center;gap:10px;flex-shrink:0;">
+        <span id="auth-email" style="font-size:11px;color:#64748b;letter-spacing:0.05em;font-family:var(--font-m);white-space:nowrap;"></span>
+        <button id="auth-signout" type="button" style="font-size:11px;color:#f5a623;background:none;cursor:pointer;padding:5px 14px;border:1px solid #f5a623;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;font-family:var(--font-m);font-weight:700;white-space:nowrap;">Sign Out</button>
+      </span>
+      <script>
+      (function () {
+        function getCookie(name) {
+          var m = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+          return m ? decodeURIComponent(m.pop()) : '';
+        }
+        fetch('/api/me', { credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+          .then(function (me) {
+            if (!me.authenticated) return;
+            document.getElementById('auth-signed-out').style.display = 'none';
+            var signedIn = document.getElementById('auth-signed-in');
+            signedIn.style.display = 'inline-flex';
+            document.getElementById('auth-email').textContent = me.email || '';
+            document.getElementById('auth-signout').addEventListener('click', function () {
+              var form = document.createElement('form');
+              form.method = 'POST';
+              form.action = '/logout/';
+              var token = document.createElement('input');
+              token.type = 'hidden';
+              token.name = 'csrfmiddlewaretoken';
+              token.value = getCookie('csrftoken');
+              form.appendChild(token);
+              document.body.appendChild(form);
+              form.submit();
+            });
+          })
+          .catch(function () { /* leave signed-out header on any error */ });
+      })();
+      </script>
+      <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
     </div>
   </div>
 </header>
@@ -718,7 +749,7 @@
         Master industrial automation — sequences, interlocks, process control —
         the same logic that runs real factories.
       </p>
-      <a href="plc-primer.html" class="hero-cta btn-clip"
+      <a href="/challenge/plc-primer/" class="hero-cta btn-clip"
          aria-label="Start training — begin with PLC Boot Camp foundations">
         ACCEPT MISSION <span class="cta-arr" aria-hidden="true">→</span>
       </a>
@@ -739,7 +770,7 @@
 
   <!-- ── INTEL BAR ── -->
   <div class="intel-bar" role="region" aria-label="Platform statistics">
-    <div class="intel-grid">
+    <div class="intel-grid" id="intel-grid">
       <div class="intel-stat">
         <div class="intel-label">
           <div class="intel-dot" style="background:var(--cyan);" aria-hidden="true"></div>
@@ -768,6 +799,19 @@
         </div>
         <div class="intel-val" style="font-size:28px;">IEC 61131</div>
       </div>
+      <div class="intel-stat" id="intel-progress-stat" style="display:none;" aria-live="polite">
+        <div class="intel-label">
+          <div class="intel-dot" style="background:var(--emerald);" aria-hidden="true"></div>
+          YOUR PROGRESS
+        </div>
+        <div class="intel-val">
+          <span id="intel-progress-val">0</span><span style="font-size:20px;"> / 6</span>
+        </div>
+        <div style="font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:4px;text-transform:uppercase;">levels attempted</div>
+        <div class="intel-prog-track" aria-hidden="true">
+          <div class="intel-prog-fill" id="intel-prog-fill"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -785,7 +829,7 @@
       <div class="missions-grid" id="missions-grid">
 
         <!-- PLC Foundations PRIMER -->
-        <a href="plc-primer.html" class="mission-card card-clip"
+        <a href="/challenge/plc-primer/" class="mission-card card-clip"
            aria-label="Mission 01 — PLC Foundations Boot Camp: 25-term glossary, 6 alternative tools, and beginner video recommendations before your first challenge.">
           <div class="card-top">
             <div class="card-badges">
@@ -813,7 +857,7 @@
         </a>
 
         <!-- Digital Multimeter TOOL -->
-        <a href="multimeter.html" class="mission-card card-clip"
+        <a href="/challenge/multimeter/" class="mission-card card-clip"
            aria-label="Tool — Digital Multimeter Simulator: Interactive DMM with 4 PLC measurement scenarios.">
           <div class="card-top">
             <div class="card-badges">
@@ -840,7 +884,7 @@
         </a>
 
         <!-- Multimeter Lesson MODULE -->
-        <a href="multimeter-lesson.html" class="mission-card card-clip"
+        <a href="/challenge/multimeter-lesson/" class="mission-card card-clip"
            aria-label="Module — Multimeter Lesson: 7-section guide covering parts, modes, procedures, safety, and fault-finding. Includes 5-question quiz.">
           <div class="card-top">
             <div class="card-badges">
@@ -867,7 +911,7 @@
         </a>
 
         <!-- L1: Start/Stop Latching Circuit -->
-        <a href="level1.html" class="mission-card card-clip"
+        <a href="/challenge/level1/" class="mission-card card-clip"
            aria-label="Level 1 — Start/Stop Latching Circuit: Build the seal-in latch and E-Stop for a conveyor belt. Beginner. 5 milestones.">
           <div class="card-top">
             <div class="card-badges">
@@ -903,7 +947,7 @@
         </a>
 
         <!-- Learn Your Log MODULE -->
-        <a href="learn-your-log.html" class="mission-card card-clip"
+        <a href="/challenge/learn-your-log/" class="mission-card card-clip"
            aria-label="Module — Learn Your Log: Interactive lesson on maintenance documentation, 8 required fields, HSE audit compliance. 5 milestones.">
           <div class="card-top">
             <div class="card-badges">
@@ -930,7 +974,7 @@
         </a>
 
         <!-- Maintenance Log TEMPLATE -->
-        <a href="maintenance-log.html" class="mission-card card-clip"
+        <a href="/challenge/maintenance-log/" class="mission-card card-clip"
            aria-label="Tool — Maintenance Log Template: Fillable 8-section log with auto-save, quick-fill, and print support.">
           <div class="card-top">
             <div class="card-badges">
@@ -957,7 +1001,7 @@
         </a>
 
         <!-- L2: Tank Filling System -->
-        <a href="level2.html" class="mission-card card-clip"
+        <a href="/challenge/level2/" class="mission-card card-clip"
            aria-label="Level 2 — Tank Filling System: Two float switches, hysteresis loop, fault injection lab. Beginner.">
           <div class="card-top">
             <div class="card-badges">
@@ -998,7 +1042,7 @@
         </a>
 
         <!-- L3: Modbus TCP Communication -->
-        <a href="level3.html" class="mission-card card-clip"
+        <a href="/challenge/level3/" class="mission-card card-clip"
            aria-label="Level 3 — Modbus TCP Communication: Build Modbus frames byte-by-byte, all 7 function codes. Intermediate.">
           <div class="card-top">
             <div class="card-badges">
@@ -1037,7 +1081,7 @@
         </a>
 
         <!-- L4: Safety Interlock — Drill Machine -->
-        <a href="level4.html" class="mission-card card-clip"
+        <a href="/challenge/level4/" class="mission-card card-clip"
            aria-label="Safety — Safety Interlock for a Drill Machine: Dual-channel E-Stop and gate guard per IEC 62061. Intermediate. 7 milestones.">
           <div class="card-top">
             <div class="card-badges">
@@ -1079,7 +1123,7 @@
         </a>
 
         <!-- L5: Timed Conveyor — TON Instruction -->
-        <a href="level5.html" class="mission-card card-clip"
+        <a href="/challenge/level5/" class="mission-card card-clip"
            aria-label="Timer — Timed Conveyor with TON Instruction: Belt runs for 5 seconds. E-Stop resets timer. Intermediate. 7 milestones.">
           <div class="card-top">
             <div class="card-badges">
@@ -1121,7 +1165,7 @@
         </a>
 
         <!-- L6: Sequential Batching — State Machine -->
-        <a href="level6.html" class="mission-card card-clip"
+        <a href="/challenge/level6/" class="mission-card card-clip"
            aria-label="Batch — Sequential Batching State Machine: Fill, mix, drain with ISA-88 step logic. Advanced. 7 milestones.">
           <div class="card-top">
             <div class="card-badges">
@@ -1175,7 +1219,7 @@
       <nav class="prog-track" aria-label="Curriculum path">
 
         <div class="prog-step">
-          <a href="level1.html" class="prog-node node-clip"
+          <a href="/challenge/level1/" class="prog-node node-clip"
              style="border-color:rgba(59,130,246,.6);color:var(--blue2);"
              aria-label="Level 1: Contacts &amp; Coils">1</a>
           <div class="prog-label" style="color:var(--blue2);">Contacts &amp; Coils</div>
@@ -1183,7 +1227,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="learn-your-log.html" class="prog-node node-clip"
+          <a href="/challenge/learn-your-log/" class="prog-node node-clip"
              style="border-color:rgba(245,158,11,.5);color:var(--amber2);"
              aria-label="Documentation module — Learn Your Log">📋</a>
           <div class="prog-label" style="color:var(--amber2);">Documentation</div>
@@ -1191,7 +1235,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="level2.html" class="prog-node node-clip"
+          <a href="/challenge/level2/" class="prog-node node-clip"
              style="border-color:rgba(20,184,166,.5);color:#2dd4bf;"
              aria-label="Level 2: Process Sensors">2</a>
           <div class="prog-label" style="color:#2dd4bf;">Process Sensors</div>
@@ -1199,7 +1243,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="level3.html" class="prog-node node-clip"
+          <a href="/challenge/level3/" class="prog-node node-clip"
              style="border-color:rgba(6,182,212,.5);color:var(--cyan2);"
              aria-label="Level 3: Networking">3</a>
           <div class="prog-label" style="color:var(--cyan2);">Networking</div>
@@ -1207,7 +1251,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="level4.html" class="prog-node node-clip"
+          <a href="/challenge/level4/" class="prog-node node-clip"
              style="border-color:rgba(239,68,68,.5);color:#f87171;"
              aria-label="Level 4: Safety Systems">S</a>
           <div class="prog-label" style="color:#f87171;">Safety Systems</div>
@@ -1215,7 +1259,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="level5.html" class="prog-node node-clip"
+          <a href="/challenge/level5/" class="prog-node node-clip"
              style="border-color:rgba(245,158,11,.5);color:var(--amber2);"
              aria-label="Level 5: Timers">T</a>
           <div class="prog-label" style="color:var(--amber2);">Timers</div>
@@ -1223,7 +1267,7 @@
         </div>
 
         <div class="prog-step">
-          <a href="level6.html" class="prog-node node-clip"
+          <a href="/challenge/level6/" class="prog-node node-clip"
              style="border-color:rgba(139,92,246,.5);color:#a78bfa;"
              aria-label="Level 6: Batch Control">B</a>
           <div class="prog-label" style="color:#a78bfa;">Batch Control</div>
@@ -1312,6 +1356,15 @@
     </p>
     <div id="results-empty" class="results-empty" role="status">
       No results yet — complete any challenge and click <strong>Get Manager's Review</strong> to record your first attempt.
+    </div>
+    <div id="results-signin" class="results-signin" role="status" style="display:none;">
+      <span class="results-signin-icon" aria-hidden="true">&#128274;</span>
+      <span>
+        <strong>Sign in to see your mission history.</strong>
+        Every Manager's Review is saved to your account so you can track your progress across sessions.
+        <a href="/login/" class="results-signin-link">Sign in</a> or
+        <a href="/register/" class="results-signin-link">create an account</a> — it's free.
+      </span>
     </div>
     <div class="results-table-wrap">
       <table class="results-table" aria-label="Saved assessment results">
@@ -1459,14 +1512,28 @@
     return tr;
   }
 
+  var signinEl = document.getElementById('results-signin');
+
   /* ── READ: load all results ── */
   function loadResults() {
-    fetch('/api/results')
-      .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+    fetch('/api/results', { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) {
+          /* Not signed in — show sign-in prompt, hide table */
+          emptyEl.style.display   = 'none';
+          signinEl.style.display  = 'flex';
+          tbody.innerHTML         = '';
+          countEl.textContent     = '0';
+          throw new Error('unauthenticated');
+        }
+        if (!r.ok) throw new Error('error');
+        return r.json();
+      })
       .then(function (data) {
         var results = data.results || [];
         tbody.innerHTML = '';
-        countEl.textContent = results.length;
+        signinEl.style.display = 'none';
+        countEl.textContent    = results.length;
         if (results.length === 0) {
           emptyEl.style.display = 'block';
         } else {
@@ -1474,7 +1541,7 @@
           results.forEach(function (r) { tbody.appendChild(renderRow(r)); });
         }
       })
-      .catch(function () { /* server not running — section stays empty */ });
+      .catch(function () { /* unauthenticated or network error — handled above */ });
   }
 
   /* ── UPDATE: inline note editing ── */
@@ -1564,6 +1631,103 @@
   /* Called by assess.js after a new result is saved */
   window.plecRefreshResults = loadResults;
 
+}());
+
+/* ── Mission grid progression state ──────────────────────────────────────
+   After /api/results loads, badge attempted levels and gently dim levels
+   whose prerequisite hasn't been attempted yet.
+   Runs once on page load; also runs when plecRefreshResults is called.
+──────────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  function updateProgressStat(results) {
+    var seen = {};
+    (results || []).forEach(function (r) { seen[r.level_key] = true; });
+    var count = Object.keys(seen).length;
+    var valEl  = document.getElementById('intel-progress-val');
+    var statEl = document.getElementById('intel-progress-stat');
+    var fillEl = document.getElementById('intel-prog-fill');
+    var grid   = document.getElementById('intel-grid');
+    if (!valEl || !statEl) return;
+    valEl.textContent = count;
+    statEl.style.display = '';
+    if (grid) grid.style.gridTemplateColumns = 'repeat(5,1fr)';
+    statEl.setAttribute('aria-label', count + ' of 6 levels attempted');
+    if (fillEl) {
+      /* Defer so the element is visible and the CSS transition fires */
+      requestAnimationFrame(function () {
+        fillEl.style.width = (Math.round(count / 6 * 1000) / 10) + '%';
+      });
+    }
+  }
+
+  function applyProgressionState(results) {
+    updateProgressStat(results);
+    var attempted = {};
+    (results || []).forEach(function (r) { attempted[r.level_key] = true; });
+    var grid = document.getElementById('missions-grid');
+    if (!grid) return;
+
+    for (var n = 1; n <= 6; n++) {
+      var card = grid.querySelector('a[href="/challenge/level' + n + '/"]');
+      if (!card) continue;
+
+      /* Badge: "✓ Attempted" overlay for levels the learner has tried */
+      var key = 'level' + n;
+      if (attempted[key] && !card.querySelector('.plec-prog-badge')) {
+        var badge = document.createElement('span');
+        badge.className = 'plec-prog-badge';
+        badge.setAttribute('aria-label', 'You have already attempted this level');
+        badge.textContent = '\u2713 Attempted';
+        badge.style.cssText =
+          'position:absolute;top:10px;right:10px;' +
+          'background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.35);' +
+          'color:#22c55e;font-size:9px;letter-spacing:1px;padding:2px 7px;' +
+          'font-family:var(--font-m);z-index:3;pointer-events:none;';
+        card.appendChild(badge);
+      }
+
+      /* Dim: levels 2–6 whose prior level has no attempt yet */
+      if (n > 1) {
+        var prevKey = 'level' + (n - 1);
+        if (!attempted[prevKey]) {
+          card.style.opacity = '0.62';
+          if (!card.getAttribute('data-prereq-title')) {
+            card.setAttribute('data-prereq-title', card.title || '');
+            card.title =
+              'Recommended: complete Level ' + (n - 1) + ' before this one';
+          }
+        } else {
+          card.style.opacity = '';
+          var orig = card.getAttribute('data-prereq-title');
+          if (orig !== null) {
+            card.title = orig;
+            card.removeAttribute('data-prereq-title');
+          }
+        }
+      }
+    }
+  }
+
+  /* Fetch results and apply state; gracefully no-ops if not signed in */
+  function run() {
+    fetch('/api/results', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (data) applyProgressionState(data.results || []);
+      })
+      .catch(function () { /* network/auth error — leave grid as-is */ });
+  }
+
+  run();
+
+  /* Re-apply after the learner saves a new result (e.g. from a separate tab) */
+  var _orig = window.plecRefreshResults;
+  window.plecRefreshResults = function () {
+    if (_orig) _orig();
+    run();
+  };
 }());
 
 </script>

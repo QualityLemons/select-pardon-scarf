@@ -35,7 +35,15 @@
     '      <tbody id="assess-breakdown-body"></tbody>',
     '    </table>',
     '    <div id="assess-error" role="alert">',
-    '      Could not connect to the assessment server. Make sure serve.py is running.',
+    '      Could not reach the assessment server. Please try again.',
+    '    </div>',
+    '    <div id="assess-signin-prompt" role="status">',
+    '      <span>&#128274;</span>',
+    '      <span>',
+    '        <strong>Sign in to save this result.</strong>',
+    '        Your score has been calculated but won\'t be recorded until you have an account.',
+    '        <a href="/login/">Sign in</a> or <a href="/register/">create an account</a> &mdash; then complete the challenge again to save it.',
+    '      </span>',
     '    </div>',
     '    <div id="assess-footer">',
     '      <button id="assess-close-btn">Close Review</button>',
@@ -158,24 +166,37 @@
       .replace(/"/g, '&quot;');
   }
 
-  /* ── Persist result to server (best-effort, silent on failure) ──
+  /* ── Persist result to server (best-effort) ──
    * The server issues a signed, single-use `result_token` from /api/assess/
    * that binds this exact scored outcome. The client cannot fabricate or
    * alter score data here — it only relays the token the server already
-   * computed and vouched for. */
+   * computed and vouched for.
+   * If the user is not signed in (401) we surface the sign-in prompt.
+   * If this is level6 and the save succeeds, we set a flag so closing the
+   * modal navigates to the donation page. */
   function saveResult(data) {
     if (!data.result_token) return;
     fetch('/api/results', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        result_token: data.result_token
-      })
-    }).then(function () {
+      method:      'POST',
+      credentials: 'same-origin',
+      headers:     { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ result_token: data.result_token })
+    }).then(function (r) {
+      if (r.status === 401) {
+        /* Not signed in — show the prompt inside the already-open modal */
+        var prompt = document.getElementById('assess-signin-prompt');
+        if (prompt) prompt.classList.add('visible');
+        return;
+      }
+      if (!r.ok) return;
       if (typeof window.plecRefreshResults === 'function') {
         window.plecRefreshResults();
       }
-    }).catch(function () { /* server not available — result already shown in modal */ });
+      /* Final mission complete — navigate to donation page after modal is closed */
+      if (LEVEL === 'level6') {
+        window._plecShowDonation = true;
+      }
+    }).catch(function () { /* network error — result still shown in modal */ });
   }
 
   /* ── Submit handler ── */
@@ -212,6 +233,13 @@
   /* ── Close handlers ── */
   function closeModal() {
     document.getElementById('assess-overlay').classList.remove('open');
+    /* If the final mission was just completed by a signed-in user, go to the
+       donation page now that the user has had a chance to read their score. */
+    if (window._plecShowDonation) {
+      window._plecShowDonation = false;
+      window.location.href = '/donate/';
+      return;
+    }
     var ab = document.getElementById('assess-btn');
     if (ab) ab.focus();
   }

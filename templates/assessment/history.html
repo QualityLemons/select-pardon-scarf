@@ -208,6 +208,18 @@
 
     .pagination a:hover { border-color: #f5a623; color: #f5a623; }
     .pagination .current { border-color: #f5a623; color: #f5a623; }
+
+    .sort-th a {
+      color: #666;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3em;
+      transition: color 0.2s;
+    }
+    .sort-th a:hover { color: #f5a623; }
+    .sort-th.active a { color: #f5a623; }
+    .sort-arrow { font-size: 0.65rem; opacity: 0.8; }
   </style>
 </head>
 <body>
@@ -217,6 +229,8 @@
   <nav>
     <a href="/challenge/">Challenges</a>
     <a href="/profile/" style="color:#f5a623;">My Results</a>
+    <a href="/reflect/">Log Reflection</a>
+    <a href="/profile/edit/">Edit Profile</a>
     <a href="/password-change/">Change Password</a>
     <form method="post" action="/logout/" style="display:inline;">
       {% csrf_token %}
@@ -228,6 +242,87 @@
 <div class="container">
   <h2>My Submission History</h2>
   <p class="sub">Signed in as {{ request.user.email }}</p>
+
+  {% if best_scores %}
+  <!-- ── Best scores summary ── -->
+  <h2 style="margin-bottom:0.5rem;">Best Scores by Level</h2>
+  <p class="sub">Your personal best from all attempts.</p>
+  <table style="margin-bottom:2.5rem;">
+    <thead>
+      <tr>
+        {% with col="level" %}
+        <th class="sort-th{% if sort == col or sort == '-'|add:col %} active{% endif %}">
+          {% if sort == col %}
+            <a href="?sort=-{{ col }}">Level <span class="sort-arrow">▲</span></a>
+          {% elif sort == '-'|add:col %}
+            <a href="?sort={{ col }}">Level <span class="sort-arrow">▼</span></a>
+          {% else %}
+            <a href="?sort={{ col }}">Level</a>
+          {% endif %}
+        </th>
+        {% endwith %}
+        {% with col="grade" %}
+        <th class="sort-th{% if sort == col or sort == '-'|add:col %} active{% endif %}">
+          {% if sort == col %}
+            <a href="?sort=-{{ col }}">Best Grade <span class="sort-arrow">▲</span></a>
+          {% elif sort == '-'|add:col %}
+            <a href="?sort={{ col }}">Best Grade <span class="sort-arrow">▼</span></a>
+          {% else %}
+            <a href="?sort={{ col }}">Best Grade</a>
+          {% endif %}
+        </th>
+        {% endwith %}
+        {% with col="score" %}
+        <th class="sort-th{% if sort == col or sort == '-'|add:col %} active{% endif %}">
+          {% if sort == col %}
+            <a href="?sort=-{{ col }}">Best Score <span class="sort-arrow">▲</span></a>
+          {% elif sort == '-'|add:col %}
+            <a href="?sort={{ col }}">Best Score <span class="sort-arrow">▼</span></a>
+          {% else %}
+            <a href="?sort={{ col }}">Best Score</a>
+          {% endif %}
+        </th>
+        {% endwith %}
+        {% with col="attempts" %}
+        <th class="sort-th{% if sort == col or sort == '-'|add:col %} active{% endif %}">
+          {% if sort == col %}
+            <a href="?sort=-{{ col }}">Attempts <span class="sort-arrow">▲</span></a>
+          {% elif sort == '-'|add:col %}
+            <a href="?sort={{ col }}">Attempts <span class="sort-arrow">▼</span></a>
+          {% else %}
+            <a href="?sort={{ col }}">Attempts</a>
+          {% endif %}
+        </th>
+        {% endwith %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in best_scores %}
+      <tr>
+        <td class="level-id">{{ row.level_key }}</td>
+        <td>
+          <span class="grade-badge grade-{% if row.best_grade in 'ABCDF' %}{{ row.best_grade }}{% else %}default{% endif %}">
+            {{ row.best_grade }}
+          </span>
+        </td>
+        <td>
+          <div class="score-bar-wrap">
+            <div class="score-bar">
+              <div class="score-fill" style="width:{{ row.best_score }}%"></div>
+            </div>
+            <span class="score-num">{{ row.best_score }}</span>
+          </div>
+        </td>
+        <td style="color:#888;">{{ row.attempts }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- ── Full chronological history ── -->
+  <h2 style="margin-bottom:0.5rem;">All Submissions</h2>
+  <p class="sub">Complete history in submission order.</p>
+  {% endif %}
 
   {% if results %}
     <table>
@@ -269,11 +364,11 @@
     {% if is_paginated %}
     <div class="pagination">
       {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
+        <a href="?sort={{ sort }}&page={{ page_obj.previous_page_number }}">&laquo; Prev</a>
       {% endif %}
       <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
       {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">Next &raquo;</a>
+        <a href="?sort={{ sort }}&page={{ page_obj.next_page_number }}">Next &raquo;</a>
       {% endif %}
     </div>
     {% endif %}

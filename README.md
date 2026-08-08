@@ -563,7 +563,7 @@ Deploying gives you:
 - **Persistent learner data** — accounts, assessment results, and mission-log entries are stored in a production PostgreSQL database that survives server restarts and redeploys. The development SQLite file would silently wipe everything on a container restart; PostgreSQL does not.
 - **Always-on availability** — the development server stops when the workspace goes to sleep. A deployed app runs 24/7 without you needing to be logged in.
 - **Production-grade security** — `DEBUG` is off, HTTPS is enforced, HSTS headers are set, and session cookies are marked `Secure`. These protections are intentionally disabled in development to make local testing easier; deployment switches them all on automatically.
-- **Institutional credibility** — a live URL is the deliverable you hand to Dudley College. It is also what assessors, supervisors, and the young people from the Oaken Grove Youth Centre evaluation actually visit.
+- **Institutional credibility** — a live URL is the deliverable you hand to Dudley College. It is also what assessors, supervisors, and the young people from the Powered by CAN evaluation actually visit.
 
 PLeC is a Django application and needs a Python host capable of running `manage.py`/WSGI — plain static hosting (GitHub Pages, Netlify, S3, etc.) is not sufficient, because authentication, the admin panel, and the assessment API all require a running Django process.
 
@@ -1137,9 +1137,9 @@ Sarah ended her session with a structured list of observations. These are her re
 
 ---
 
-### User testing — Oaken Grove Youth Centre
+### User testing — Powered by CAN youth group
 
-**Group:** Oaken Grove Youth Centre — a West Midlands community group supporting young people on the Youth Guarantee employment scheme, summer 2026  
+**Group:** Powered by CAN — a West Midlands community group supporting young people on the Youth Guarantee employment scheme, summer 2026  
 **Context:** Three participants tested PLeC as part of their employability and digital skills training. All three are new to PLC engineering. None were given instructions beyond "have a go and tell us what you think." Testing was conducted on a shared laptop over one session of roughly 45 minutes.
 
 ---
@@ -1280,7 +1280,7 @@ Darnell read the opening of the Learn Your Log lesson, specifically the paragrap
 
 ---
 
-#### Group observations — Oaken Grove Youth Centre session
+#### Group observations — Powered by CAN session
 
 | Observation | Detail |
 |---|---|

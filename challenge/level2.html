@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 2 — Tank Filling System | PLeC</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #8b5cf6;
+      --blue: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --orange: #f97316;
+      --cyan: #06b6d4;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --energized: #22c55e;
+      --de-energized: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: .5px;
+    }
+    header h1 { font-size: 15px; font-weight: 600; }
+    .nav-links { margin-left: auto; display: flex; gap: 10px; }
+    .nav-link {
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      transition: color .2s, border-color .2s;
+    }
+    .nav-link:hover { color: var(--text); border-color: var(--accent); }
+    .nav-link.active { color: var(--accent); border-color: var(--accent); }
+    .scan-counter {
+      font-size: 11px;
+      color: var(--muted);
+      font-family: monospace;
+    }
+    .scan-counter span { color: var(--green); font-weight: 700; }
+
+    /* ── Layout ── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      grid-template-rows: auto auto auto;
+      gap: 0;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 18px;
+    }
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title::after { content:''; flex:1; height:1px; background:var(--border); }
+
+    /* ── Ladder ── */
+    #ladder-panel { grid-column:1; grid-row:1; }
+    #ladder-svg { display:block; width:100%; min-width:540px; }
+
+    /* ── Tank simulation ── */
+    #tank-panel {
+      grid-column: 2;
+      grid-row: 1 / 4;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* State badge */
+    .state-badge {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .state-dot {
+      width: 12px; height: 12px; border-radius: 50%;
+      background: var(--muted);
+      transition: background .2s, box-shadow .2s;
+    }
+    .state-dot.idle    { background: var(--muted); }
+    .state-dot.filling { background: var(--cyan);  box-shadow: 0 0 8px var(--cyan); }
+    .state-dot.full    { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .state-dot.fault   { background: var(--red);   box-shadow: 0 0 8px var(--red); }
+    .state-label { font-size: 13px; font-weight: 600; }
+    .state-desc  { font-size: 11px; color: var(--muted); margin-left: auto; }
+
+    /* Tank SVG */
+    .tank-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #tank-svg { display: block; }
+
+    /* Pump */
+    .pump-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .pump-led {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--de-energized);
+      transition: background .1s, box-shadow .1s;
+      flex-shrink: 0;
+    }
+    .pump-led.on { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+    .pump-label  { font-size: 13px; font-weight: 600; }
+    .pump-speed  { margin-left: auto; font-size: 11px; font-weight: 700; color: var(--muted); }
+    .pump-speed.on { color: var(--cyan); }
+
+    /* Drain button */
+    .drain-btn {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 9px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: border-color .2s, background .2s;
+    }
+    .drain-btn:hover { border-color: var(--orange); background: #1c1e2e; }
+    .drain-btn.active { border-color: var(--orange); background: #1c1102; color: var(--orange); }
+    .drain-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--muted); flex-shrink: 0;
+    }
+    .drain-btn.active .drain-dot { background: var(--orange); }
+
+    /* Fault injection */
+    .fault-panel {
+      border: 1px solid #7f1d1d;
+      border-radius: 8px;
+      padding: 12px;
+      background: #0f0606;
+    }
+    .fault-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--red);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fault-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      background: transparent;
+      border: 1px solid #7f1d1d;
+      border-radius: 6px;
+      color: #fca5a5;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 7px 10px;
+      margin-bottom: 6px;
+      transition: background .2s, border-color .2s;
+      text-align: left;
+    }
+    .fault-btn:hover { background: #1a0808; }
+    .fault-btn.active {
+      background: #1a0808;
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .fault-btn:last-child { margin-bottom: 0; }
+    .fault-indicator {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #7f1d1d; flex-shrink: 0;
+    }
+    .fault-btn.active .fault-indicator { background: var(--red); box-shadow: 0 0 6px var(--red); }
+    .fault-note { font-size: 10px; color: var(--muted); margin-top: 3px; }
+
+    /* I/O Table */
+    #io-panel { grid-column:1; grid-row:2; }
+    .io-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .io-table th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 4px 8px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .io-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+    .io-table tr:last-child td { border-bottom: none; }
+    .tag-address { font-weight: 700; color: var(--accent); }
+    .tag-type { font-size:11px; padding:2px 6px; border-radius:4px; font-weight:600; }
+    .tag-type.input  { background:#1e3a5f; color:#60a5fa; }
+    .tag-type.output { background:#1c3a26; color:#4ade80; }
+    .tag-type.memory { background:#3b1f5e; color:#c084fc; }
+    .io-bit {
+      display:inline-block; width:28px; height:28px; line-height:28px;
+      text-align:center; border-radius:4px; font-weight:700; font-size:14px;
+      background:var(--de-energized); color:var(--muted);
+      transition: background .1s, color .1s;
+    }
+    .io-bit.one { background:var(--green); color:#fff; }
+    .io-bit.nc-open { background:var(--red); color:#fff; }
+    .io-bit.fault { background:var(--red); color:#fff; animation: blink .5s step-start infinite; }
+    @keyframes blink { 50% { opacity: .3; } }
+    .nc-note { font-size:10px; color:var(--muted); }
+    .fault-tag { font-size:10px; font-weight:700; color:var(--red); }
+
+    /* Learn / assessment panel */
+    #learn-panel {
+      grid-column: 1 / 3;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+    .learn-card { background:var(--surface); padding:18px; }
+    .learn-card h3 { font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+    .learn-card p, .learn-card li { font-size:12px; color:#94a3b8; line-height:1.7; }
+    .learn-card ul { padding-left:16px; }
+
+    .progress-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:10px; }
+    .milestone { display:flex; align-items:center; gap:10px; padding:5px 0; font-size:12px; color:var(--muted); transition:color .3s; }
+    .milestone.done { color:var(--green); }
+    .milestone-dot { width:10px; height:10px; border-radius:50%; background:var(--border); flex-shrink:0; transition:background .3s, box-shadow .3s; }
+    .milestone.done .milestone-dot { background:var(--green); box-shadow:0 0 6px var(--green); }
+    .complete-banner { display:none; background:linear-gradient(135deg,#166534,#15803d); border:1px solid #22c55e; border-radius:8px; padding:12px 16px; margin-top:12px; font-size:13px; font-weight:600; color:#dcfce7; text-align:center; }
+    .complete-banner.show { display:block; }
+
+    .concept-row { display:flex; gap:8px; margin-bottom:10px; }
+    .concept-color-box { width:14px; height:14px; border-radius:3px; flex-shrink:0; margin-top:2px; }
+
+    /* ── Accessibility ── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:#3b82f6;color:#fff;font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none}
+    .skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px}
+    :focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    button:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    a:focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    button{min-height:44px}
+    /* ── Theme toggle button ── */
+    #theme-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:16px;line-height:1;padding:4px 9px;border-radius:6px;cursor:pointer;flex-shrink:0;transition:background .15s,border-color .15s}
+    #theme-toggle:hover{background:rgba(255,255,255,.07)}
+    /* ── Light mode ── */
+    [data-theme="light"]{--bg:#f0f4f8;--surface:#ffffff;--surface2:#eef2f7;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--de-energized:#94a3b8}
+    [data-theme="light"] body{background:var(--bg);color:var(--text)}
+    [data-theme="light"] .tag-type.input{background:#dbeafe;color:#1d4ed8}
+    [data-theme="light"] .tag-type.output{background:#dcfce7;color:#15803d}
+    [data-theme="light"] .tag-type.memory{background:#ede9fe;color:#7c3aed}
+    [data-theme="light"] .learn-card p,[data-theme="light"] .learn-card li{color:#475569}
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="assess.css">
+  <link rel="stylesheet" href="mission-log.css">
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="a11y-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div id="a11y-alert"  role="alert"  aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<header>
+  <span class="badge">LEVEL 2</span>
+  <h1>Tank Filling System — Process Control &amp; Fail-Safe Design</h1>
+  <nav class="nav-links" aria-label="Challenge navigation">
+    <a href="index.html" class="nav-link">⌂ Home</a>
+    <a href="level1.html" class="nav-link">L1</a>
+    <a href="learn-your-log.html" class="nav-link" style="color:#f59e0b;border-color:#d97706;">📋 Log</a>
+    <a href="level2.html" class="nav-link active">Level 2</a>
+    <a href="level3.html" class="nav-link">Level 3 →</a>
+  </nav>
+  <div class="scan-counter" aria-hidden="true">SCAN #<span id="scan-num">0</span> &nbsp;|&nbsp; 50 ms</div>
+  <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
+</header>
+
+<main id="main-content"><div class="main">
+
+  <!-- ══ LADDER LOGIC DIAGRAM ══ -->
+  <div class="panel" id="ladder-panel">
+    <div class="panel-title">Ladder Logic Program</div>
+    <svg id="ladder-svg" role="img" aria-label="Tank filling ladder logic — Rung 1: pump starts when level is low (I0). Rung 2: latching seal. Rung 3: pump stops at high level (I1). Output Q0 drives pump motor." height="210" viewBox="0 0 640 210" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Power rails -->
+      <line id="rail-L" x1="40" y1="15" x2="40" y2="195" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+      <line id="rail-N" x1="600" y1="15" x2="600" y2="195" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+      <text x="40"  y="11" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700" font-family="monospace">L+</text>
+      <text x="600" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="monospace">N−</text>
+
+      <!-- ══ RUNG 1: Pump control ══ -->
+      <!-- L+ → I0 LS_LOW NO contact -->
+      <line id="r1-wa" x1="40" y1="75" x2="100" y2="75" stroke="#334155" stroke-width="3"/>
+
+      <!-- I0: LS_LOW — NO contact -->
+      <g id="contact-I0" transform="translate(100,55)">
+        <line id="i0-l"    x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="i0-b1"   x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="i0-b2"   x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="i0-r"    x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">LS_LOW</text>
+        <text x="20" y="62" text-anchor="middle" fill="#64748b" font-size="8" font-family="sans-serif">[NO]</text>
+      </g>
+
+      <!-- wire after I0 → junction -->
+      <line id="r1-wb" x1="140" y1="75" x2="210" y2="75" stroke="#334155" stroke-width="3"/>
+      <circle id="jdot" cx="210" cy="75" r="4" fill="#334155"/>
+
+      <!-- wire junction → I1 -->
+      <line id="r1-wc" x1="210" y1="75" x2="370" y2="75" stroke="#334155" stroke-width="3"/>
+
+      <!-- I1: LS_HIGH — NC contact -->
+      <g id="contact-I1" transform="translate(370,55)">
+        <line id="i1-l"    x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="i1-b1"   x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="i1-b2"   x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="i1-slash" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <line id="i1-r"    x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">LS_HIGH</text>
+        <text x="20" y="62" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700" font-family="sans-serif">[NC]</text>
+      </g>
+
+      <!-- wire after I1 → coil -->
+      <line id="r1-wd" x1="410" y1="75" x2="555" y2="75" stroke="#334155" stroke-width="3"/>
+
+      <!-- Q0: PUMP coil -->
+      <g id="coil-Q0" transform="translate(555,55)">
+        <line id="q0-cl" x1="0" y1="20" x2="8" y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="q0-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="q0-cr" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">PUMP</text>
+      </g>
+
+      <line id="r1-wrail" x1="595" y1="75" x2="600" y2="75" stroke="#334155" stroke-width="3"/>
+      <text x="6" y="79" text-anchor="middle" fill="#334155" font-size="12" font-weight="700" font-family="monospace">1</text>
+
+      <!-- Seal-in branch (Q0 parallel) -->
+      <line id="seal-down-a"  x1="210" y1="75"  x2="210" y2="140" stroke="#334155" stroke-width="3"/>
+      <line id="seal-left"    x1="210" y1="140" x2="270" y2="140" stroke="#334155" stroke-width="3"/>
+
+      <!-- Q0 seal-in contact -->
+      <g id="contact-Q0-seal" transform="translate(270,120)">
+        <line id="qs-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="qs-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="qs-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="qs-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">SEAL-IN</text>
+      </g>
+
+      <line id="seal-right" x1="310" y1="140" x2="370" y2="140" stroke="#334155" stroke-width="3"/>
+      <line id="seal-up"    x1="370" y1="140" x2="370" y2="75"  stroke="#334155" stroke-width="3"/>
+
+      <!-- ══ RUNG 2: High-level fault indicator ══ -->
+      <line id="r2-wa" x1="40" y1="190" x2="100" y2="190" stroke="#334155" stroke-width="3"/>
+
+      <!-- I1 NC in rung 2 (inverted — used to detect sensor break / full) -->
+      <g id="contact-I1-inv" transform="translate(100,170)">
+        <line id="i1inv-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="i1inv-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="i1inv-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <!-- NOT slash (inverted contact) -->
+        <line id="i1inv-slash" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">HI-LVL</text>
+      </g>
+
+      <line id="r2-wb" x1="140" y1="190" x2="555" y2="190" stroke="#334155" stroke-width="3"/>
+
+      <!-- M1: TANK_FULL coil -->
+      <g id="coil-M1" transform="translate(555,170)">
+        <line id="m1-cl"   x1="0"  y1="20" x2="8" y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="m1-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="m1-cr"   x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#f97316" font-size="11" font-weight="700" font-family="monospace">M1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">TK_FULL</text>
+      </g>
+
+      <line id="r2-wrail" x1="595" y1="190" x2="600" y2="190" stroke="#334155" stroke-width="3"/>
+      <text x="6" y="194" text-anchor="middle" fill="#334155" font-size="12" font-weight="700" font-family="monospace">2</text>
+
+    </svg>
+  </div>
+
+  <!-- ══ TANK SIMULATION PANEL ══ -->
+  <div class="panel" id="tank-panel">
+    <div class="panel-title">Tank Simulation</div>
+
+    <!-- State badge -->
+    <div class="state-badge">
+      <div class="state-dot idle" id="state-dot"></div>
+      <span class="state-label" id="state-label">IDLE</span>
+      <span class="state-desc" id="state-desc">Waiting for low level</span>
+    </div>
+
+    <!-- Tank SVG -->
+    <div class="tank-wrap">
+      <svg id="tank-svg" role="img" aria-label="Tank process visualisation — shows current liquid level percentage and pump state." width="280" height="280" viewBox="0 0 280 280" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Inlet pipe top -->
+        <rect x="116" y="0" width="18" height="30" rx="3" fill="#334155" stroke="#475569" stroke-width="1.5"/>
+        <text x="125" y="46" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">INLET</text>
+
+        <!-- Pump symbol on inlet -->
+        <circle id="pump-circle" cx="125" cy="18" r="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+        <text id="pump-arrow" x="125" y="22" text-anchor="middle" fill="#475569" font-size="10" font-weight="700">▼</text>
+
+        <!-- Tank body -->
+        <rect x="40" y="50" width="170" height="200" rx="4" fill="#0f172a" stroke="#334155" stroke-width="2"/>
+
+        <!-- Water fill (clipped inside tank) -->
+        <defs>
+          <clipPath id="tank-clip">
+            <rect x="42" y="52" width="166" height="196" rx="3"/>
+          </clipPath>
+        </defs>
+
+        <!-- Water background (empty) -->
+        <rect x="42" y="52" width="166" height="196" rx="3" fill="#0f1623"/>
+
+        <!-- Water body (animated height) -->
+        <rect id="water-fill" x="42" y="248" width="166" height="0" rx="0" fill="#1d4ed8" clip-path="url(#tank-clip)">
+          <animate id="water-wave" attributeName="y" dur="0" repeatCount="indefinite" calcMode="linear" values="248;248" fill="freeze"/>
+        </rect>
+
+        <!-- Water surface wave overlay -->
+        <g clip-path="url(#tank-clip)">
+          <rect id="water-surface-tint" x="42" y="248" width="166" height="6" fill="#3b82f6" opacity="0.4"/>
+        </g>
+
+        <!-- Bubbles (visible when pump running) -->
+        <g id="bubbles" opacity="0">
+          <circle id="b1" cx="120" cy="60" r="3" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.6"/>
+          <circle id="b2" cx="130" cy="70" r="2" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.5"/>
+          <circle id="b3" cx="115" cy="75" r="2.5" fill="none" stroke="#60a5fa" stroke-width="1" opacity="0.7"/>
+        </g>
+
+        <!-- Tank level percentage label -->
+        <text id="level-pct" x="125" y="155" text-anchor="middle" fill="#94a3b8" font-size="22" font-weight="700" font-family="monospace">0%</text>
+        <text x="125" y="172" text-anchor="middle" fill="#475569" font-size="10" font-family="sans-serif">LEVEL</text>
+
+        <!-- LS_HIGH sensor (at 85%) -->
+        <!-- 85% level = y: 52 + 196*(1-0.85) = 52+29.4 = 81.4 → y≈82 -->
+        <g id="sensor-high-group">
+          <line x1="40" y1="81" x2="28" y2="81" stroke="#475569" stroke-width="1.5"/>
+          <circle id="sensor-high-led" cx="22" cy="81" r="7" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+          <text x="22" y="85" text-anchor="middle" fill="#64748b" font-size="8" font-weight="700">H</text>
+          <text x="14" y="96" text-anchor="middle" fill="#64748b" font-size="8">LS_H</text>
+          <!-- Fault indicator -->
+          <text id="sensor-high-fault" x="22" y="68" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="700" display="none">⚡</text>
+        </g>
+
+        <!-- LS_LOW sensor (at 20%) -->
+        <!-- 20% level = y: 52 + 196*(1-0.20) = 52+156.8 = 208.8 → y≈209 -->
+        <g id="sensor-low-group">
+          <line x1="40" y1="209" x2="28" y2="209" stroke="#475569" stroke-width="1.5"/>
+          <circle id="sensor-low-led" cx="22" cy="209" r="7" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+          <text x="22" y="213" text-anchor="middle" fill="#64748b" font-size="8" font-weight="700">L</text>
+          <text x="14" y="224" text-anchor="middle" fill="#64748b" font-size="8">LS_L</text>
+          <text id="sensor-low-fault" x="22" y="196" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="700" display="none">⚡</text>
+        </g>
+
+        <!-- Drain outlet bottom right -->
+        <rect x="210" y="238" width="40" height="12" rx="3" fill="#334155" stroke="#475569" stroke-width="1.5"/>
+        <text x="230" y="261" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">DRAIN</text>
+        <rect id="drain-flow" x="248" y="238" width="2" height="12" fill="#334155" rx="1"/>
+
+        <!-- Water level gauge tick marks on right side -->
+        <line x1="210" y1="52"  x2="218" y2="52"  stroke="#1e3050" stroke-width="1"/>
+        <line x1="210" y1="91"  x2="218" y2="91"  stroke="#1e3050" stroke-width="1"/>
+        <text x="220" y="95"  fill="#334155" font-size="8" font-family="monospace">75%</text>
+        <line x1="210" y1="130" x2="218" y2="130" stroke="#1e3050" stroke-width="1"/>
+        <text x="220" y="134" fill="#334155" font-size="8" font-family="monospace">50%</text>
+        <line x1="210" y1="170" x2="218" y2="170" stroke="#1e3050" stroke-width="1"/>
+        <text x="220" y="174" fill="#334155" font-size="8" font-family="monospace">25%</text>
+        <line x1="210" y1="209" x2="218" y2="209" stroke="#2e3350" stroke-width="1.5"/>
+        <text x="220" y="213" fill="#64748b" font-size="8" font-family="monospace">20%</text>
+        <line x1="210" y1="248" x2="218" y2="248" stroke="#1e3050" stroke-width="1"/>
+        <text x="220" y="252" fill="#334155" font-size="8" font-family="monospace">0%</text>
+        <line x1="210" y1="81"  x2="218" y2="81"  stroke="#2e3350" stroke-width="1.5"/>
+        <text x="220" y="85"  fill="#64748b" font-size="8" font-family="monospace">85%</text>
+
+        <!-- Overflow indicator (top) -->
+        <rect id="overflow-flash" x="42" y="52" width="166" height="8" fill="#ef4444" opacity="0" rx="3"/>
+        <text id="overflow-label" x="125" y="34" text-anchor="middle" fill="transparent" font-size="10" font-weight="700">OVERFLOW!</text>
+
+      </svg>
+    </div>
+
+    <!-- Pump status row -->
+    <div class="pump-row">
+      <div class="pump-led" id="pump-led"></div>
+      <span class="pump-label">Pump Q0</span>
+      <span class="pump-speed off" id="pump-speed">STOPPED</span>
+    </div>
+
+    <!-- Drain control -->
+    <button class="drain-btn" id="drain-btn" onclick="toggleDrain()">
+      <span class="drain-dot"></span>
+      Manual Drain Valve — <span id="drain-label">CLOSED</span>
+    </button>
+
+    <!-- Fault Injection -->
+    <div class="fault-panel">
+      <div class="fault-title">⚡ Fault Injection Lab</div>
+      <button class="fault-btn" id="fault-lshigh-btn" onclick="toggleFault('lshigh')">
+        <span class="fault-indicator" id="fi-lshigh"></span>
+        Break LS_HIGH wire (I1 open)
+      </button>
+      <div class="fault-note" id="fn-lshigh">Simulates broken wire on high-level sensor</div>
+      <button class="fault-btn" id="fault-lslow-btn" onclick="toggleFault('lslow')">
+        <span class="fault-indicator" id="fi-lslow"></span>
+        Break LS_LOW wire (I0 stuck 0)
+      </button>
+      <div class="fault-note" id="fn-lslow">Simulates broken wire on low-level sensor</div>
+    </div>
+
+    <!-- I/O mini table -->
+    <div>
+      <div class="panel-title" style="margin-top:4px">I/O Register Table</div>
+      <table class="io-table">
+        <thead>
+          <tr>
+            <th scope="col">Addr</th><th scope="col">Tag</th><th scope="col">Type</th><th scope="col">Val</th><th scope="col">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tag-address">I0</td>
+            <td>LS_LOW</td>
+            <td><span class="tag-type input">INPUT</span></td>
+            <td><span class="io-bit" id="bit-I0">0</span></td>
+            <td class="nc-note">NO — low float</td>
+          </tr>
+          <tr>
+            <td class="tag-address">I1</td>
+            <td>LS_HIGH</td>
+            <td><span class="tag-type input">INPUT</span></td>
+            <td><span class="io-bit one" id="bit-I1">1</span></td>
+            <td class="nc-note">NC — high float <span id="fault-i1-tag" class="fault-tag" style="display:none">FAULT</span></td>
+          </tr>
+          <tr>
+            <td class="tag-address">Q0</td>
+            <td>PUMP</td>
+            <td><span class="tag-type output">OUTPUT</span></td>
+            <td><span class="io-bit" id="bit-Q0">0</span></td>
+            <td class="nc-note">Fill pump</td>
+          </tr>
+          <tr>
+            <td class="tag-address">M1</td>
+            <td>TK_FULL</td>
+            <td><span class="tag-type memory">MEMORY</span></td>
+            <td><span class="io-bit" id="bit-M1">0</span></td>
+            <td class="nc-note">Tank full relay</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ══ I/O Panel ══ -->
+  <div class="panel" id="io-panel">
+    <div class="panel-title">Fault Analysis &amp; Circuit Notes</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div>
+        <div class="progress-title">Wire Break Test — Observed Behaviour</div>
+        <div id="fault-analysis">
+          <div style="font-size:12px; color:#475569; line-height:1.7;">
+            Use the <span style="color:#ef4444">Fault Injection Lab</span> buttons to break sensor wires one at a time and observe how the system responds. Record the behaviour here.
+          </div>
+          <div class="milestone" id="fb1">
+            <div class="milestone-dot"></div>
+            LS_HIGH broken → pump stopped immediately (safe)
+          </div>
+          <div class="milestone" id="fb2">
+            <div class="milestone-dot"></div>
+            LS_HIGH fault cleared → normal operation resumed
+          </div>
+          <div class="milestone" id="fb3">
+            <div class="milestone-dot"></div>
+            LS_LOW broken → pump refused to start (different risk)
+          </div>
+          <div class="milestone" id="fb4">
+            <div class="milestone-dot"></div>
+            Cleared all faults → system self-recovered
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="progress-title">Challenge Milestones</div>
+        <div class="milestone" id="m1"><div class="milestone-dot"></div>Observe pump auto-start at low level</div>
+        <div class="milestone" id="m2"><div class="milestone-dot"></div>Tank fills: latch holds through mid-level</div>
+        <div class="milestone" id="m3"><div class="milestone-dot"></div>Pump stops at high level (85%)</div>
+        <div class="milestone" id="m4"><div class="milestone-dot"></div>Tank drains; auto-cycle restarts</div>
+        <div class="milestone" id="m5"><div class="milestone-dot"></div>All fault injection tests completed</div>
+        <div class="complete-banner" id="complete-banner">
+          🎉 Level 2 Complete! You understand process control &amp; fail-safe design.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LEARNING PANEL ══ -->
+  <div id="learn-panel">
+    <div class="learn-card">
+      <h2><span>🔵</span> State Machine Design</h2>
+      <p>This tank uses a <strong>2-setpoint hysteresis controller</strong>. The pump starts at the <em>low</em> setpoint (20%) and stays on — latched by Q0's seal-in contact — until the <em>high</em> setpoint (85%) is reached. This prevents the pump from rapidly cycling on and off around a single threshold.</p>
+    </div>
+    <div class="learn-card">
+      <h2><span>🔴</span> Fail-Safe Wiring Principle</h2>
+      <p>The high-level sensor (LS_HIGH) is wired as <strong>Normally Closed (NC)</strong>. If the wire breaks, I1 reads <code>0</code> — exactly as if the tank were full — so the pump stops. The system <em>fails safely</em> rather than overflowing. This is a fundamental principle of industrial safety design (IEC 60947).</p>
+    </div>
+    <div class="learn-card">
+      <h2><span>🟠</span> Sensor Types &amp; I/O Mapping</h2>
+      <ul>
+        <li><strong>Float switches</strong> — mechanical, change state when submerged</li>
+        <li><strong>Physical address I0/I1</strong> maps to input terminals on the PLC hardware</li>
+        <li><strong>Wire break</strong> on a NO input = stuck 0 (unsafe start risk)</li>
+        <li><strong>Wire break</strong> on an NC input = stuck 0 (safe shutdown)</li>
+        <li>Always specify sensor type (NO/NC) on P&amp;ID drawings</li>
+      </ul>
+    </div>
+  </div>
+
+
+<!-- ── MISSION LOG ─────────────────────────────────────── -->
+<section class="ml-wrap" aria-label="Mission progress log">
+  <div class="ml-panel" id="ml-panel" data-level="l2"
+       data-hint="State machine / fail-safe sensor wiring">
+    <button class="ml-toggle" id="ml-toggle" type="button"
+            aria-expanded="false" aria-controls="ml-body">
+      <span class="ml-toggle-icon" aria-hidden="true">📋</span>
+      <span class="ml-toggle-label">MISSION LOG</span>
+      <span class="ml-toggle-count" id="ml-count"></span>
+      <span class="ml-toggle-chevron" aria-hidden="true">▼</span>
+    </button>
+    <div class="ml-body" id="ml-body">
+      <div class="ml-form-area">
+        <div class="ml-form-row">
+          <div class="ml-field ml-field--grow">
+            <label class="ml-label" for="ml-skill">SKILL PRACTICED</label>
+            <input class="ml-input" id="ml-skill" type="text"
+                   placeholder="What skill did you work on?">
+          </div>
+          <div class="ml-field">
+            <div class="ml-label" id="ml-stars-lbl">DIFFICULTY</div>
+            <div class="ml-stars" id="ml-stars" role="group" aria-labelledby="ml-stars-lbl">
+              <button class="ml-star" data-v="1" type="button" aria-label="1 — Easy">★</button>
+              <button class="ml-star" data-v="2" type="button" aria-label="2">★</button>
+              <button class="ml-star" data-v="3" type="button" aria-label="3 — Medium">★</button>
+              <button class="ml-star" data-v="4" type="button" aria-label="4">★</button>
+              <button class="ml-star" data-v="5" type="button" aria-label="5 — Hard">★</button>
+            </div>
+          </div>
+        </div>
+        <div class="ml-field">
+          <label class="ml-label" for="ml-notes">NOTES</label>
+          <textarea class="ml-textarea" id="ml-notes" rows="3"
+                    placeholder="What clicked? What tripped you up? Any real-world connections?"></textarea>
+        </div>
+        <div class="ml-actions">
+          <button class="ml-btn ml-btn--save" id="ml-save" type="button">
+            <span aria-hidden="true">⬡</span> LOG ENTRY
+          </button>
+          <button class="ml-btn ml-btn--clear" id="ml-clear" type="button">CLEAR ALL</button>
+        </div>
+      </div>
+      <div class="ml-entries" id="ml-entries" aria-live="polite" aria-label="Previous log entries"></div>
+    </div>
+  </div>
+</section>
+
+</div></main><!-- /main-content -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  SIMULATION STATE
+// ══════════════════════════════════════════════════════════════
+const LOW_SETPOINT  = 20;   // % — pump starts
+const HIGH_SETPOINT = 85;   // % — pump stops
+
+let level      = 35;    // % current water level
+let drainOpen  = false;
+let faults     = { lshigh: false, lslow: false };
+
+const FILL_RATE  = 0.55;  // % per scan when pump ON
+const DRAIN_RATE_BASE = 0.18; // % per scan (passive leak/evaporation)
+const DRAIN_RATE_VALVE = 0.7; // additional % per scan when drain open
+
+// PLC state
+const plc = {
+  inputs:  { I0: false, I1: true },
+  outputs: { Q0: false },
+  memory:  { M1: false },
+
+  readInputs() {
+    // Physical sensor logic
+    const rawLsLow  = level <= LOW_SETPOINT;   // NO closes when level is low
+    const rawLsHigh = level < HIGH_SETPOINT;   // NC is OPEN (0) when level reaches high
+
+    // Apply faults (wire break = stuck 0)
+    this.inputs.I0 = faults.lslow  ? false : rawLsLow;
+    this.inputs.I1 = faults.lshigh ? false : rawLsHigh;
+  },
+
+  executeLogic() {
+    // Seal-in latch: Q0 = (I0 OR Q0) AND I1
+    const sealIn    = this.inputs.I0 || this.outputs.Q0;
+    this.outputs.Q0 = sealIn && this.inputs.I1;
+    // Tank full indicator (I1=0 means high level or fault)
+    this.memory.M1  = !this.inputs.I1;
+  },
+
+  scan() {
+    this.readInputs();
+    this.executeLogic();
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  LADDER COLOUR HELPERS
+// ══════════════════════════════════════════════════════════════
+const ON  = '#22c55e';
+const OFF = '#334155';
+const FAULT_COL = '#ef4444';
+
+function setStroke(ids, colour) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('stroke', colour);
+  });
+}
+function contactOn(prefix, on) {
+  const col = on ? ON : OFF;
+  setStroke([`${prefix}-l`,`${prefix}-b1`,`${prefix}-b2`,`${prefix}-r`], col);
+}
+function coilOn(bodyId, clId, crId, on) {
+  const body = document.getElementById(bodyId);
+  if (body) {
+    body.setAttribute('stroke', on ? ON : OFF);
+    body.setAttribute('fill',   on ? '#052e16' : 'none');
+  }
+  setStroke([clId, crId], on ? ON : OFF);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  TANK VISUAL UPDATE
+// ══════════════════════════════════════════════════════════════
+let bubblePhase = 0;
+
+function updateTank(Q0) {
+  const clamped = Math.max(0, Math.min(100, level));
+
+  // Water fill rect — tank inner: y52, height196
+  const waterH = (clamped / 100) * 196;
+  const waterY = 52 + 196 - waterH;
+  document.getElementById('water-fill').setAttribute('y',      waterY);
+  document.getElementById('water-fill').setAttribute('height', waterH);
+  document.getElementById('water-surface-tint').setAttribute('y', waterY);
+
+  // Water colour based on level
+  let waterColour = '#1d4ed8';
+  if (clamped >= HIGH_SETPOINT) waterColour = '#0e7490';   // cyan when full
+  else if (clamped <= LOW_SETPOINT) waterColour = '#1e3a8a'; // dark blue when low
+  document.getElementById('water-fill').setAttribute('fill', waterColour);
+
+  // Percentage label
+  document.getElementById('level-pct').textContent = Math.round(clamped) + '%';
+
+  // LS_HIGH sensor LED (activates when level >= 85%)
+  const lshHighActive = clamped >= HIGH_SETPOINT;
+  const lshLed = document.getElementById('sensor-high-led');
+  lshLed.setAttribute('fill', faults.lshigh ? '#3b0000' : (lshHighActive ? '#164e63' : '#1e293b'));
+  lshLed.setAttribute('stroke', faults.lshigh ? FAULT_COL : (lshHighActive ? '#06b6d4' : '#475569'));
+  document.getElementById('sensor-high-fault').setAttribute('display', faults.lshigh ? 'inline' : 'none');
+
+  // LS_LOW sensor LED (activates when level <= 20%)
+  const lslLowActive = clamped <= LOW_SETPOINT;
+  const lslLed = document.getElementById('sensor-low-led');
+  lslLed.setAttribute('fill', faults.lslow ? '#3b0000' : (lslLowActive ? '#1e3a5f' : '#1e293b'));
+  lslLed.setAttribute('stroke', faults.lslow ? FAULT_COL : (lslLowActive ? '#3b82f6' : '#475569'));
+  document.getElementById('sensor-low-fault').setAttribute('display', faults.lslow ? 'inline' : 'none');
+
+  // Bubbles when pump is running
+  const bubbles = document.getElementById('bubbles');
+  if (Q0) {
+    bubbles.setAttribute('opacity', '1');
+    bubblePhase += 0.2;
+    ['b1','b2','b3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      const baseY = 60 + i * 8;
+      const dy = Math.sin(bubblePhase + i) * 4;
+      el.setAttribute('cy', (baseY + dy).toFixed(1));
+    });
+  } else {
+    bubbles.setAttribute('opacity', '0');
+  }
+
+  // Drain flow animation
+  const drainFlow = document.getElementById('drain-flow');
+  drainFlow.setAttribute('fill', drainOpen ? '#3b82f6' : '#334155');
+
+  // Overflow flash
+  if (clamped >= 100) {
+    document.getElementById('overflow-flash').setAttribute('opacity', '0.7');
+    document.getElementById('overflow-label').setAttribute('fill', '#ef4444');
+  } else {
+    document.getElementById('overflow-flash').setAttribute('opacity', '0');
+    document.getElementById('overflow-label').setAttribute('fill', 'transparent');
+  }
+
+  // Pump icon
+  const pumpArrow = document.getElementById('pump-arrow');
+  const pumpCircle = document.getElementById('pump-circle');
+  if (Q0) {
+    pumpArrow.setAttribute('fill', '#06b6d4');
+    pumpCircle.setAttribute('stroke', '#06b6d4');
+  } else {
+    pumpArrow.setAttribute('fill', '#475569');
+    pumpCircle.setAttribute('stroke', '#475569');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STATE BADGE
+// ══════════════════════════════════════════════════════════════
+function updateState(Q0) {
+  const dot   = document.getElementById('state-dot');
+  const label = document.getElementById('state-label');
+  const desc  = document.getElementById('state-desc');
+  const hasFault = faults.lshigh || faults.lslow;
+
+  if (hasFault && !Q0) {
+    dot.className   = 'state-dot fault';
+    label.textContent = 'FAULT — PUMP SAFE-OFF';
+    desc.textContent  = 'Broken wire detected';
+  } else if (Q0) {
+    dot.className   = 'state-dot filling';
+    label.textContent = 'FILLING';
+    desc.textContent  = `Rate: +${FILL_RATE.toFixed(1)}%/scan`;
+  } else if (level >= HIGH_SETPOINT) {
+    dot.className   = 'state-dot full';
+    label.textContent = 'FULL — PUMP STOPPED';
+    desc.textContent  = 'LS_HIGH opened rung';
+  } else {
+    dot.className   = 'state-dot idle';
+    label.textContent = 'DRAINING / IDLE';
+    desc.textContent  = `Level: ${Math.round(level)}%`;
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FAULT INJECTION
+// ══════════════════════════════════════════════════════════════
+function toggleFault(type) {
+  faults[type] = !faults[type];
+  const btn = document.getElementById(`fault-${type}-btn`);
+  const fi  = document.getElementById(`fi-${type}`);
+  btn.classList.toggle('active', faults[type]);
+  fi.style.background = faults[type] ? 'var(--red)' : '#7f1d1d';
+  if (faults[type]) fi.style.boxShadow = '0 0 6px var(--red)';
+  else fi.style.boxShadow = 'none';
+
+  // Fault analysis milestones
+  if (type === 'lshigh' && faults.lshigh) {
+    checkFaultMilestone('fb1', !plc.outputs.Q0 || true); // will be checked next scan
+    pendingFaultCheck.lshigh = true;
+  }
+  if (type === 'lshigh' && !faults.lshigh && faultHistory.lshighWasOn) {
+    setMilestone('fb2', true);
+  }
+  if (type === 'lslow' && faults.lslow) {
+    pendingFaultCheck.lslow = true;
+  }
+  if (type === 'lslow' && !faults.lslow && faultHistory.lslowWasOn) {
+    setMilestone('fb4', true);
+    if (faultHistory.lshighWasOn) setMilestone('fb4', true);
+  }
+
+  if (faults.lshigh) faultHistory.lshighWasOn = true;
+  if (faults.lslow)  faultHistory.lslowWasOn  = true;
+
+  // Update fault tag in I/O table
+  document.getElementById('fault-i1-tag').style.display = faults.lshigh ? 'inline' : 'none';
+}
+
+const faultHistory = { lshighWasOn: false, lslowWasOn: false };
+const pendingFaultCheck = { lshigh: false, lslow: false };
+
+function checkFaultMilestone(id, condition) {
+  if (condition) setMilestone(id, true);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DRAIN VALVE
+// ══════════════════════════════════════════════════════════════
+function toggleDrain() {
+  drainOpen = !drainOpen;
+  const btn = document.getElementById('drain-btn');
+  btn.classList.toggle('active', drainOpen);
+  document.getElementById('drain-label').textContent = drainOpen ? 'OPEN' : 'CLOSED';
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ASSESSMENT MILESTONES
+// ══════════════════════════════════════════════════════════════
+const ms = {
+  m1: false, m2: false, m3: false, m4: false, m5: false,
+  fb1: false, fb2: false, fb3: false, fb4: false,
+};
+let prevQ0 = false;
+let pumpWasOn = false;
+let midLevelSeen = false;
+let highStopSeen = false;
+let drainCycleSeen = false;
+
+function setMilestone(id, done) {
+  if (ms[id] === done) return;
+  ms[id] = done;
+  document.getElementById(id).classList.toggle('done', done);
+  if (done) {
+    const el = document.getElementById(id);
+    announce('Milestone complete: ' + (el ? el.innerText.replace(/^\s+/, '') : id), true);
+  }
+}
+
+// ── Screen-reader announcer ──────────────────────────────────
+function announce(msg, urgent) {
+  const el = document.getElementById(urgent ? 'a11y-alert' : 'a11y-status');
+  if (!el) return;
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = msg; });
+}
+
+function checkMilestones(Q0) {
+  // M1: pump auto-started
+  if (Q0 && !pumpWasOn) { setMilestone('m1', true); pumpWasOn = true; }
+
+  // M2: latch held through mid-level
+  if (Q0 && level > 50) setMilestone('m2', true);
+
+  // M3: pump stopped at high level
+  if (!Q0 && prevQ0 && level >= HIGH_SETPOINT - 5) { setMilestone('m3', true); highStopSeen = true; }
+
+  // M4: drain cycle restart
+  if (Q0 && highStopSeen && level < 25) setMilestone('m4', true);
+
+  // Fault milestones
+  if (pendingFaultCheck.lshigh && !Q0 && faults.lshigh) {
+    setMilestone('fb1', true);
+    pendingFaultCheck.lshigh = false;
+  }
+  if (pendingFaultCheck.lslow && !Q0 && faults.lslow && level <= LOW_SETPOINT) {
+    setMilestone('fb3', true);
+    pendingFaultCheck.lslow = false;
+  }
+  if (!faults.lshigh && faultHistory.lshighWasOn) setMilestone('fb2', true);
+  if (!faults.lslow && !faults.lshigh && faultHistory.lslowWasOn && faultHistory.lshighWasOn) {
+    setMilestone('fb4', true);
+  }
+
+  // M5: all fault tests done
+  if (ms.fb1 && ms.fb2 && ms.fb3 && ms.fb4) setMilestone('m5', true);
+
+  // Complete
+  if (ms.m1 && ms.m2 && ms.m3 && ms.m4 && ms.m5) {
+    document.getElementById('complete-banner').classList.add('show');
+  }
+
+  prevQ0 = Q0;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  BIT DISPLAY
+// ══════════════════════════════════════════════════════════════
+function setBit(id, value, options = {}) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = value ? '1' : '0';
+  el.className = 'io-bit';
+  if (options.fault) { el.classList.add('fault'); return; }
+  if (value) el.classList.add('one');
+  if (options.nc && !value) el.classList.add('nc-open');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN SCAN LOOP — 50 ms
+// ══════════════════════════════════════════════════════════════
+let scanCount = 0;
+
+setInterval(() => {
+  scanCount++;
+  document.getElementById('scan-num').textContent = scanCount;
+
+  // --- PLC scan ---
+  plc.scan();
+  const I0 = plc.inputs.I0;
+  const I1 = plc.inputs.I1;
+  const Q0 = plc.outputs.Q0;
+  const M1 = plc.memory.M1;
+
+  // --- Update physical level ---
+  let delta = -DRAIN_RATE_BASE;  // passive drain always active
+  if (drainOpen) delta -= DRAIN_RATE_VALVE;
+  if (Q0) delta += FILL_RATE;
+  level = Math.max(0, Math.min(100, level + delta));
+
+  // --- I/O Table ---
+  setBit('bit-I0', I0, { fault: faults.lslow });
+  setBit('bit-I1', I1, { nc: true, fault: faults.lshigh });
+  setBit('bit-Q0', Q0);
+  setBit('bit-M1', M1);
+
+  // --- Ladder colouring ---
+  setStroke(['rail-L'], '#3b82f6');
+
+  // Rung 1
+  setStroke(['r1-wa'], ON);  // L+ rail always live
+  contactOn('i0', I0);
+  const afterI0 = I0 || Q0;
+  setStroke(['r1-wb'], afterI0 ? ON : OFF);
+  document.getElementById('jdot').setAttribute('fill', afterI0 ? ON : OFF);
+  setStroke(['r1-wc'], afterI0 ? ON : OFF);
+
+  // I1 NC contact colour
+  const i1col = faults.lshigh ? FAULT_COL : (afterI0 && I1 ? ON : OFF);
+  setStroke(['i1-l','i1-b1','i1-b2','i1-r'], i1col);
+  document.getElementById('i1-slash').setAttribute('stroke', faults.lshigh ? FAULT_COL : (I1 ? '#64748b' : ON));
+
+  const afterI1 = afterI0 && I1;
+  setStroke(['r1-wd'], afterI1 ? ON : OFF);
+  coilOn('q0-body','q0-cl','q0-cr', Q0);
+  setStroke(['r1-wrail'], Q0 ? ON : OFF);
+
+  // Seal-in branch
+  setStroke(['seal-down-a','seal-left'], Q0 ? ON : OFF);
+  contactOn('qs', Q0);
+  setStroke(['seal-right','seal-up'], Q0 ? ON : OFF);
+
+  // Rung 2 (tank-full indicator)
+  setStroke(['r2-wa'], ON);
+  // I1 inverted contact (active when I1=0 = tank full or fault)
+  const r2pass = !I1;
+  setStroke(['i1inv-l','i1inv-b1','i1inv-b2','i1inv-r'], r2pass ? ON : OFF);
+  document.getElementById('i1inv-slash').setAttribute('stroke', r2pass ? ON : '#64748b');
+  setStroke(['r2-wb'], r2pass ? ON : OFF);
+  coilOn('m1-body','m1-cl','m1-cr', M1);
+  setStroke(['r2-wrail'], M1 ? ON : OFF);
+
+  // --- Tank visual ---
+  updateTank(Q0);
+  updateState(Q0);
+
+  // --- Pump HMI ---
+  const led = document.getElementById('pump-led');
+  const spd = document.getElementById('pump-speed');
+  led.className = 'pump-led' + (Q0 ? ' on' : '');
+  spd.className = 'pump-speed ' + (Q0 ? 'on' : 'off');
+  spd.textContent = Q0 ? '▶  RUNNING' : 'STOPPED';
+
+  // --- Milestones ---
+  checkMilestones(Q0);
+
+}, 50);
+
+// ── Theme toggle ──
+(function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
+</script>
+<script>window.PLC_LEVEL='level2';</script>
+<script src="assess.js"></script>
+<script src="mission-log.js"></script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'📡',v:'',tx:'<strong>I0 = LOW level sensor (NO).</strong> It closes when the tank is LOW — signalling the pump to start. It opens again as the tank fills past the low setpoint.'},
+    {ic:'📡',v:'warn',tx:'<strong>I1 = HIGH level sensor (NC).</strong> It opens when the tank is FULL — breaking the rung and stopping the pump. NC = the safe state is pump running, not stopped.'},
+    {ic:'🔁',v:'',tx:'<strong>Hysteresis loop:</strong> the pump won\'t restart until I0 closes again (tank drops to LOW). This prevents rapid cycling that would burn out the pump motor.'},
+    {ic:'⚠️',v:'warn',tx:'<strong>Inject a fault:</strong> toggle I1 to OPEN while the pump is running. It should stop immediately. If it doesn\'t, your NC contact logic is wired incorrectly.'},
+    {ic:'🔒',v:'danger',tx:'<strong>Fail-safe direction matters.</strong> If I1 fails open (wire break), the pump stops — safe. If I1 fails closed, the tank overfills. Always ask: which failure mode is the dangerous one?'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

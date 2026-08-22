@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level 1 — Start/Stop Latching Circuit | PLeC</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #3b82f6;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #eab308;
+      --orange: #f97316;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --energized: #22c55e;
+      --de-energized: #334155;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .badge {
+      background: var(--accent);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      letter-spacing: .5px;
+    }
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .scan-counter {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: monospace;
+    }
+    .scan-counter span {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* ── Main grid ── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      grid-template-rows: auto auto;
+      gap: 0;
+    }
+
+    /* ── Panels ── */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 20px;
+    }
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Ladder Panel ── */
+    #ladder-panel {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .ladder-wrap {
+      overflow-x: auto;
+    }
+
+    #ladder-svg {
+      display: block;
+      width: 100%;
+      min-width: 520px;
+    }
+
+    /* ── HMI Panel ── */
+    #hmi-panel {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .plc-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: #fff;
+      position: relative;
+      transition: transform 80ms, box-shadow 80ms;
+      user-select: none;
+      outline: none;
+    }
+    .plc-btn:active, .plc-btn.pressed {
+      transform: scale(.92);
+    }
+
+    .btn-start {
+      background: radial-gradient(circle at 40% 35%, #4ade80, #16a34a);
+      box-shadow: 0 4px 0 #14532d, 0 0 16px #22c55e44;
+    }
+    .btn-start.pressed {
+      box-shadow: 0 1px 0 #14532d, 0 0 8px #22c55e44;
+    }
+    .btn-stop {
+      background: radial-gradient(circle at 40% 35%, #f87171, #b91c1c);
+      box-shadow: 0 4px 0 #7f1d1d, 0 0 16px #ef444444;
+    }
+    .btn-stop.pressed {
+      box-shadow: 0 1px 0 #7f1d1d, 0 0 8px #ef444444;
+    }
+
+    .btn-label {
+      font-size: 10px;
+      text-align: center;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .hmi-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    /* Motor status */
+    .motor-status {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+    }
+    .motor-led {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--de-energized);
+      box-shadow: none;
+      transition: background .1s, box-shadow .1s;
+      flex-shrink: 0;
+    }
+    .motor-led.on {
+      background: var(--green);
+      box-shadow: 0 0 12px var(--green);
+    }
+    .motor-label { font-size: 13px; font-weight: 600; }
+    .motor-state {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+    .motor-state.on { color: var(--green); }
+    .motor-state.off { color: var(--muted); }
+
+    /* Conveyor belt */
+    .conveyor-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+    }
+    #conveyor-svg {
+      display: block;
+      width: 100%;
+    }
+
+    /* I/O Table */
+    #io-panel {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .io-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+    }
+    .io-table th {
+      text-align: left;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      padding: 4px 8px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .io-table td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .io-table tr:last-child td { border-bottom: none; }
+
+    .tag-address {
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .tag-type {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .tag-type.input  { background: #1e3a5f; color: #60a5fa; }
+    .tag-type.output { background: #1c3a26; color: #4ade80; }
+    .tag-type.memory { background: #3b1f5e; color: #c084fc; }
+
+    .io-bit {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 14px;
+      background: var(--de-energized);
+      color: var(--muted);
+      transition: background .1s, color .1s;
+    }
+    .io-bit.one {
+      background: var(--green);
+      color: #fff;
+    }
+    .io-bit.nc-open {
+      background: var(--red);
+      color: #fff;
+    }
+
+    .nc-note {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* ── Bottom: learning sidebar ── */
+    #learn-panel {
+      grid-column: 1 / 3;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+
+    .learn-card {
+      background: var(--surface);
+      padding: 20px;
+    }
+    .learn-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .learn-card p, .learn-card li {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .learn-card ul { padding-left: 16px; }
+    .icon {
+      font-size: 16px;
+    }
+
+    /* ── Progress / assessment ── */
+    .progress-section {
+      margin-top: 14px;
+    }
+    .progress-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .milestone {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 12px;
+      color: var(--muted);
+      transition: color .3s;
+    }
+    .milestone.done {
+      color: var(--green);
+    }
+    .milestone-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background .3s, box-shadow .3s;
+    }
+    .milestone.done .milestone-dot {
+      background: var(--green);
+      box-shadow: 0 0 6px var(--green);
+    }
+
+    .complete-banner {
+      display: none;
+      background: linear-gradient(135deg, #166534, #15803d);
+      border: 1px solid #22c55e;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 14px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #dcfce7;
+      text-align: center;
+    }
+    .complete-banner.show { display: block; }
+
+    /* Tooltip labels on SVG */
+    .tooltip-bg { fill: #1a1d27; stroke: #2e3350; stroke-width: 1; }
+
+    /* ── Accessibility ── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:#3b82f6;color:#fff;font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none}
+    .skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px}
+    :focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    button:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    a:focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    .plc-btn{min-height:48px;min-width:48px}
+    /* ── Theme toggle button ── */
+    #theme-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:16px;line-height:1;padding:4px 9px;border-radius:6px;cursor:pointer;flex-shrink:0;transition:background .15s,border-color .15s}
+    #theme-toggle:hover{background:rgba(255,255,255,.07)}
+    /* ── Light mode ── */
+    [data-theme="light"]{--bg:#f0f4f8;--surface:#ffffff;--surface2:#eef2f7;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--de-energized:#94a3b8}
+    [data-theme="light"] body{background:var(--bg);color:var(--text)}
+    [data-theme="light"] .tag-type.input{background:#dbeafe;color:#1d4ed8}
+    [data-theme="light"] .tag-type.output{background:#dcfce7;color:#15803d}
+    [data-theme="light"] .tag-type.memory{background:#ede9fe;color:#7c3aed}
+    [data-theme="light"] .learn-card p,[data-theme="light"] .learn-card li{color:#475569}
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="assess.css">
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="a11y-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div id="a11y-alert"  role="alert"  aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<header>
+  <span class="badge">LEVEL 1</span>
+  <h1>Start/Stop Latching Circuit — Conveyor Belt</h1>
+  <nav class="nav-links" style="margin-left:auto; display:flex; gap:10px;" aria-label="Challenge navigation">
+    <a href="index.html"  style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">⌂ Home</a>
+    <a href="level1.html" style="font-size:12px;color:#8b5cf6;text-decoration:none;padding:4px 10px;border:1px solid #8b5cf6;border-radius:6px;">L1</a>
+    <a href="learn-your-log.html" style="font-size:12px;color:#f59e0b;text-decoration:none;padding:4px 10px;border:1px solid #d97706;border-radius:6px;">📋 Log</a>
+    <a href="level2.html" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">L2</a>
+    <a href="level3.html" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">L3</a>
+    <a href="level4.html" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Safety</a>
+    <a href="level5.html" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Timer</a>
+    <a href="level6.html" style="font-size:12px;color:#64748b;text-decoration:none;padding:4px 10px;border:1px solid #2e3350;border-radius:6px;">Batch</a>
+  </nav>
+  <div class="scan-counter" style="margin-left:0" aria-hidden="true">SCAN #<span id="scan-num">0</span> &nbsp;|&nbsp; Cycle: <span id="cycle-time">50</span>ms</div>
+  <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
+</header>
+
+<main id="main-content"><div class="main">
+
+  <!-- ── Ladder Logic Diagram ── -->
+  <div class="panel" id="ladder-panel">
+    <div class="panel-title">Ladder Logic Program</div>
+    <div class="ladder-wrap">
+      <svg id="ladder-svg" role="img" aria-label="Ladder logic program — Rung 1: Start/Stop seal circuit. START contact (I0.0) and memory seal M0 in series with NC Stop (I0.1), energising motor output Q0." height="240" viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Power rails -->
+        <line id="rail-L" x1="40" y1="20" x2="40" y2="220" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+        <line id="rail-N" x1="590" y1="20" x2="590" y2="220" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+        <text x="40" y="14" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700" font-family="monospace">L+</text>
+        <text x="590" y="14" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="monospace">N−</text>
+
+        <!-- ══ RUNG 1: Start/Stop Latch ══ -->
+
+        <!-- Rung horizontal wire L to first contact -->
+        <line id="r1-wire-a" x1="40" y1="80" x2="100" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- I0 NO Contact (Start button) -->
+        <g id="contact-I0" transform="translate(100,60)">
+          <line id="r1-i0-l" x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+          <line id="r1-i0-bar1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r1-i0-bar2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r1-i0-r" x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+          <text x="20" y="3" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I0</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">START</text>
+          <text x="20" y="62" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">[NO]</text>
+        </g>
+
+        <!-- Wire between I0 and branch junction -->
+        <line id="r1-wire-b" x1="140" y1="80" x2="200" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Branch junction dot -->
+        <circle id="junction-dot" cx="200" cy="80" r="4" fill="#334155"/>
+
+        <!-- Wire I0→ coil (upper rung path) -->
+        <line id="r1-wire-c" x1="200" y1="80" x2="480" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- I1 NC Contact (Stop button) – shown with diagonal slash -->
+        <g id="contact-I1" transform="translate(480,60)">
+          <line id="r1-i1-l" x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+          <line id="r1-i1-bar1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r1-i1-bar2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+          <!-- NC slash -->
+          <line id="r1-i1-slash" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+          <line id="r1-i1-r" x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+          <text x="20" y="3" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I1</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">STOP</text>
+          <text x="20" y="62" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="700" font-family="sans-serif">[NC]</text>
+        </g>
+
+        <!-- Wire I1 → coil -->
+        <line id="r1-wire-d" x1="520" y1="80" x2="545" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Q0 Output Coil -->
+        <g id="coil-Q0" transform="translate(545,60)">
+          <line id="r1-coil-l" x1="0" y1="20" x2="8" y2="20" stroke="#334155" stroke-width="3"/>
+          <ellipse id="r1-coil-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+          <line id="r1-coil-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+          <text x="20" y="3" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">MOTOR</text>
+        </g>
+
+        <!-- Rail N connection for rung 1 -->
+        <line id="r1-wire-rail" x1="585" y1="80" x2="590" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- ══ RUNG 1b: Seal-in branch (parallel Q0 NO contact) ══ -->
+
+        <!-- Branch down from junction -->
+        <line id="seal-wire-down-a" x1="200" y1="80" x2="200" y2="150" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Seal-in horizontal -->
+        <line id="seal-wire-left" x1="200" y1="150" x2="260" y2="150" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Q0 NO Contact (seal-in) -->
+        <g id="contact-Q0-seal" transform="translate(260,130)">
+          <line id="r1-q0-l" x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+          <line id="r1-q0-bar1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r1-q0-bar2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r1-q0-r" x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+          <text x="20" y="3" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">SEAL-IN</text>
+        </g>
+
+        <!-- Seal-in right wire up to main rung -->
+        <line id="seal-wire-right-h" x1="300" y1="150" x2="480" y2="150" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+        <line id="seal-wire-up-b" x1="480" y1="150" x2="480" y2="80" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Rung 1 label -->
+        <text x="6" y="84" text-anchor="middle" fill="#334155" font-size="12" font-weight="700" font-family="monospace">1</text>
+
+        <!-- ══ RUNG 2: Conveyor indicator rung ══ -->
+        <line id="r2-wire-a" x1="40" y1="200" x2="100" y2="200" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- Q0 NO contact (status rung) -->
+        <g id="contact-Q0-status" transform="translate(100,180)">
+          <line id="r2-q0-l" x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+          <line id="r2-q0-bar1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r2-q0-bar2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+          <line id="r2-q0-r" x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+          <text x="20" y="3" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">RUNNING</text>
+        </g>
+
+        <line id="r2-wire-b" x1="140" y1="200" x2="545" y2="200" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+
+        <!-- M0 Output Coil (indicator) -->
+        <g id="coil-M0" transform="translate(545,180)">
+          <line x1="0" y1="20" x2="8" y2="20" stroke="#334155" stroke-width="3" id="r2-coil-l"/>
+          <ellipse id="r2-coil-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+          <line x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3" id="r2-coil-r"/>
+          <text x="20" y="3" text-anchor="middle" fill="#f97316" font-size="11" font-weight="700" font-family="monospace">M0</text>
+          <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="10" font-family="sans-serif">INDICATOR</text>
+        </g>
+
+        <line id="r2-wire-rail" x1="585" y1="200" x2="590" y2="200" stroke="#334155" stroke-width="3"/>
+
+        <text x="6" y="204" text-anchor="middle" fill="#334155" font-size="12" font-weight="700" font-family="monospace">2</text>
+
+      </svg>
+    </div>
+  </div>
+
+  <!-- ── HMI Panel ── -->
+  <div class="panel" id="hmi-panel">
+    <div class="panel-title">Physical HMI Panel</div>
+
+    <div class="hmi-section-title">Control Buttons</div>
+    <div class="btn-group">
+      <div style="text-align:center">
+        <button class="plc-btn btn-start" id="btn-start"
+                onmousedown="pressStart()" onmouseup="releaseStart()"
+                ontouchstart="pressStart()" ontouchend="releaseStart()">START</button>
+        <div class="btn-label">I0 &nbsp;·&nbsp; Momentary NO</div>
+      </div>
+      <div style="text-align:center">
+        <button class="plc-btn btn-stop" id="btn-stop"
+                onmousedown="pressStop()" onmouseup="releaseStop()"
+                ontouchstart="pressStop()" ontouchend="releaseStop()">STOP</button>
+        <div class="btn-label">I1 &nbsp;·&nbsp; Momentary NC</div>
+      </div>
+    </div>
+
+    <div class="motor-status">
+      <div class="motor-led" id="motor-led"></div>
+      <span class="motor-label">Conveyor Motor Q0</span>
+      <span class="motor-state off" id="motor-state-label">OFF</span>
+    </div>
+
+    <div class="conveyor-wrap">
+      <div class="hmi-section-title" style="margin-bottom:8px">Conveyor Belt</div>
+      <svg id="conveyor-svg" role="img" aria-label="Conveyor belt process visualisation — shows motor on/off state and belt movement." height="90" viewBox="0 0 300 90" xmlns="http://www.w3.org/2000/svg">
+        <!-- Frame -->
+        <rect x="10" y="30" width="280" height="30" rx="4" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+        <!-- Left drum -->
+        <circle cx="22" cy="45" r="12" fill="#334155" stroke="#475569" stroke-width="2" id="drum-left"/>
+        <!-- Right drum -->
+        <circle cx="278" cy="45" r="12" fill="#334155" stroke="#475569" stroke-width="2" id="drum-right"/>
+        <!-- Belt top surface -->
+        <rect x="22" y="33" width="256" height="6" rx="2" fill="#374151" id="belt-top"/>
+        <!-- Belt bottom surface -->
+        <rect x="22" y="51" width="256" height="6" rx="2" fill="#1f2937" id="belt-bottom"/>
+
+        <!-- Belt segments (animated) -->
+        <g id="belt-segments">
+          <rect class="belt-seg" x="30"  y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="62"  y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="94"  y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="126" y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="158" y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="190" y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="222" y="34" width="24" height="4" rx="1" fill="#4b5563"/>
+          <rect class="belt-seg" x="254" y="34" width="22" height="4" rx="1" fill="#4b5563"/>
+        </g>
+
+        <!-- Cargo boxes on belt -->
+        <g id="cargo">
+          <rect id="box1" x="50"  y="20" width="22" height="14" rx="2" fill="#92400e" stroke="#b45309" stroke-width="1"/>
+          <rect id="box2" x="130" y="20" width="22" height="14" rx="2" fill="#1e40af" stroke="#2563eb" stroke-width="1"/>
+          <rect id="box3" x="210" y="20" width="22" height="14" rx="2" fill="#166534" stroke="#16a34a" stroke-width="1"/>
+        </g>
+
+        <!-- Speed label -->
+        <text id="belt-speed-label" x="150" y="80" text-anchor="middle" fill="#334155" font-size="10" font-family="monospace">■ STOPPED</text>
+
+        <!-- Drum rotation marks -->
+        <line id="drum-l-mark" x1="22" y1="33" x2="22" y2="45" stroke="#64748b" stroke-width="2"/>
+        <line id="drum-r-mark" x1="278" y1="33" x2="278" y2="45" stroke="#64748b" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <!-- I/O Address Map -->
+    <div>
+      <div class="hmi-section-title">I/O Register Table</div>
+      <table class="io-table">
+        <thead>
+          <tr>
+            <th scope="col">Address</th>
+            <th scope="col">Tag</th>
+            <th scope="col">Type</th>
+            <th scope="col">Value</th>
+            <th scope="col">Note</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="tag-address">I0</td>
+            <td>START_PB</td>
+            <td><span class="tag-type input">INPUT</span></td>
+            <td><span class="io-bit" id="bit-I0">0</span></td>
+            <td class="nc-note">Momentary NO</td>
+          </tr>
+          <tr>
+            <td class="tag-address">I1</td>
+            <td>STOP_PB</td>
+            <td><span class="tag-type input">INPUT</span></td>
+            <td><span class="io-bit one" id="bit-I1">1</span></td>
+            <td class="nc-note">NC — <em>open</em> when pressed</td>
+          </tr>
+          <tr>
+            <td class="tag-address">Q0</td>
+            <td>CONV_MTR</td>
+            <td><span class="tag-type output">OUTPUT</span></td>
+            <td><span class="io-bit" id="bit-Q0">0</span></td>
+            <td class="nc-note">Conveyor motor</td>
+          </tr>
+          <tr>
+            <td class="tag-address">M0</td>
+            <td>RUN_IND</td>
+            <td><span class="tag-type memory">MEMORY</span></td>
+            <td><span class="io-bit" id="bit-M0">0</span></td>
+            <td class="nc-note">Indicator relay</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── I/O Panel (bottom left) ── -->
+  <div class="panel" id="io-panel">
+    <div class="panel-title">Assessment &amp; Learning Goals</div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+      <div>
+        <div class="progress-title">Challenge Milestones</div>
+        <div class="milestone" id="m1">
+          <div class="milestone-dot"></div>
+          Press START — observe momentary I0 pulse
+        </div>
+        <div class="milestone" id="m2">
+          <div class="milestone-dot"></div>
+          Motor latches ON after START is released
+        </div>
+        <div class="milestone" id="m3">
+          <div class="milestone-dot"></div>
+          Press STOP — observe NC contact opening
+        </div>
+        <div class="milestone" id="m4">
+          <div class="milestone-dot"></div>
+          Motor drops out — circuit de-energised
+        </div>
+        <div class="milestone" id="m5">
+          <div class="milestone-dot"></div>
+          Full start–run–stop cycle completed ✓
+        </div>
+        <div class="complete-banner" id="complete-banner">
+          🎉 Level 1 Complete! You understand the seal-in latch circuit.
+          <div style="margin-top:10px;font-size:11px;font-weight:400;line-height:1.6;opacity:.9;">
+            A technician who can't document their work is a liability. Before moving to Level 2, build the habit:
+            <a href="learn-your-log.html" style="color:inherit;text-decoration:underline;font-weight:700;white-space:nowrap;">Learn Your Log →</a>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="progress-title">Key Concepts</div>
+        <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+          <li style="font-size:12px; color:#94a3b8; display:flex; gap:8px;">
+            <span style="color:#60a5fa">■</span>
+            <span><strong style="color:#e2e8f0">Normally Open (NO)</strong> — Contact passes current only when the physical button is <em>held</em>. START is NO.</span>
+          </li>
+          <li style="font-size:12px; color:#94a3b8; display:flex; gap:8px;">
+            <span style="color:#ef4444">■</span>
+            <span><strong style="color:#e2e8f0">Normally Closed (NC)</strong> — Contact passes current at rest; <em>opens</em> when pressed. STOP is NC.</span>
+          </li>
+          <li style="font-size:12px; color:#94a3b8; display:flex; gap:8px;">
+            <span style="color:#22c55e">■</span>
+            <span><strong style="color:#e2e8f0">Seal-in / Latch</strong> — Q0 output feeds back a parallel NO contact so the rung stays energised after START is released.</span>
+          </li>
+          <li style="font-size:12px; color:#94a3b8; display:flex; gap:8px;">
+            <span style="color:#f97316">■</span>
+            <span><strong style="color:#e2e8f0">PLC Scan Cycle</strong> — Read inputs → Execute logic → Write outputs, repeated every 50 ms.</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+</div></main><!-- /main-content -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  PLC ENGINE — Level 1: Start/Stop Latching Circuit
+// ══════════════════════════════════════════════════════════════
+const plc = {
+  inputs:  { I0: false, I1: true },   // I1 starts TRUE (NC = normally closed = passing)
+  outputs: { Q0: false },
+  memory:  { M0: false },
+
+  readInputs(hw) {
+    this.inputs.I0 = hw.startPressed;   // NO: true only while held
+    this.inputs.I1 = !hw.stopPressed;   // NC: true at rest, false when pressed
+  },
+
+  executeLogic() {
+    // Seal-in latch:  Q0 = (I0 OR Q0) AND I1
+    const sealIn  = this.inputs.I0 || this.outputs.Q0;
+    this.outputs.Q0 = sealIn && this.inputs.I1;
+    // Indicator relay follows output
+    this.memory.M0  = this.outputs.Q0;
+  },
+
+  writeOutputs() {
+    return { motorOn: this.outputs.Q0, indicatorOn: this.memory.M0 };
+  },
+
+  scan(hw) {
+    this.readInputs(hw);
+    this.executeLogic();
+    return this.writeOutputs();
+  }
+};
+
+// Physical hardware state
+const hw = { startPressed: false, stopPressed: false };
+
+// ── Button handlers ──
+function pressStart()   { hw.startPressed = true;  document.getElementById('btn-start').classList.add('pressed'); }
+function releaseStart() { hw.startPressed = false; document.getElementById('btn-start').classList.remove('pressed'); }
+function pressStop()    { hw.stopPressed  = true;  document.getElementById('btn-stop').classList.add('pressed'); }
+function releaseStop()  { hw.stopPressed  = false; document.getElementById('btn-stop').classList.remove('pressed'); }
+
+// Prevent context menu on long-press mobile
+document.getElementById('btn-start').addEventListener('contextmenu', e => e.preventDefault());
+document.getElementById('btn-stop').addEventListener('contextmenu',  e => e.preventDefault());
+
+// Keyboard accessibility for momentary buttons (Space/Enter = hold)
+[['btn-start', pressStart, releaseStart], ['btn-stop', pressStop, releaseStop]].forEach(([id, dn, up]) => {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.addEventListener('keydown', e => { if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); dn(); }});
+  btn.addEventListener('keyup',   e => { if (e.code === 'Space' || e.code === 'Enter') up(); });
+});
+
+// ══════════════════════════════════════════════════════════════
+//  LADDER SVG — colour helpers
+// ══════════════════════════════════════════════════════════════
+const ON  = '#22c55e';
+const OFF = '#334155';
+
+function wireColour(ids, energised) {
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('stroke', energised ? ON : OFF);
+  });
+}
+function contactColour(prefix, energised) {
+  ['l','bar1','bar2','r'].forEach(part => {
+    const el = document.getElementById(`${prefix}-${part}`);
+    if (el) el.setAttribute('stroke', energised ? ON : OFF);
+  });
+}
+function coilColour(id, labelId, energised) {
+  const body = document.getElementById(id);
+  if (body) {
+    body.setAttribute('stroke', energised ? ON : OFF);
+    if (energised) body.setAttribute('fill', '#052e16');
+    else body.setAttribute('fill', 'none');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CONVEYOR ANIMATION
+// ══════════════════════════════════════════════════════════════
+let beltOffset = 0;
+let drumAngle  = 0;
+const BELT_SPEED = 2.5;   // px per frame when running
+const BELT_WIDTH = 256;   // full belt width
+const BOX_START_X = [50, 130, 210];
+const boxes = ['box1','box2','box3'];
+let boxPositions = [...BOX_START_X];
+
+function animateConveyor(running) {
+  const segs = document.querySelectorAll('.belt-seg');
+  const speedLabel = document.getElementById('belt-speed-label');
+  const drumLMark  = document.getElementById('drum-l-mark');
+  const drumRMark  = document.getElementById('drum-r-mark');
+
+  if (!running) {
+    speedLabel.textContent = '■ STOPPED';
+    speedLabel.setAttribute('fill', '#475569');
+    return;
+  }
+
+  speedLabel.textContent = '▶ RUNNING — 0.8 m/s';
+  speedLabel.setAttribute('fill', '#22c55e');
+
+  beltOffset = (beltOffset + BELT_SPEED) % 32;
+  segs.forEach((seg, i) => {
+    const base = 30 + i * 32;
+    const nx   = ((base - beltOffset + BELT_WIDTH) % BELT_WIDTH) + 22;
+    seg.setAttribute('x', nx);
+  });
+
+  // Move cargo boxes
+  boxPositions = boxPositions.map((x, i) => {
+    let nx = x + BELT_SPEED;
+    if (nx > 280) nx = 10;
+    document.getElementById(boxes[i]).setAttribute('x', nx);
+    return nx;
+  });
+
+  // Rotate drum marks
+  drumAngle = (drumAngle + 4) % 360;
+  const rad = (drumAngle * Math.PI) / 180;
+  const lx2 = 22 + 12 * Math.sin(rad);
+  const ly2 = 45 - 12 * Math.cos(rad);
+  const rx2 = 278 + 12 * Math.sin(rad);
+  const ry2 = 45 - 12 * Math.cos(rad);
+  drumLMark.setAttribute('x2', lx2); drumLMark.setAttribute('y2', ly2);
+  drumRMark.setAttribute('x2', rx2); drumRMark.setAttribute('y2', ry2);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  ASSESSMENT / MILESTONE TRACKER
+// ══════════════════════════════════════════════════════════════
+const state = {
+  sawStart:     false,
+  sawLatch:     false,
+  sawStop:      false,
+  sawDropout:   false,
+  sawFullCycle: false,
+  wasRunning:   false,  // track previous Q0 to detect transitions
+  startWasSeen: false,  // I0 was momentarily true
+};
+
+function checkMilestones(I0, I1raw, Q0, stopPressed) {
+  // M1: START was pressed (I0 momentary pulse)
+  if (I0 && !state.sawStart) {
+    state.sawStart = true;
+    state.startWasSeen = true;
+    setMilestone('m1', true);
+  }
+  // M2: Motor latched ON after START released
+  if (state.startWasSeen && !I0 && Q0 && !state.sawLatch) {
+    state.sawLatch = true;
+    setMilestone('m2', true);
+  }
+  // M3: STOP was pressed while motor was running.
+  // Use (Q0 || state.wasRunning) because Q0 may have already dropped to false
+  // in the same scan cycle that STOP was pressed.
+  if (stopPressed && (Q0 || state.wasRunning) && state.sawLatch && !state.sawStop) {
+    state.sawStop = true;
+    setMilestone('m3', true);
+  }
+  // M4: Motor dropped out
+  if (!Q0 && state.wasRunning && state.sawStop && !state.sawDropout) {
+    state.sawDropout = true;
+    setMilestone('m4', true);
+  }
+  // M5: Full cycle
+  if (state.sawStart && state.sawLatch && state.sawStop && state.sawDropout && !state.sawFullCycle) {
+    state.sawFullCycle = true;
+    setMilestone('m5', true);
+    setTimeout(() => {
+      document.getElementById('complete-banner').classList.add('show');
+    }, 300);
+  }
+  state.wasRunning = Q0;
+}
+
+function setMilestone(id, done) {
+  document.getElementById(id).classList.toggle('done', done);
+  if (done) {
+    const el = document.getElementById(id);
+    announce('Milestone complete: ' + (el ? el.innerText.replace(/^\s+/, '') : id), true);
+  }
+}
+
+// ── Screen-reader announcer ──────────────────────────────────
+function announce(msg, urgent) {
+  const el = document.getElementById(urgent ? 'a11y-alert' : 'a11y-status');
+  if (!el) return;
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = msg; });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN SCAN LOOP — 50 ms
+// ══════════════════════════════════════════════════════════════
+let scanCount = 0;
+
+setInterval(() => {
+  scanCount++;
+  document.getElementById('scan-num').textContent = scanCount;
+
+  // --- Run PLC ---
+  const result = plc.scan(hw);
+  const I0 = plc.inputs.I0;
+  const I1 = plc.inputs.I1;  // NC logic value (true = stop NOT pressed)
+  const Q0 = plc.outputs.Q0;
+  const M0 = plc.memory.M0;
+
+  // --- I/O Table ---
+  setBit('bit-I0', I0,  false);
+  setBit('bit-I1', I1,  true);   // NC column
+  setBit('bit-Q0', Q0,  false);
+  setBit('bit-M0', M0,  false);
+
+  // --- Ladder colouring ---
+  // L+ rail always live
+  wireColour(['rail-L'], true);
+
+  // Wire from L+ → I0
+  wireColour(['r1-wire-a'], true);
+
+  // I0 contact
+  const i0pass = I0;
+  contactColour('r1-i0', i0pass);
+  wireColour(['r1-wire-b'], i0pass);              // wire FROM I0 → junction: only lit when START pressed
+  wireColour(['r1-wire-c'], i0pass || Q0);        // wire FROM junction → I1: lit when junction energised from either path
+
+  // Junction dot
+  const junctionEnergised = i0pass || Q0;
+  document.getElementById('junction-dot').setAttribute('fill', junctionEnergised ? ON : OFF);
+
+  // I1 NC contact
+  const i1pass = I1;   // I1 true = NC in normal state = passing
+  contactColour('r1-i1', junctionEnergised && i1pass);
+  // NC slash colour
+  document.getElementById('r1-i1-slash').setAttribute('stroke', hw.stopPressed ? ON : (junctionEnergised ? '#64748b' : OFF));
+
+  // Wire to coil
+  wireColour(['r1-wire-d'], junctionEnergised && i1pass);
+
+  // Q0 coil
+  coilColour('r1-coil-body', null, Q0);
+  wireColour(['r1-coil-l', 'r1-coil-r'], Q0);
+  wireColour(['r1-wire-rail'], Q0);
+
+  // Seal-in branch
+  wireColour(['seal-wire-down-a', 'seal-wire-left'], Q0);
+  contactColour('r1-q0', Q0);
+  wireColour(['seal-wire-right-h', 'seal-wire-up-b'], Q0);
+
+  // Rung 2
+  wireColour(['r2-wire-a'], true);
+  const r2pass = Q0;
+  ['r2-q0-l','r2-q0-bar1','r2-q0-bar2','r2-q0-r'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('stroke', r2pass ? ON : OFF);
+  });
+  wireColour(['r2-wire-b'], r2pass);
+  coilColour('r2-coil-body', null, M0);
+  wireColour(['r2-coil-l','r2-coil-r','r2-wire-rail'], M0);
+
+  // --- Motor status ---
+  const led   = document.getElementById('motor-led');
+  const label = document.getElementById('motor-state-label');
+  led.className   = 'motor-led' + (Q0 ? ' on' : '');
+  label.className = 'motor-state ' + (Q0 ? 'on' : 'off');
+  label.textContent = Q0 ? 'RUNNING' : 'OFF';
+
+  // --- Conveyor ---
+  animateConveyor(Q0);
+
+  // --- Milestones ---
+  checkMilestones(I0, I1, Q0, hw.stopPressed);
+
+}, 50);
+
+// ── Bit display helper ──
+function setBit(id, value, isNc) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = value ? '1' : '0';
+  el.className = 'io-bit';
+  if (value) el.classList.add('one');
+  // NC: when open (false) show red warning
+  if (isNc && !value) el.classList.add('nc-open');
+}
+
+// Prevent mouse drag off button from keeping it pressed
+document.addEventListener('mouseup',   () => { releaseStart(); releaseStop(); });
+document.addEventListener('touchend',  () => { releaseStart(); releaseStop(); });
+
+// ── Theme toggle ──
+(function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
+</script>
+<script>window.PLC_LEVEL='level1';</script>
+<script src="assess.js"></script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'🟢',v:'',tx:'<strong>Press START first</strong> — watch the M0 seal contact in the ladder close and create a parallel path that bypasses the START button.'},
+    {ic:'🔗',v:'',tx:'<strong>The seal-in contact is the key.</strong> The M0 memory bit in parallel with START keeps the rung energised after you release the button.'},
+    {ic:'⛔',v:'warn',tx:'<strong>STOP is Normally Closed (NC).</strong> The diagonal slash through the symbol means it\'s closed at rest. Pressing STOP opens it and drops the entire rung.'},
+    {ic:'🔒',v:'danger',tx:'<strong>E-Stop safety rule:</strong> E-Stops are always wired NC. If the wire breaks or the button is pressed, the machine stops. The safe state is always OFF — that\'s fail-safe design.'},
+    {ic:'💡',v:'warn',tx:'<strong>Motor won\'t latch?</strong> Check the seal contact is wired in <em>parallel</em> with START, not in series. Series means both must be active simultaneously — not what you want here.'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

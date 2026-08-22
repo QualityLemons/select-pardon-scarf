@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multimeter Lesson — PLeC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" /></noscript>
+  <style>
+    :root {
+      --bg:    #0a0e1a;
+      --surf:  #0d1117;
+      --card:  rgba(15,23,42,.55);
+      --brd:   rgba(30,58,76,.8);
+      --text:  #cbd5e1;
+      --muted: #64748b;
+      --cyan:  #06b6d4; --cyan2: #22d3ee;
+      --blue:  #3b82f6; --blue2: #60a5fa;
+      --amber: #f59e0b; --amber2:#fbbf24;
+      --green: #22c55e;
+      --red:   #ef4444;
+      --purple:#a855f7;
+      --font-d:'Teko','Impact',sans-serif;
+      --font-m:'Share Tech Mono','Courier New',monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background:var(--bg); color:var(--text);
+      font-family:var(--font-m); font-size:14px;
+      min-height:100vh; overflow-x:hidden;
+    }
+    body::before {
+      content:''; position:fixed; inset:0;
+      background-image: linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+      background-size:50px 50px; pointer-events:none; z-index:0;
+    }
+    a { text-decoration:none; color:inherit; }
+
+    /* ── HEADER ── */
+    header {
+      position:sticky; top:0; z-index:40;
+      background:rgba(10,14,26,.9); backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(6,182,212,.15);
+      padding:0 24px; height:56px;
+      display:flex; align-items:center; gap:12px;
+    }
+    .back-link { font-size:11px; color:var(--muted); letter-spacing:1px; transition:color .15s; display:flex; align-items:center; gap:5px; }
+    .back-link:hover { color:var(--cyan); }
+    .header-title { font-family:var(--font-d); font-size:22px; color:#fff; letter-spacing:2px; }
+    .header-title em { font-style:normal; color:var(--purple); }
+    .hbadge { font-size:9px; padding:2px 8px; letter-spacing:2px; background:rgba(168,85,247,.1); color:#c084fc; border:1px solid rgba(168,85,247,.3); }
+    .tool-link { margin-left:auto; font-size:11px; color:var(--cyan); letter-spacing:1px; border:1px solid rgba(6,182,212,.3); padding:4px 12px; transition:background .15s; }
+    .tool-link:hover { background:rgba(6,182,212,.1); }
+
+    /* ── LAYOUT ── */
+    .page { max-width:900px; margin:0 auto; padding:40px 24px 80px; position:relative; z-index:1; }
+
+    /* ── PROGRESS BAR ── */
+    .progress-wrap { position:sticky; top:56px; z-index:30; background:rgba(10,14,26,.95); padding:8px 24px; border-bottom:1px solid rgba(30,41,59,.8); }
+    .progress-inner { max-width:900px; margin:0 auto; display:flex; align-items:center; gap:12px; }
+    .progress-bar { flex:1; height:3px; background:rgba(30,41,59,.8); border-radius:2px; }
+    .progress-fill { height:100%; background:linear-gradient(90deg,var(--cyan),var(--blue)); border-radius:2px; transition:width .3s; width:0%; }
+    .progress-label { font-size:10px; color:var(--muted); letter-spacing:1px; white-space:nowrap; }
+
+    /* ── HERO ── */
+    .lesson-hero {
+      text-align:center; padding:48px 0 40px;
+      border-bottom:1px solid var(--brd);
+      background:linear-gradient(rgba(10,14,26,.9),rgba(10,14,26,.95)),
+        url("data:image/svg+xml,%3Csvg width='60' height='100' viewBox='0 0 60 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l25.98 15v30L30 60 4.02 45V15z' stroke-width='1' stroke='%231e293b' fill='none' opacity='0.5'/%3E%3C/svg%3E");
+    }
+    .lesson-eyebrow { display:inline-flex; align-items:center; gap:6px; font-size:10px; color:#c084fc; letter-spacing:2px; border:1px solid rgba(168,85,247,.3); padding:3px 12px; margin-bottom:20px; }
+    .lesson-h1 { font-family:var(--font-d); font-size:clamp(40px,6vw,72px); color:#fff; letter-spacing:2px; text-transform:uppercase; line-height:1; margin-bottom:14px; }
+    .lesson-h1 span { color:var(--cyan); }
+    .lesson-sub { font-size:13px; color:var(--muted); max-width:560px; margin:0 auto 28px; line-height:1.8; }
+    .pill-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+    .pill { font-size:10px; letter-spacing:1px; padding:3px 10px; border:1px solid; }
+    .pill-blue   { border-color:rgba(59,130,246,.4); color:var(--blue2); background:rgba(59,130,246,.08); }
+    .pill-purple { border-color:rgba(168,85,247,.4); color:#c084fc; background:rgba(168,85,247,.08); }
+    .pill-amber  { border-color:rgba(245,158,11,.4); color:var(--amber2); background:rgba(245,158,11,.08); }
+    .pill-green  { border-color:rgba(34,197,94,.4); color:#86efac; background:rgba(34,197,94,.08); }
+
+    /* ── SECTION ── */
+    .lesson-section { padding:48px 0; border-bottom:1px solid var(--brd); }
+    .lesson-section:last-child { border-bottom:none; }
+    .sec-eyebrow { font-size:9px; color:var(--muted); letter-spacing:3px; text-transform:uppercase; margin-bottom:6px; }
+    .sec-h2 { font-family:var(--font-d); font-size:38px; color:#fff; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+    .sec-h2 em { font-style:normal; }
+    .sec-lead { font-size:13px; color:var(--muted); line-height:1.8; margin-bottom:28px; max-width:700px; }
+
+    /* ── PARTS DIAGRAM ── */
+    .parts-diagram { display:grid; grid-template-columns:200px 1fr; gap:24px; align-items:start; }
+    .meter-visual {
+      background:linear-gradient(165deg,#363636,#1e1e1e); border-radius:14px 14px 24px 24px;
+      border:2px solid #3a3a3a; padding:12px; width:180px;
+      box-shadow:0 16px 40px rgba(0,0,0,.7);
+    }
+    .mv-brand { font-family:var(--font-d); font-size:16px; color:#e0e0e0; letter-spacing:3px; margin-bottom:8px; text-align:center; }
+    .mv-lcd { background:#0d1a0d; border:1px solid #1a3a1a; border-radius:6px; padding:8px 10px; margin-bottom:8px; }
+    .mv-lcd-num { font-family:var(--font-m); font-size:28px; color:#39ff14; text-align:right; letter-spacing:3px; text-shadow:0 0 8px rgba(57,255,20,.4); }
+    .mv-lcd-unit { font-size:9px; color:#2ea; text-align:right; letter-spacing:1px; }
+    .mv-btns { display:flex; gap:4px; margin-bottom:8px; }
+    .mv-btn { flex:1; padding:3px 0; font-size:7px; background:#333; border:1px solid #555; color:#999; border-radius:3px; text-align:center; }
+    .mv-dial { width:90px; height:90px; background:radial-gradient(circle at 40% 35%,#e8aa20,#7a5810); border-radius:50%; border:3px solid #111; margin:0 auto 8px; box-shadow:0 4px 14px rgba(0,0,0,.7); }
+    .mv-sockets { display:flex; justify-content:space-around; }
+    .mv-sock { display:flex; flex-direction:column; align-items:center; gap:2px; }
+    .mv-sock-hole { width:12px; height:12px; border-radius:50%; border:2px solid; }
+    .mv-sock-lbl  { font-size:7px; color:#888; }
+    /* Parts labels */
+    .parts-list { display:flex; flex-direction:column; gap:12px; }
+    .part-item { display:flex; gap:12px; align-items:flex-start; }
+    .part-num { font-family:var(--font-d); font-size:22px; color:var(--cyan); min-width:28px; }
+    .part-name { font-family:var(--font-d); font-size:17px; color:#fff; letter-spacing:1px; }
+    .part-desc { font-size:12px; color:var(--muted); line-height:1.6; }
+
+    /* ── DIAL MODES TABLE ── */
+    .modes-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+    .mode-card { background:var(--card); border:1px solid var(--brd); padding:14px 16px; transition:border-color .2s; }
+    .mode-card:hover { border-color:rgba(6,182,212,.3); }
+    .mode-symbol { font-family:var(--font-d); font-size:28px; margin-bottom:4px; }
+    .mode-name   { font-size:13px; color:#fff; letter-spacing:1px; margin-bottom:4px; }
+    .mode-use    { font-size:11px; color:var(--muted); line-height:1.6; }
+    .mode-range  { font-size:10px; color:var(--cyan); letter-spacing:1px; margin-top:6px; }
+
+    /* ── STEP PROCEDURE ── */
+    .procedure { display:flex; flex-direction:column; gap:0; }
+    .proc-step { display:flex; gap:16px; padding:16px 0; border-bottom:1px solid rgba(30,41,59,.5); }
+    .proc-step:last-child { border-bottom:none; }
+    .step-num {
+      width:36px; height:36px; border-radius:50%; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-d); font-size:18px; font-weight:700;
+      border:2px solid; color:var(--cyan); border-color:var(--cyan);
+      background:rgba(6,182,212,.08);
+    }
+    .step-body { flex:1; }
+    .step-title { font-family:var(--font-d); font-size:18px; color:#fff; letter-spacing:1px; margin-bottom:4px; }
+    .step-desc  { font-size:12px; color:var(--muted); line-height:1.7; }
+    .step-tip   { margin-top:8px; font-size:11px; color:var(--cyan); background:rgba(6,182,212,.06); border-left:2px solid var(--cyan); padding:6px 10px; }
+    .step-warn  { margin-top:8px; font-size:11px; color:var(--amber2); background:rgba(245,158,11,.06); border-left:2px solid var(--amber); padding:6px 10px; }
+    .step-danger{ margin-top:8px; font-size:11px; color:#f87171; background:rgba(239,68,68,.06); border-left:2px solid var(--red); padding:6px 10px; }
+
+    /* ── READING EXAMPLES ── */
+    .reading-examples { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .reading-ex { background:var(--card); border:1px solid var(--brd); padding:14px; text-align:center; }
+    .reading-ex .display {
+      background:#0d1a0d; border:1px solid #1a3a1a; border-radius:4px;
+      font-family:var(--font-m); font-size:26px; color:#39ff14;
+      padding:8px; letter-spacing:3px; text-shadow:0 0 8px rgba(57,255,20,.4);
+      margin-bottom:8px;
+    }
+    .reading-ex .runit { font-size:11px; color:#2ea; letter-spacing:1px; }
+    .reading-ex .rmean { font-size:11px; color:var(--muted); line-height:1.6; margin-top:6px; }
+    .reading-ex.ok   { border-top:2px solid var(--green); }
+    .reading-ex.warn { border-top:2px solid var(--amber); }
+    .reading-ex.bad  { border-top:2px solid var(--red); }
+
+    /* ── SAFETY BOX ── */
+    .safety-box { background:rgba(239,68,68,.06); border:1px solid rgba(239,68,68,.3); padding:20px 24px; }
+    .safety-h { font-family:var(--font-d); font-size:24px; color:#f87171; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:10px; }
+    .safety-rules { display:flex; flex-direction:column; gap:10px; }
+    .safety-rule { display:flex; gap:10px; align-items:flex-start; font-size:12px; color:var(--text); line-height:1.7; }
+    .safety-rule-num { font-family:var(--font-d); font-size:18px; color:#f87171; min-width:24px; }
+
+    /* ── TROUBLESHOOTING TABLE ── */
+    .fault-table { width:100%; border-collapse:collapse; }
+    .fault-table th { text-align:left; font-size:10px; color:var(--muted); letter-spacing:2px; padding:8px 12px; border-bottom:1px solid var(--brd); }
+    .fault-table td { padding:12px 12px; border-bottom:1px solid rgba(30,41,59,.4); font-size:12px; line-height:1.6; vertical-align:top; }
+    .fault-table tr:hover td { background:rgba(6,182,212,.04); }
+    .fault-sym { font-size:11px; font-family:var(--font-d); font-size:14px; }
+    .tag-vdc  { font-size:9px; padding:1px 6px; background:rgba(59,130,246,.1); color:var(--blue2); border:1px solid rgba(59,130,246,.3); }
+    .tag-ohm  { font-size:9px; padding:1px 6px; background:rgba(245,158,11,.1); color:var(--amber2); border:1px solid rgba(245,158,11,.3); }
+    .tag-cont { font-size:9px; padding:1px 6px; background:rgba(34,197,94,.1); color:#86efac; border:1px solid rgba(34,197,94,.3); }
+
+    /* ── QUIZ ── */
+    .quiz { display:flex; flex-direction:column; gap:20px; }
+    .quiz-q { background:var(--card); border:1px solid var(--brd); padding:18px 20px; }
+    .q-text { font-size:13px; color:var(--text); line-height:1.7; margin-bottom:14px; }
+    .q-options { display:flex; flex-direction:column; gap:7px; }
+    .q-opt {
+      padding:9px 14px; background:rgba(30,41,59,.4); border:1px solid rgba(30,41,59,.8);
+      font-size:12px; cursor:pointer; transition:all .15s; text-align:left; color:var(--text);
+      font-family:var(--font-m); display:flex; align-items:center; gap:8px;
+    }
+    .q-opt:hover { border-color:rgba(6,182,212,.4); background:rgba(6,182,212,.06); }
+    .q-opt.correct { border-color:var(--green); background:rgba(34,197,94,.1); color:#86efac; }
+    .q-opt.wrong   { border-color:var(--red); background:rgba(239,68,68,.1); color:#fca5a5; }
+    .q-opt:disabled { cursor:default; }
+    .q-feedback { margin-top:10px; font-size:12px; padding:8px 12px; border-left:2px solid; display:none; line-height:1.6; }
+    .q-feedback.show { display:block; }
+    .q-feedback.ok  { border-color:var(--green); color:#86efac; background:rgba(34,197,94,.06); }
+    .q-feedback.bad { border-color:var(--red); color:#fca5a5; background:rgba(239,68,68,.06); }
+
+    /* ── CTA ── */
+    .lesson-cta {
+      text-align:center; padding:48px 0 0;
+    }
+    .cta-h { font-family:var(--font-d); font-size:36px; color:#fff; letter-spacing:2px; margin-bottom:10px; }
+    .cta-p { font-size:12px; color:var(--muted); margin-bottom:24px; }
+    .cta-btn {
+      display:inline-flex; align-items:center; gap:10px;
+      background:var(--cyan); color:var(--bg);
+      font-family:var(--font-d); font-size:22px; letter-spacing:3px;
+      padding:14px 40px;
+      clip-path:polygon(10px 0,100% 0,100% calc(100% - 10px),calc(100% - 10px) 100%,0 100%,0 10px);
+      transition:background .15s;
+    }
+    .cta-btn:hover { background:#22d3ee; }
+
+    /* ── MISC ── */
+    .divider { height:1px; background:linear-gradient(90deg,transparent,var(--cyan),transparent); margin:0; opacity:.3; }
+    code { font-family:var(--font-m); font-size:11px; background:rgba(6,182,212,.1); color:var(--cyan2); padding:1px 5px; border-radius:2px; }
+    .skip-link { position:absolute;top:-50px;left:16px;z-index:9999;padding:8px 16px;background:var(--cyan);color:var(--bg);font-weight:700;border-radius:0 0 4px 4px;transition:top .15s; }
+    .skip-link:focus { top:0; }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    :focus-visible { outline:2px solid var(--cyan);outline-offset:3px; }
+
+    @media (max-width:680px) {
+      .parts-diagram { grid-template-columns:1fr; }
+      .modes-grid { grid-template-columns:1fr; }
+      .reading-examples { grid-template-columns:repeat(2,1fr); }
+    }
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="back-link">← BACK</a>
+  <div style="width:1px;height:24px;background:rgba(30,41,59,.8);"></div>
+  <div class="header-title">MULTIMETER <em>LESSON</em></div>
+  <span class="hbadge">MODULE</span>
+  <a href="multimeter.html" class="tool-link">🔧 OPEN TOOL →</a>
+</header>
+
+<!-- PROGRESS BAR -->
+<div class="progress-wrap" role="region" aria-label="Reading progress">
+  <div class="progress-inner">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    <div class="progress-label" id="progress-label">0% read</div>
+  </div>
+</div>
+
+<main id="main-content">
+
+<!-- HERO -->
+<div class="lesson-hero">
+  <div class="page" style="padding-top:0;padding-bottom:0;">
+    <div class="lesson-eyebrow">📖 TECHNICAL MODULE // DIAGNOSTIC INSTRUMENTS</div>
+    <h1 class="lesson-h1">How to Use a<br><span>Multimeter</span></h1>
+    <p class="lesson-sub">
+      Every field engineer carries one. Know how to use it and you can diagnose 80% of PLC faults
+      without a laptop. Misuse it on live mains and you won't get a second chance.
+    </p>
+    <div class="pill-row">
+      <span class="pill pill-purple">MODULE</span>
+      <span class="pill pill-blue">DC Voltage</span>
+      <span class="pill pill-amber">Resistance / Continuity</span>
+      <span class="pill pill-green">PLC Fault-Finding</span>
+    </div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════════
+       SECTION 1 — WHAT IS A MULTIMETER
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-intro" aria-labelledby="h-intro">
+    <div class="sec-eyebrow">SECTION 01</div>
+    <h2 class="sec-h2" id="h-intro">WHAT IS A <em style="color:var(--cyan)">MULTIMETER?</em></h2>
+    <p class="sec-lead">
+      A digital multimeter (DMM) is a handheld test instrument that measures electrical quantities —
+      voltage, resistance, and current — using a single device. In PLC environments, it is the primary
+      tool for verifying wiring, diagnosing field device faults, and confirming power supply health.
+    </p>
+    <div class="parts-diagram">
+      <!-- Visual multimeter -->
+      <div class="meter-visual" aria-hidden="true">
+        <div class="mv-brand">DMM-9000</div>
+        <div class="mv-lcd">
+          <div class="mv-lcd-num"> 24.1</div>
+          <div class="mv-lcd-unit">V DC</div>
+        </div>
+        <div class="mv-btns">
+          <div class="mv-btn">HOLD</div>
+          <div class="mv-btn">REL</div>
+          <div class="mv-btn">AUTO</div>
+        </div>
+        <div style="position:relative;">
+          <div class="mv-dial"></div>
+          <div style="position:absolute;top:12px;left:50%;width:2px;height:20px;background:#fff;transform:translateX(-50%) rotate(40deg);transform-origin:bottom center;border-radius:1px;"></div>
+        </div>
+        <div class="mv-sockets">
+          <div class="mv-sock">
+            <div class="mv-sock-hole" style="border-color:#555;background:#111;"></div>
+            <div class="mv-sock-lbl">COM</div>
+          </div>
+          <div class="mv-sock">
+            <div class="mv-sock-hole" style="border-color:#c0392b;background:#2d0a08;"></div>
+            <div class="mv-sock-lbl">VΩmA</div>
+          </div>
+          <div class="mv-sock">
+            <div class="mv-sock-hole" style="border-color:#b73030;background:#2d0a08;"></div>
+            <div class="mv-sock-lbl">10A</div>
+          </div>
+        </div>
+      </div>
+      <!-- Parts list -->
+      <div class="parts-list">
+        <div class="part-item">
+          <div class="part-num">①</div>
+          <div>
+            <div class="part-name">LCD DISPLAY</div>
+            <div class="part-desc">Shows the measured value, unit (V/Ω/mA), and mode indicators. Most DMMs auto-range — they select the best scale automatically.</div>
+          </div>
+        </div>
+        <div class="part-item">
+          <div class="part-num" style="color:var(--amber);">②</div>
+          <div>
+            <div class="part-name">ROTARY DIAL</div>
+            <div class="part-desc">Selects the measurement function — DC voltage, AC voltage, resistance, continuity, or current. Always set this <em>before</em> touching the probes to the circuit.</div>
+          </div>
+        </div>
+        <div class="part-item">
+          <div class="part-num" style="color:var(--red);">③</div>
+          <div>
+            <div class="part-name">RED PROBE (+)</div>
+            <div class="part-desc">Connected to the <code>VΩmA</code> socket. Positive terminal for voltage and current. Goes in the <code>10A</code> socket only when measuring high current.</div>
+          </div>
+        </div>
+        <div class="part-item">
+          <div class="part-num" style="color:#94a3b8;">④</div>
+          <div>
+            <div class="part-name">BLACK PROBE (−)</div>
+            <div class="part-desc">Always connected to the <code>COM</code> socket. This is your reference (ground) terminal for all measurements.</div>
+          </div>
+        </div>
+        <div class="part-item">
+          <div class="part-num" style="color:var(--purple);">⑤</div>
+          <div>
+            <div class="part-name">FUNCTION BUTTONS</div>
+            <div class="part-desc"><code>HOLD</code> freezes the last reading. <code>REL</code> sets a relative baseline. <code>AUTO</code> indicates auto-ranging is active.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 2 — DIAL MODES
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-modes" aria-labelledby="h-modes">
+    <div class="sec-eyebrow">SECTION 02</div>
+    <h2 class="sec-h2" id="h-modes">THE <em style="color:var(--amber)">DIAL</em> — MEASUREMENT MODES</h2>
+    <p class="sec-lead">
+      The rotary dial is the most important control on the meter. Select the wrong mode and you
+      can damage the meter, blow its internal fuse, or — on live mains — put yourself in danger.
+    </p>
+    <div class="modes-grid">
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--blue2);">V⎓</div>
+        <div class="mode-name">DC VOLTAGE (VDC)</div>
+        <div class="mode-use">Measures steady-state direct current voltage. Used for: 24V PLC supply rails, PLC I/O card terminals, sensor signal voltages, battery checks.</div>
+        <div class="mode-range">Typical PLC range: 20V or 200V setting</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--amber2);">V~</div>
+        <div class="mode-name">AC VOLTAGE (VAC)</div>
+        <div class="mode-use">Measures alternating current voltage (sinusoidal). Used for: mains input to PSU (230V/120V AC), transformer secondary outputs. ⚠ Highest risk mode.</div>
+        <div class="mode-range">Use 200V or 750V range for mains</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--green);">Ω</div>
+        <div class="mode-name">RESISTANCE (OHM)</div>
+        <div class="mode-use">Measures resistance in ohms (Ω). Used for: solenoid coil checks (~100–500Ω), wire resistance (near 0Ω), contact resistance, motor winding checks. <strong>ALWAYS de-energise before measuring resistance.</strong></div>
+        <div class="mode-range">PLC ranges: 200Ω, 2kΩ, 200kΩ</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--cyan);">)))</div>
+        <div class="mode-name">CONTINUITY</div>
+        <div class="mode-use">Beeps audibly if resistance &lt; ~50Ω between the two probes. Used for: confirming wire runs, checking fuse integrity, verifying switch contacts. Fastest diagnostic — eyes-free use.</div>
+        <div class="mode-range">Beep = connected, Silence/OL = open</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--purple);">⊢|◁</div>
+        <div class="mode-name">DIODE TEST</div>
+        <div class="mode-use">Measures the forward voltage drop of a diode or LED (typically 0.5–0.7V for silicon). Used for: checking freewheeling diodes across relay coils, LED indicators.</div>
+        <div class="mode-range">Good silicon diode: 0.5–0.7V</div>
+      </div>
+      <div class="mode-card">
+        <div class="mode-symbol" style="color:var(--red);">mA⎓</div>
+        <div class="mode-name">DC CURRENT (ADC)</div>
+        <div class="mode-use">Measures current flow. <strong>Must be connected in SERIES</strong> — the meter becomes part of the circuit. In-line connection only. Use 10A socket for high currents or you will blow the internal fuse.</div>
+        <div class="mode-range">Use 10A socket for currents > 200mA</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 3 — DC VOLTAGE PROCEDURE
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-vdc" aria-labelledby="h-vdc">
+    <div class="sec-eyebrow">SECTION 03</div>
+    <h2 class="sec-h2" id="h-vdc">MEASURING <em style="color:var(--blue2)">DC VOLTAGE</em></h2>
+    <p class="sec-lead">
+      DC voltage measurement is the most common task in a PLC panel. You use it to confirm a 24V supply
+      rail is healthy, verify that an output is driving its load, or check that a sensor is signalling.
+    </p>
+    <div class="procedure">
+      <div class="proc-step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">INSERT PROBES INTO CORRECT SOCKETS</div>
+          <div class="step-desc">Black probe → <code>COM</code> socket. Red probe → <code>VΩmA</code> socket. This never changes for voltage measurement.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">SET DIAL TO V⎓ (DC VOLTAGE)</div>
+          <div class="step-desc">Select the range that is <em>above</em> your expected voltage. For a 24V PLC rail, select the <strong>200V DC</strong> range. If the reading is small, switch to 20V for more precision.</div>
+          <div class="step-tip">💡 If you don't know the voltage, always start on the highest range to protect the meter.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">PLACE BLACK PROBE FIRST</div>
+          <div class="step-desc">Touch the black (−) probe to the <strong>0V common / GND rail</strong> first. This provides your reference point. Keep it stable — don't let it slip.</div>
+          <div class="step-warn">⚠ On live panels, maintain a firm grip. Use test clips if hands-free measurement is needed.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <div class="step-title">TOUCH RED PROBE TO TEST POINT</div>
+          <div class="step-desc">Touch the red (+) probe to the terminal you want to measure — e.g., the +24V supply output, a PLC input terminal, or an output coil terminal.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <div class="step-title">READ THE DISPLAY</div>
+          <div class="step-desc">The meter shows the DC voltage. A negative reading means your probes are reversed — swap them or note that current flows the other way.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <div class="step-title">INTERPRET THE RESULT</div>
+          <div class="step-desc">For a 24V DC system, an acceptable reading is typically <strong>22.5V to 25.5V</strong> (±6%). A reading below 20V under load indicates a weak PSU or excessive voltage drop.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="sec-eyebrow" style="margin-bottom:12px;">READING EXAMPLES — VDC AT PLC OUTPUT TERMINAL</div>
+      <div class="reading-examples">
+        <div class="reading-ex ok">
+          <div class="display"> 23.8</div>
+          <div class="runit">V DC</div>
+          <div class="rmean">✓ Output is energised. Voltage within spec. Load is being driven.</div>
+        </div>
+        <div class="reading-ex warn">
+          <div class="display">  0.0</div>
+          <div class="runit">V DC</div>
+          <div class="rmean">Output de-energised OR PLC output OFF. Check rung logic or blown fuse.</div>
+        </div>
+        <div class="reading-ex bad">
+          <div class="display">OL</div>
+          <div class="runit">V DC</div>
+          <div class="rmean">✗ Overload — voltage exceeds selected range. Switch to 200V range.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 4 — RESISTANCE & CONTINUITY
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-ohm" aria-labelledby="h-ohm">
+    <div class="sec-eyebrow">SECTION 04</div>
+    <h2 class="sec-h2" id="h-ohm">RESISTANCE &amp; <em style="color:var(--green)">CONTINUITY</em></h2>
+    <p class="sec-lead">
+      Resistance measurement and continuity testing let you verify wiring integrity and component
+      health <em>without</em> powering the circuit. They are your go-to tools for diagnosing broken
+      wires, blown fuses, and failed solenoid coils.
+    </p>
+
+    <div class="procedure">
+      <div class="proc-step">
+        <div class="step-num" style="border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08);">1</div>
+        <div class="step-body">
+          <div class="step-title">⚠ DE-ENERGISE THE CIRCUIT FIRST</div>
+          <div class="step-desc">Resistance measurement injects a small test current from the meter's battery. If the circuit is live, the reading will be meaningless and you may damage the meter. <strong>Lock out / tag out before probing.</strong></div>
+          <div class="step-danger">⛔ Never measure resistance on a live circuit. OL display with known-good wiring often means the circuit is still powered.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num" style="border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08);">2</div>
+        <div class="step-body">
+          <div class="step-title">SET DIAL — Ω MODE</div>
+          <div class="step-desc">Select the resistance range. Start with <strong>200Ω</strong> for wires and contacts, <strong>2kΩ</strong> for solenoid coils (~100–500Ω), <strong>200kΩ</strong> for high-impedance checks.</div>
+          <div class="step-tip">💡 For a simple wire continuity check, use <code>)))</code> CONT mode instead — the audible beep means you don't have to watch the display.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num" style="border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08);">3</div>
+        <div class="step-body">
+          <div class="step-title">PLACE PROBES — EITHER WAY AROUND</div>
+          <div class="step-desc">Unlike voltage, resistance is non-polar. Place one probe at each end of the component or wire segment you want to check. Order doesn't matter.</div>
+        </div>
+      </div>
+      <div class="proc-step">
+        <div class="step-num" style="border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08);">4</div>
+        <div class="step-body">
+          <div class="step-title">READ AND INTERPRET</div>
+          <div class="step-desc">
+            <strong>Wire / fuse:</strong> Should read &lt;1Ω (near zero). Higher reading = corrosion, loose crimp, or break.<br>
+            <strong>Solenoid coil:</strong> Typically 50–500Ω depending on voltage rating. OL = open/burnt coil.<br>
+            <strong>E-Stop button (NC):</strong> Should read ~0Ω when released, OL when pressed.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="sec-eyebrow" style="margin-bottom:12px;">CONTINUITY — FAST WIRE TRACING</div>
+      <div class="reading-examples">
+        <div class="reading-ex ok">
+          <div class="display"> •)))</div>
+          <div class="runit">CONT</div>
+          <div class="rmean">✓ BEEP! Wire intact, fuse good, switch contact closed.</div>
+        </div>
+        <div class="reading-ex bad">
+          <div class="display">OL</div>
+          <div class="runit">CONT</div>
+          <div class="rmean">✗ Open circuit — broken wire, blown fuse, or open contact.</div>
+        </div>
+        <div class="reading-ex warn">
+          <div class="display"> 148</div>
+          <div class="runit">Ω</div>
+          <div class="rmean">Solenoid coil resistance — 148Ω is typical for a 24V DC coil. Intact.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 5 — SAFETY
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-safety" aria-labelledby="h-safety">
+    <div class="sec-eyebrow">SECTION 05</div>
+    <h2 class="sec-h2" id="h-safety">⚠ SAFETY <em style="color:var(--red)">RULES</em></h2>
+    <p class="sec-lead">
+      A multimeter used correctly is safe. Used incorrectly near mains voltage, it is lethal.
+      These rules are non-negotiable on any industrial site.
+    </p>
+    <div class="safety-box">
+      <div class="safety-h">⚡ MANDATORY SAFETY RULES</div>
+      <div class="safety-rules">
+        <div class="safety-rule"><div class="safety-rule-num">01</div><div>Check the meter's <strong>CAT rating</strong>. Always use a <strong>CAT III</strong> or <strong>CAT IV</strong> rated meter in industrial panel environments. CAT I meters are for low-energy electronics only.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">02</div><div>Inspect leads before every use. Cracked insulation, exposed copper, or burnt probe tips must be replaced immediately. A broken lead at 230V AC is fatal.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">03</div><div>Set the dial <em>before</em> touching the probes to any circuit. Switching modes with probes live can cause arcing if switching from Ω/CONT to VAC accidentally.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">04</div><div>When measuring AC voltage: insert black probe first, then red. Remove red first, then black. This minimises the risk of accidental contact between the probes.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">05</div><div>Never exceed the meter's input ratings. Most DMMs are rated 1000V DC or 750V AC max, but internal fuses limit current measurement to 10A (fused). Exceeding this blows the fuse — or worse.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">06</div><div>Use one hand only on live measurements. Keep the other hand in your pocket or behind your back. This prevents current from passing across your chest if you accidentally contact live terminals.</div></div>
+        <div class="safety-rule"><div class="safety-rule-num">07</div><div>Wear appropriate PPE — insulated gloves rated for the voltage, safety glasses. On mains-voltage panels, a face shield is required under IEC 61482.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 6 — PLC FAULT-FINDING GUIDE
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-fault" aria-labelledby="h-fault">
+    <div class="sec-eyebrow">SECTION 06</div>
+    <h2 class="sec-h2" id="h-fault">PLC <em style="color:var(--purple)">FAULT-FINDING</em> GUIDE</h2>
+    <p class="sec-lead">
+      Follow this structured approach with the multimeter when a PLC system isn't behaving as expected.
+      Always work from power source to load — confirm each stage is healthy before moving further.
+    </p>
+    <table class="fault-table" >
+      <thead>
+        <tr>
+          <th>SYMPTOM</th>
+          <th>WHERE TO PROBE</th>
+          <th>MODE</th>
+          <th>EXPECTED / ACTION</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="fault-sym">Output coil won't drive load</span></td>
+          <td>PLC Q terminal → 0V common</td>
+          <td><span class="tag-vdc">VDC 20</span></td>
+          <td>Should read ~24V when rung true. 0V = rung is false or output card failed.</td>
+        </tr>
+        <tr>
+          <td>Load coil doesn't energise even with 24V at PLC output</td>
+          <td>Solenoid terminals A–B</td>
+          <td><span class="tag-ohm">Ω 2kΩ</span></td>
+          <td>Expect 50–500Ω. OL = open coil (burnt). 0Ω = short circuit.</td>
+        </tr>
+        <tr>
+          <td>PLC input never goes HIGH despite switch pressed</td>
+          <td>Input terminal → 0V common</td>
+          <td><span class="tag-vdc">VDC 20</span></td>
+          <td>Should read ~24V with switch closed. 0V = wiring fault or switch not passing voltage.</td>
+        </tr>
+        <tr>
+          <td>Field switch suspected faulty</td>
+          <td>Switch terminals (de-energised)</td>
+          <td><span class="tag-cont">CONT</span></td>
+          <td>Beep when pressed (NO) or released (NC). No beep at expected state = switch failed.</td>
+        </tr>
+        <tr>
+          <td>Intermittent faults — suspected bad wire or connector</td>
+          <td>Both ends of each wire</td>
+          <td><span class="tag-cont">CONT</span></td>
+          <td>Beep = good. Wiggle wires during test. If beep drops = intermittent break.</td>
+        </tr>
+        <tr>
+          <td>24V PSU output low (&lt; 22V under load)</td>
+          <td>PSU DC output+ → DC common</td>
+          <td><span class="tag-vdc">VDC 200</span></td>
+          <td>Good: 22.5–25.5V. Low: overloaded supply or failing capacitors — replace PSU.</td>
+        </tr>
+        <tr>
+          <td>No power to panel at all</td>
+          <td>PSU AC input L → N</td>
+          <td><span class="tag-ohm">VAC 200</span></td>
+          <td>Should read 230V (or 120V). 0V = upstream CB tripped or fuse blown. ⚠ Live mains.</td>
+        </tr>
+        <tr>
+          <td>Blown fuse suspected</td>
+          <td>Fuse terminal IN → OUT (de-energised)</td>
+          <td><span class="tag-cont">CONT</span></td>
+          <td>Beep = fuse good. Silence (OL) = fuse blown. Confirm with Ω 200: good fuse &lt; 1Ω.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top:20px; padding:14px 18px; background:rgba(6,182,212,.06); border-left:3px solid var(--cyan);">
+      <div style="font-family:var(--font-d);font-size:18px;color:#fff;letter-spacing:1px;margin-bottom:6px;">THE GOLDEN RULE</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+        When a PLC output is ON (rung logic true, output LED lit on card) but the load doesn't operate:
+        <br><strong style="color:var(--text);">1.</strong> Measure voltage at PLC output terminal → 0V common. Should be ~24V. If 0V, output card is blown.
+        <br><strong style="color:var(--text);">2.</strong> If 24V at terminal, measure voltage at load terminals. If 0V, wire is broken between terminal block and load.
+        <br><strong style="color:var(--text);">3.</strong> If 24V at load terminals but load doesn't work, de-energise and measure coil resistance. Likely open coil.
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════
+       SECTION 7 — QUICK QUIZ
+  ══════════════════════════════════════ -->
+  <section class="lesson-section" id="sec-quiz" aria-labelledby="h-quiz">
+    <div class="sec-eyebrow">SECTION 07</div>
+    <h2 class="sec-h2" id="h-quiz">KNOWLEDGE <em style="color:var(--amber)">CHECK</em></h2>
+    <p class="sec-lead">Five questions to confirm you've got the key concepts locked in.</p>
+
+    <div class="quiz" id="quiz">
+
+      <div class="quiz-q" data-answer="b">
+        <div class="q-text">1. You want to measure the resistance of a solenoid coil. The solenoid is wired into an energised PLC panel. What is the <strong>first</strong> thing you must do?</div>
+        <div class="q-options">
+          <button class="q-opt" data-val="a">Set the dial to Ω 2kΩ and place the probes on the coil terminals.</button>
+          <button class="q-opt" data-val="b">De-energise and isolate the circuit, then lock out / tag out before touching the coil.</button>
+          <button class="q-opt" data-val="c">Switch to VDC 20V to verify voltage before measuring resistance.</button>
+          <button class="q-opt" data-val="d">Check that the red probe is in the VΩmA socket.</button>
+        </div>
+        <div class="q-feedback" id="fb-0"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="c">
+        <div class="q-text">2. A PLC input is showing HIGH (true) in the software, but the engineer suspects the physical wire may be intermittently breaking. Which meter mode is the <strong>fastest</strong> way to confirm wire integrity?</div>
+        <div class="q-options">
+          <button class="q-opt" data-val="a">VAC 200 — measure AC ripple on the wire</button>
+          <button class="q-opt" data-val="b">VDC 20 — measure DC voltage end-to-end</button>
+          <button class="q-opt" data-val="c">CONT — beep test with wire wiggle while circuit is de-energised</button>
+          <button class="q-opt" data-val="d">Ω 200k — measure insulation resistance to earth</button>
+        </div>
+        <div class="q-feedback" id="fb-1"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="a">
+        <div class="q-text">3. You measure 0V DC at a PLC output terminal (Q0.0) while the rung logic shows the output is TRUE (coil energised in software). What does this most likely indicate?</div>
+        <div class="q-options">
+          <button class="q-opt" data-val="a">The output card transistor or relay contact has failed — card fault.</button>
+          <button class="q-opt" data-val="b">The solenoid coil has failed open-circuit.</button>
+          <button class="q-opt" data-val="c">The 24V power supply is failing.</button>
+          <button class="q-opt" data-val="d">The black probe is not on the correct common terminal.</button>
+        </div>
+        <div class="q-feedback" id="fb-2"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="d">
+        <div class="q-text">4. When measuring current with a multimeter, where must the meter be inserted?</div>
+        <div class="q-options">
+          <button class="q-opt" data-val="a">In parallel with the load (same terminals as the load)</button>
+          <button class="q-opt" data-val="b">Across the power supply output terminals</button>
+          <button class="q-opt" data-val="c">Between the PLC output and the 0V common rail, without disconnecting anything</button>
+          <button class="q-opt" data-val="d">In series with the load — the circuit must be broken and the meter inserted in the break</button>
+        </div>
+        <div class="q-feedback" id="fb-3"></div>
+      </div>
+
+      <div class="quiz-q" data-answer="b">
+        <div class="q-text">5. The continuity tester beeps when you place probes across a fuse. What does this tell you?</div>
+        <div class="q-options">
+          <button class="q-opt" data-val="a">The fuse is blown — beep indicates a short circuit through the burnt element.</button>
+          <button class="q-opt" data-val="b">The fuse element is intact — low resistance path exists through the fuse.</button>
+          <button class="q-opt" data-val="c">The circuit is live — beep is a warning from the meter.</button>
+          <button class="q-opt" data-val="d">The meter is in the wrong mode — continuity cannot test fuses.</button>
+        </div>
+        <div class="q-feedback" id="fb-4"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div class="lesson-cta">
+    <div class="cta-h">READY TO PRACTISE?</div>
+    <p class="cta-p">Open the interactive multimeter tool and work through the four measurement scenarios.</p>
+    <a href="multimeter.html" class="cta-btn">OPEN MULTIMETER TOOL →</a>
+  </div>
+
+</div><!-- /page -->
+</main>
+
+<script>
+// ── Progress bar ──
+(function(){
+  const fill  = document.getElementById('progress-fill');
+  const label = document.getElementById('progress-label');
+  function update(){
+    const h   = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = h > 0 ? Math.min(100, Math.round(window.scrollY / h * 100)) : 0;
+    fill.style.width  = pct + '%';
+    label.textContent = pct + '% read';
+  }
+  window.addEventListener('scroll', update, { passive:true });
+  update();
+})();
+
+// ── Quiz ──
+(function(){
+  const explanations = [
+    { b:'Correct. Resistance measurement injects a small current. On a live circuit the result is meaningless and potentially dangerous. De-energise and LOTO before every resistance measurement.' },
+    { c:'Correct. Continuity mode gives an immediate audible beep — ideal for wire tracing with one hand. Wiggling the wire during the test reveals intermittent breaks that voltage measurement might miss.' },
+    { a:'Correct. If software shows the output TRUE but the terminal reads 0V, the output card\'s switching element (transistor or relay contact) has not closed. The card is faulty.' },
+    { d:'Correct. The meter must be in series — the circuit must be broken, one side connected to each probe. Parallel connection will short-circuit through the meter\'s low internal resistance and likely blow the internal fuse.' },
+    { b:'Correct. A beep on continuity mode means the resistance between the probes is below ~50Ω — the fuse element is conducting normally. OL (no beep) = fuse has blown.' },
+  ];
+
+  document.querySelectorAll('.quiz-q').forEach((qEl, qi) => {
+    const answer = qEl.dataset.answer;
+    const fb = document.getElementById('fb-' + qi);
+    qEl.querySelectorAll('.q-opt').forEach(btn => {
+      btn.addEventListener('click', function(){
+        if (qEl.dataset.answered) return;
+        qEl.dataset.answered = '1';
+        const val = btn.dataset.val;
+        const correct = val === answer;
+        btn.classList.add(correct ? 'correct' : 'wrong');
+        if (!correct) {
+          const correctBtn = qEl.querySelector(`[data-val="${answer}"]`);
+          if (correctBtn) correctBtn.classList.add('correct');
+        }
+        qEl.querySelectorAll('.q-opt').forEach(b => b.disabled = true);
+        const exp = explanations[qi][answer];
+        fb.textContent = exp || (correct ? 'Correct!' : 'Incorrect — the correct answer is highlighted above.');
+        fb.className   = 'q-feedback show ' + (correct ? 'ok' : 'bad');
+      });
+    });
+  });
+})();
+</script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'📖',v:'',tx:'<strong>Read Section 01 fully first.</strong> Understand the parts before memorising dial positions. A half-understood meter on a live panel is more dangerous than no meter at all.'},
+    {ic:'🔄',v:'danger',tx:'<strong>Set the dial BEFORE touching probes to any circuit.</strong> Switching modes while probes are live — especially from Ω/CONT to VAC — can cause arcing and destroy the meter.'},
+    {ic:'⚠️',v:'danger',tx:'<strong>Safety Section 05 is not optional.</strong> CAT rating, lead inspection, one-hand rule — read these before using a real meter on any live panel. This is the section that keeps you alive.'},
+    {ic:'⬛',v:'warn',tx:'<strong>Black probe to COM first.</strong> For voltage measurement, place the black (−) probe before the red. This minimises the risk of accidental contact between live probes.'},
+    {ic:'📋',v:'good',tx:'<strong>The fault-finding table in Section 06</strong> is your cheat sheet in the field. 8 common PLC fault scenarios with the correct mode and expected reading for each one.'},
+    {ic:'🧠',v:'',tx:'<strong>On the quiz:</strong> if you\'re unsure, go back and re-read the relevant section. Every answer is explicitly stated in the lesson — this is recall, not guesswork.'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

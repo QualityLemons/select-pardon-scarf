@@ -18,9 +18,21 @@ lib/
 lib64/
 
 # ── Databases ─────────────────────────────────────────────────────────────────
+# Production data lives in PostgreSQL (DATABASE_URL). Any *.db/*.sqlite3 files
+# below are local-dev-only artifacts (or legacy pre-Django scripts) and must
+# never be relied on or committed as a source of truth.
 *.sqlite3
+*.sqlite
+*.sqlite3-journal
+*.sqlite-journal
+*.sqlite3-shm
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite-wal
 *.db
-!plec.db
+*.db-journal
+*.db-shm
+*.db-wal
 
 # ── Environment / secrets ─────────────────────────────────────────────────────
 .env

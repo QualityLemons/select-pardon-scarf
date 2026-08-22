@@ -297,6 +297,100 @@
     .donate-note a { color: var(--muted); text-decoration: underline; }
     .donate-note a:hover { color: var(--text); }
 
+    .payment-panel {
+      width: 100%;
+      padding: 24px;
+      background: rgba(10,14,26,.75);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+    .payment-title {
+      font-family: var(--font-d);
+      font-size: 20px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .payment-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .amount-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .amount-option {
+      padding: 10px 8px;
+      color: var(--text);
+      background: rgba(30,58,76,.3);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-family: var(--font-m);
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .amount-option:hover,
+    .amount-option.selected {
+      color: var(--cyan2);
+      border-color: var(--cyan);
+      background: rgba(6,182,212,.1);
+    }
+    .custom-amount {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0 10px;
+      margin-bottom: 18px;
+    }
+    .custom-amount:focus-within { border-color: var(--cyan); }
+    .custom-amount input {
+      width: 100%;
+      padding: 10px 0;
+      color: var(--text);
+      background: transparent;
+      border: 0;
+      outline: 0;
+      font: inherit;
+    }
+    .payment-element {
+      margin: 18px 0;
+      padding: 16px;
+      background: #111827;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+    .payment-status {
+      min-height: 20px;
+      margin-top: 12px;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    .payment-status.error { color: #fca5a5; }
+    .payment-status.success { color: #6ee7b7; }
+    .payment-unavailable {
+      width: 100%;
+      padding: 16px;
+      color: var(--amber2);
+      background: rgba(245,158,11,.08);
+      border: 1px solid rgba(245,158,11,.35);
+      font-size: 11px;
+      line-height: 1.7;
+      text-align: center;
+    }
+    .payment-panel[hidden],
+    .payment-element[hidden],
+    .payment-unavailable[hidden] { display: none; }
+
     /* ── Return link ── */
     .return-link {
       display: inline-flex; align-items: center; gap: 8px;
@@ -428,17 +522,41 @@
   </div>
 
   <div class="donate-wrap">
-    <a class="btn-donate"
-       href="https://buy.stripe.com/test_5kQdR111x4otddjcPO6J200"
-       target="_blank"
-       rel="noopener noreferrer"
-       aria-label="Support PLeC — opens donation page in new tab">
-      <span class="btn-donate-icon" aria-hidden="true">♡</span>
-      Support This Project
-    </a>
+    <div class="payment-panel" id="donation-panel"
+         data-publishable-key="{{ stripe_publishable_key|default:'' }}">
+      <div class="payment-title">Support PLeC from this page</div>
+      <form id="donation-form">
+        {% csrf_token %}
+        <label class="payment-label" for="custom-amount">Choose an amount</label>
+        <div class="amount-options" role="group" aria-label="Suggested donation amounts">
+          <button class="amount-option" type="button" data-amount="300">£3</button>
+          <button class="amount-option selected" type="button" data-amount="500">£5</button>
+          <button class="amount-option" type="button" data-amount="1000">£10</button>
+          <button class="amount-option" type="button" data-amount="2000">£20</button>
+        </div>
+        <label class="custom-amount">
+          <span>£</span>
+          <input id="custom-amount" type="number" min="1" max="1000" step="0.01"
+                 placeholder="Other amount" inputmode="decimal">
+        </label>
+        <button class="btn-donate" id="begin-payment" type="submit">
+          <span class="btn-donate-icon" aria-hidden="true">♡</span>
+          Continue to payment
+        </button>
+        <div class="payment-panel" id="card-panel" hidden>
+          <div class="payment-label">Card details</div>
+          <div class="payment-element" id="payment-element"></div>
+          <button class="btn-donate" id="pay-button" type="button">Donate £5</button>
+        </div>
+        <div class="payment-status" id="payment-status" role="status" aria-live="polite"></div>
+      </form>
+    </div>
+    <div class="payment-unavailable" id="payment-unavailable" hidden>
+      Online donations are temporarily unavailable. Please try again later.
+    </div>
     <p class="donate-note">
-      Secure payment via Stripe. Any amount is appreciated and goes directly toward
-      hosting and future development.<br>
+      Secure card payment processed by Stripe without leaving PLeC. Any amount is appreciated
+      and goes directly toward hosting and future development.<br>
       <a href="/">No thanks — return to missions</a>
     </p>
   </div>
@@ -449,11 +567,140 @@
 
 </main>
 
+<script src="https://js.stripe.com/v3/"></script>
 <script>
 (function () {
   /* Restore theme preference */
   var t = localStorage.getItem('plc-theme') || 'dark';
   document.documentElement.dataset.theme = t;
+
+  var panel = document.getElementById('donation-panel');
+  var unavailable = document.getElementById('payment-unavailable');
+  var form = document.getElementById('donation-form');
+  var cardPanel = document.getElementById('card-panel');
+  var paymentElementHost = document.getElementById('payment-element');
+  var beginButton = document.getElementById('begin-payment');
+  var payButton = document.getElementById('pay-button');
+  var status = document.getElementById('payment-status');
+  var customAmount = document.getElementById('custom-amount');
+  var selectedAmount = 500;
+  var stripe;
+  var elements;
+
+  function getCookie(name) {
+    var match = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return match ? decodeURIComponent(match.pop()) : '';
+  }
+
+  function setStatus(message, kind) {
+    status.textContent = message;
+    status.className = 'payment-status' + (kind ? ' ' + kind : '');
+  }
+
+  function pounds() {
+    var custom = parseFloat(customAmount.value);
+    return customAmount.value.trim() ? Math.round(custom * 100) : selectedAmount;
+  }
+
+  document.querySelectorAll('.amount-option').forEach(function (button) {
+    button.addEventListener('click', function () {
+      document.querySelectorAll('.amount-option').forEach(function (item) {
+        item.classList.remove('selected');
+      });
+      button.classList.add('selected');
+      selectedAmount = Number(button.dataset.amount);
+      customAmount.value = '';
+    });
+  });
+
+  customAmount.addEventListener('input', function () {
+    document.querySelectorAll('.amount-option').forEach(function (item) {
+      item.classList.remove('selected');
+    });
+  });
+
+  if (!panel.dataset.publishableKey || typeof Stripe === 'undefined') {
+    panel.hidden = true;
+    unavailable.hidden = false;
+    return;
+  }
+
+  stripe = Stripe(panel.dataset.publishableKey);
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    var amount = pounds();
+    if (!Number.isInteger(amount) || amount < 100 || amount > 100000) {
+      setStatus('Choose an amount between £1 and £1,000.', 'error');
+      return;
+    }
+
+    beginButton.disabled = true;
+    setStatus('Preparing secure card payment…');
+    fetch('/api/donations/payment-intent/', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken')
+      },
+      body: JSON.stringify({ amount: amount })
+    })
+      .then(function (response) {
+        return response.json().then(function (data) {
+          if (!response.ok) throw new Error(data.error || 'Unable to start payment.');
+          return data;
+        });
+      })
+      .then(function (data) {
+        elements = stripe.elements({
+          clientSecret: data.client_secret,
+          appearance: {
+            theme: 'night',
+            variables: {
+              colorPrimary: '#10b981',
+              colorBackground: '#111827',
+              colorText: '#cbd5e1',
+              colorDanger: '#fca5a5',
+              fontFamily: 'Share Tech Mono, Courier New, monospace'
+            }
+          }
+        });
+        elements.create('payment').mount(paymentElementHost);
+        cardPanel.hidden = false;
+        beginButton.hidden = true;
+        payButton.textContent = 'Donate £' + (amount / 100).toFixed(2);
+        setStatus('Enter your card details, then confirm your donation.');
+      })
+      .catch(function (error) {
+        beginButton.disabled = false;
+        setStatus(error.message, 'error');
+      });
+  });
+
+  payButton.addEventListener('click', function () {
+    payButton.disabled = true;
+    setStatus('Confirming your donation securely…');
+    stripe.confirmPayment({
+      elements: elements,
+      redirect: 'if_required'
+    }).then(function (result) {
+      if (result.error) {
+        payButton.disabled = false;
+        setStatus(result.error.message || 'The payment could not be completed.', 'error');
+        return;
+      }
+      if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+        cardPanel.hidden = true;
+        setStatus('Thank you — your donation was received successfully.', 'success');
+      } else {
+        setStatus('Your payment has been submitted. Thank you for supporting PLeC.', 'success');
+      }
+    }).catch(function () {
+      payButton.disabled = false;
+      setStatus('The payment could not be completed. Please try again.', 'error');
+    });
+  });
 }());
 </script>
 </body>

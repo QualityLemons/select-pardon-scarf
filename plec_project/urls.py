@@ -62,6 +62,7 @@ urlpatterns = [
 
     path('profile/', ResultHistoryView.as_view(), name='profile'),
     path('profile/edit/', account_views.EditProfileView.as_view(), name='profile_edit'),
+    path('api/donations/payment-intent/', account_views.DonationPaymentIntentView.as_view(), name='donation_payment_intent'),
     path('reflect/', ReflectionCreateView.as_view(), name='reflect'),
     path('reflect/all/', ReflectionListView.as_view(), name='reflect_list'),
     path('reflect/<int:pk>/edit/', ReflectionUpdateView.as_view(), name='reflect_edit'),
@@ -69,7 +70,7 @@ urlpatterns = [
     path('api/', include('apps.assessment.urls')),
 
     # Donation page — login required; shown after completing the final mission
-    path('donate/', LoginRequiredTemplateView.as_view(template_name='challenge/donate.html'), name='donate'),
+    path('donate/', account_views.DonateView.as_view(), name='donate'),
 
     # Game home
     path('', TemplateView.as_view(template_name='challenge/index.html'), name='home'),

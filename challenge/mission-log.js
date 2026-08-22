@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   MISSION LOG — shared progress journal
+   MISSION LOG — auth-aware learning journal
    challenge/mission-log.js
 ════════════════════════════════════════════════ */
 (function () {
@@ -10,7 +10,7 @@
 
   var LEVEL    = panel.dataset.level || 'unknown';
   var HINT     = panel.dataset.hint  || '';
-  var SK       = 'plc-ml-' + LEVEL;
+  var LS_KEY   = 'plc-ml-' + LEVEL;   // localStorage fallback key
 
   var toggle    = document.getElementById('ml-toggle');
   var body      = document.getElementById('ml-body');
@@ -22,21 +22,40 @@
   var entriesEl = document.getElementById('ml-entries');
   var countEl   = document.getElementById('ml-count');
 
-  var rating = 0;
+  var rating    = 0;
+  var authState = null;   // null = unknown, { authenticated, email }
 
-  /* ── storage helpers ── */
-  function load() {
-    try { return JSON.parse(localStorage.getItem(SK) || '[]'); }
+  /* ── sign-in prompt banner (injected once inside ml-body) ── */
+  var signInBanner = null;
+  function getOrCreateBanner() {
+    if (signInBanner) return signInBanner;
+    signInBanner = document.createElement('div');
+    signInBanner.className = 'ml-signin-prompt';
+    signInBanner.innerHTML =
+      '<span class="ml-signin-icon" aria-hidden="true">🔒</span>' +
+      '<span class="ml-signin-text">' +
+        'Entries are saved to this browser only. ' +
+        '<a href="/login/" class="ml-signin-link">Sign in</a> or ' +
+        '<a href="/register/" class="ml-signin-link">create an account</a> ' +
+        'to save your log to your record.' +
+      '</span>';
+    body.insertBefore(signInBanner, body.firstChild);
+    return signInBanner;
+  }
+
+  /* ── localStorage helpers (guest fallback) ── */
+  function lsLoad() {
+    try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); }
     catch (e) { return []; }
   }
-  function persist(entries) {
-    try { localStorage.setItem(SK, JSON.stringify(entries)); }
+  function lsPersist(entries) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(entries)); }
     catch (e) {}
   }
 
   /* ── formatting ── */
-  function fmtDate(ts) {
-    var d = new Date(ts);
+  function fmtDate(val) {
+    var d = (typeof val === 'number') ? new Date(val) : new Date(val + (val.indexOf('Z') === -1 ? 'Z' : ''));
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) +
       '  ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   }
@@ -47,10 +66,8 @@
   }
   function esc(s) {
     return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
   /* ── toast ── */
@@ -69,38 +86,79 @@
     setTimeout(function () { t.classList.remove('show'); }, 1800);
   }
 
-  /* ── update badge count ── */
-  function updateCount() {
-    var n = load().length;
+  /* ── render a single entry element ── */
+  function makeEntryEl(entryId, skill, notes, ratingVal, dateVal, isServer) {
+    var el = document.createElement('article');
+    el.className = 'ml-entry';
+    el.dataset.entryId  = entryId;
+    el.dataset.isServer = isServer ? '1' : '0';
+    el.innerHTML =
+      '<div class="ml-entry-top">' +
+        '<span class="ml-entry-ts">' + fmtDate(dateVal) + '</span>' +
+        (skill ? '<span class="ml-entry-skill">' + esc(skill) + '</span>' : '') +
+        '<span class="ml-entry-stars" aria-label="Difficulty: ' + ratingVal + ' out of 5">' +
+          starStr(ratingVal) +
+        '</span>' +
+      '</div>' +
+      '<div class="ml-entry-notes">' + esc(notes) + '</div>' +
+      '<button class="ml-entry-del" data-entry-id="' + esc(String(entryId)) + '" type="button" ' +
+        'aria-label="Delete this log entry">✕</button>';
+    return el;
+  }
+
+  /* ── count badge ── */
+  function updateCount(n) {
     countEl.textContent = n + (n === 1 ? ' ENTRY' : ' ENTRIES');
   }
 
-  /* ── render entry list ── */
-  function render() {
-    updateCount();
-    var entries = load();
+  /* ── SERVER render ── */
+  function renderServerEntries(entries) {
+    updateCount(entries.length);
+    entriesEl.innerHTML = '';
     if (!entries.length) {
       entriesEl.innerHTML = '<div class="ml-empty">NO LOG ENTRIES YET — COMPLETE THE CHALLENGE AND RECORD WHAT YOU LEARNED</div>';
       return;
     }
-    entriesEl.innerHTML = '';
     for (var i = entries.length - 1; i >= 0; i--) {
       var e = entries[i];
-      var el = document.createElement('article');
-      el.className = 'ml-entry';
-      el.innerHTML =
-        '<div class="ml-entry-top">' +
-          '<span class="ml-entry-ts">' + fmtDate(e.ts) + '</span>' +
-          (e.skill ? '<span class="ml-entry-skill">' + esc(e.skill) + '</span>' : '') +
-          '<span class="ml-entry-stars" aria-label="Difficulty: ' + e.rating + ' out of 5">' +
-            starStr(e.rating) +
-          '</span>' +
-        '</div>' +
-        '<div class="ml-entry-notes">' + esc(e.notes) + '</div>' +
-        '<button class="ml-entry-del" data-idx="' + i + '" type="button" ' +
-          'aria-label="Delete this log entry">✕</button>';
-      entriesEl.appendChild(el);
+      entriesEl.appendChild(makeEntryEl(e.id, e.skill, e.notes, e.rating, e.created_at, true));
     }
+  }
+
+  /* ── GUEST render ── */
+  function renderGuestEntries() {
+    getOrCreateBanner();
+    var entries = lsLoad();
+    updateCount(entries.length);
+    entriesEl.innerHTML = '';
+    if (!entries.length) {
+      entriesEl.innerHTML = '<div class="ml-empty">NO LOG ENTRIES YET — COMPLETE THE CHALLENGE AND RECORD WHAT YOU LEARNED</div>';
+      return;
+    }
+    for (var i = entries.length - 1; i >= 0; i--) {
+      var e = entries[i];
+      entriesEl.appendChild(makeEntryEl(i, e.skill, e.notes, e.rating, e.ts, false));
+    }
+  }
+
+  /* ── load and render based on auth state ── */
+  function loadAndRender() {
+    if (authState && authState.authenticated) {
+      fetch('/api/mission-log/' + LEVEL + '/', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : { entries: [] }; })
+        .then(function (data) { renderServerEntries(data.entries || []); })
+        .catch(function () { renderServerEntries([]); });
+    } else {
+      renderGuestEntries();
+    }
+  }
+
+  /* ── check auth, then init ── */
+  function initAuth(cb) {
+    fetch('/api/me', { credentials: 'same-origin' })
+      .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+      .then(function (me) { authState = me; cb(); })
+      .catch(function () { authState = { authenticated: false }; cb(); });
   }
 
   /* ── toggle open/close ── */
@@ -109,11 +167,27 @@
     toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     body.hidden = !isOpen;
     if (isOpen) {
-      if (!skillIn.value && HINT) { skillIn.placeholder = HINT; }
-      render();
+      if (!skillIn.value && HINT) skillIn.placeholder = HINT;
+      if (authState === null) {
+        initAuth(loadAndRender);
+      } else {
+        loadAndRender();
+      }
     }
   });
   body.hidden = true;
+
+  /* initialise count badge without opening the panel */
+  initAuth(function () {
+    if (authState && authState.authenticated) {
+      fetch('/api/mission-log/' + LEVEL + '/', { credentials: 'same-origin' })
+        .then(function (r) { return r.ok ? r.json() : { entries: [] }; })
+        .then(function (data) { updateCount((data.entries || []).length); })
+        .catch(function () { updateCount(0); });
+    } else {
+      updateCount(lsLoad().length);
+    }
+  });
 
   /* ── star rating ── */
   var starBtns = starsEl.querySelectorAll('.ml-star');
@@ -146,43 +220,76 @@
       setTimeout(function () { notesIn.style.borderColor = ''; }, 1400);
       return;
     }
-    var entries = load();
-    entries.push({
-      ts:     Date.now(),
-      skill:  skillIn.value.trim(),
-      rating: rating,
-      notes:  notes
-    });
-    persist(entries);
-    notesIn.value = '';
-    skillIn.value = '';
-    rating = 0;
-    Array.prototype.forEach.call(starBtns, function (s) { s.classList.remove('lit'); });
-    render();
-    toast('ENTRY LOGGED ✓');
+
+    if (authState && authState.authenticated) {
+      /* ── save to server ── */
+      saveBtn.disabled = true;
+      fetch('/api/mission-log/' + LEVEL + '/', {
+        method:  'POST',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ skill: skillIn.value.trim(), notes: notes, rating: rating })
+      })
+        .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+        .then(function () {
+          notesIn.value = '';
+          skillIn.value = '';
+          rating = 0;
+          Array.prototype.forEach.call(starBtns, function (s) { s.classList.remove('lit'); });
+          loadAndRender();
+          toast('ENTRY SAVED TO YOUR ACCOUNT ✓');
+        })
+        .catch(function () { toast('Could not save — please try again.'); })
+        .finally(function () { saveBtn.disabled = false; });
+    } else {
+      /* ── guest: localStorage ── */
+      var entries = lsLoad();
+      entries.push({ ts: Date.now(), skill: skillIn.value.trim(), rating: rating, notes: notes });
+      lsPersist(entries);
+      notesIn.value = '';
+      skillIn.value = '';
+      rating = 0;
+      Array.prototype.forEach.call(starBtns, function (s) { s.classList.remove('lit'); });
+      renderGuestEntries();
+      toast('ENTRY LOGGED LOCALLY — sign in to save to your account ✓');
+    }
   });
 
-  /* ── delete single entry ── */
+  /* ── delete entry ── */
   entriesEl.addEventListener('click', function (e) {
     var btn = e.target.closest ? e.target.closest('.ml-entry-del') : null;
     if (!btn) return;
-    var idx = parseInt(btn.dataset.idx, 10);
-    var entries = load();
-    entries.splice(idx, 1);
-    persist(entries);
-    render();
+    var entryId = btn.getAttribute('data-entry-id');
+    var articleEl = btn.parentNode;
+
+    if (authState && authState.authenticated) {
+      fetch('/api/mission-log/' + LEVEL + '/' + entryId + '/', {
+        method: 'DELETE',
+        credentials: 'same-origin',
+      })
+        .then(function () { loadAndRender(); })
+        .catch(function () { toast('Could not delete — please try again.'); });
+    } else {
+      var idx = parseInt(entryId, 10);
+      var entries = lsLoad();
+      entries.splice(idx, 1);
+      lsPersist(entries);
+      renderGuestEntries();
+    }
   });
 
-  /* ── clear all ── */
+  /* ── clear all (guest only — server uses per-entry delete) ── */
   clearBtn.addEventListener('click', function () {
-    if (!load().length) return;
+    if (authState && authState.authenticated) {
+      /* hide the button for server-backed mode — no bulk delete API */
+      clearBtn.style.display = 'none';
+      return;
+    }
+    if (!lsLoad().length) return;
     if (!confirm('Clear all mission log entries for this level? This cannot be undone.')) return;
-    localStorage.removeItem(SK);
-    render();
+    localStorage.removeItem(LS_KEY);
+    renderGuestEntries();
     toast('LOG CLEARED');
   });
-
-  /* ── init badge count on page load ── */
-  updateCount();
 
 }());

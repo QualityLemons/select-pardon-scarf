@@ -1,3 +1,10 @@
+# LEGACY / DEV-ONLY: this hand-rolled http.server backend predates the
+# Django migration and is superseded by plec_project (Django). It only ever
+# talks to a standalone local SQLite file (plec.db) and is completely
+# disconnected from the production database, which is PostgreSQL configured
+# via the DATABASE_URL environment variable (see plec_project/settings.py).
+# Running this script does not read from, write to, or otherwise affect
+# production data. Kept for historical reference only — do not deploy this.
 import http.server
 import socketserver
 import os

@@ -2,6 +2,15 @@
 create_db.py — Creates and seeds plec.db (SQLite) from project data.
 Run once: python create_db.py
 Safe to re-run: drops and recreates all tables each time.
+
+LEGACY / DEV-ONLY: this script predates the Django migration and only ever
+builds a standalone local SQLite file (plec.db). It is unrelated to the
+production database, which is PostgreSQL configured via the DATABASE_URL
+environment variable (see plec_project/settings.py). Running this script
+does not read from, write to, or otherwise affect production data. The
+Django-native equivalent that seeds the real (Postgres) database is the
+`load_seed_data` management command:
+    python manage.py load_seed_data
 """
 
 import sqlite3

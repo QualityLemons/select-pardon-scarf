@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Multimeter — PLeC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" media="print" onload="this.media='all'"
+        href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Teko:wght@500;600;700&display=swap" /></noscript>
+  <style>
+    :root {
+      --bg:     #0a0e1a;
+      --surf:   #0d1117;
+      --card:   rgba(15,23,42,.6);
+      --border: rgba(30,58,76,.8);
+      --text:   #cbd5e1;
+      --muted:  #64748b;
+      --cyan:   #06b6d4;
+      --blue:   #3b82f6;
+      --amber:  #f59e0b;
+      --green:  #22c55e;
+      --red:    #ef4444;
+      --purple: #a855f7;
+      --font-d: 'Teko', 'Impact', sans-serif;
+      --font-m: 'Share Tech Mono', 'Courier New', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: var(--font-m); font-size: 13px;
+      min-height: 100vh; display: flex; flex-direction: column;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(59,130,246,.04) 1px,transparent 1px),
+                        linear-gradient(90deg,rgba(59,130,246,.04) 1px,transparent 1px);
+      background-size: 50px 50px; pointer-events: none; z-index: 0;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0; z-index: 40;
+      background: rgba(10,14,26,.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(6,182,212,.15);
+      padding: 0 20px; height: 56px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .back-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--muted); letter-spacing: 1px;
+      transition: color .15s;
+    }
+    .back-link:hover { color: var(--cyan); }
+    .header-title {
+      font-family: var(--font-d); font-size: 22px; color: #fff; letter-spacing: 2px;
+    }
+    .header-title em { font-style: normal; color: var(--cyan); }
+    .header-badge {
+      font-size: 9px; font-family: var(--font-m); letter-spacing: 2px;
+      padding: 2px 8px; background: rgba(245,158,11,.1);
+      color: var(--amber); border: 1px solid rgba(245,158,11,.3);
+    }
+    .lesson-link {
+      margin-left: auto; font-size: 11px; color: var(--cyan); letter-spacing: 1px;
+      display: flex; align-items: center; gap: 5px;
+      border: 1px solid rgba(6,182,212,.3); padding: 4px 10px;
+      transition: background .15s;
+    }
+    .lesson-link:hover { background: rgba(6,182,212,.1); }
+
+    /* ── MAIN LAYOUT ── */
+    .main {
+      flex: 1; display: flex; gap: 0;
+      position: relative; z-index: 1;
+    }
+
+    /* ═══════════════════════════════════
+       MULTIMETER BODY (left column)
+    ═══════════════════════════════════ */
+    .meter-col {
+      width: 300px; flex-shrink: 0;
+      background: linear-gradient(to bottom, #1a1d27, #0d1117);
+      border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 16px 24px; gap: 0;
+      position: sticky; top: 56px; height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    /* Multimeter body */
+    .meter-body {
+      width: 240px;
+      background: linear-gradient(165deg, #363636 0%, #1e1e1e 100%);
+      border-radius: 16px 16px 30px 30px;
+      border: 2px solid #3a3a3a;
+      box-shadow: 0 20px 60px rgba(0,0,0,.8), inset 0 1px 0 rgba(255,255,255,.08);
+      padding: 14px 14px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    /* Top brand strip */
+    .meter-brand {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 4px 6px;
+    }
+    .meter-brand-name { font-family: var(--font-d); font-size: 18px; color: #e0e0e0; letter-spacing: 4px; }
+    .meter-brand-model { font-size: 10px; color: #888; letter-spacing: 1px; }
+
+    /* LCD Display */
+    .meter-lcd {
+      background: linear-gradient(to bottom, #0d1a0d, #081208);
+      border: 2px solid #1a3a1a;
+      border-radius: 8px;
+      padding: 10px 14px 10px;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,.6);
+    }
+    .lcd-top {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 4px;
+    }
+    .lcd-mode { font-size: 10px; color: #4a9; letter-spacing: 2px; }
+    .lcd-indicators { display: flex; gap: 6px; }
+    .lcd-ind {
+      font-size: 9px; color: #2a5; opacity: .4;
+      transition: opacity .2s;
+    }
+    .lcd-ind.active { opacity: 1; color: #6cf76c; }
+    .lcd-main {
+      font-family: var(--font-m);
+      font-size: 52px; color: #39ff14;
+      text-align: right; letter-spacing: 4px; line-height: 1;
+      text-shadow: 0 0 12px rgba(57,255,20,.4), 0 0 30px rgba(57,255,20,.15);
+      min-height: 58px; display: flex; align-items: center; justify-content: flex-end;
+    }
+    .lcd-unit {
+      font-size: 14px; color: #2ea; letter-spacing: 2px;
+      text-align: right; margin-top: 4px; min-height: 18px;
+    }
+    .lcd-status {
+      font-size: 10px; color: #4a9; letter-spacing: 1px;
+      text-align: center; margin-top: 5px; min-height: 14px;
+      border-top: 1px solid rgba(57,255,20,.1); padding-top: 4px;
+    }
+
+    /* Meter function buttons */
+    .meter-btns {
+      display: flex; gap: 6px; justify-content: center;
+    }
+    .meter-btn {
+      flex: 1; padding: 5px 0; font-size: 10px; letter-spacing: 1px;
+      background: linear-gradient(to bottom, #444, #2a2a2a);
+      border: 1px solid #555; border-radius: 4px; color: #bbb;
+      cursor: pointer; transition: background .1s, color .1s; font-family: var(--font-m);
+    }
+    .meter-btn:hover { background: linear-gradient(to bottom, #555, #383838); color: #fff; }
+    .meter-btn.active { background: linear-gradient(to bottom, #1a3a2a, #0d1a15); color: #6cf76c; border-color: #2a5; }
+
+    /* Rotary Dial */
+    .dial-area { position: relative; width: 210px; height: 210px; margin: 4px 0; }
+    .dial-surround {
+      position: absolute; inset: 8px;
+      background: radial-gradient(circle at 40% 35%, #555, #1a1a1a);
+      border-radius: 50%; border: 4px solid #111;
+      box-shadow: 0 6px 24px rgba(0,0,0,.8), inset 0 2px 4px rgba(255,255,255,.08);
+    }
+    .dial-knob {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 80px; height: 80px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #e8aa20, #7a5810);
+      border: 4px solid #1a1a1a;
+      box-shadow: 0 4px 14px rgba(0,0,0,.7);
+      cursor: pointer; z-index: 3;
+    }
+    .dial-indicator {
+      position: absolute; top: 50%; left: 50%;
+      width: 3px; height: 36px;
+      background: #fff;
+      transform-origin: bottom center;
+      transform: translateX(-50%) translateY(-100%) rotate(0deg);
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      z-index: 4; border-radius: 2px 2px 0 0;
+    }
+    .dial-center-dot {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #1a1a1a; border: 2px solid #555; z-index: 5;
+    }
+    /* Mode labels */
+    .dial-label {
+      position: absolute; top: 50%; left: 50%;
+      transform-origin: center center;
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer; z-index: 2;
+    }
+    .dial-label-text {
+      font-family: var(--font-m); font-size: 8.5px; color: #999;
+      text-align: center; line-height: 1.2; letter-spacing: .5px;
+      transition: color .15s;
+      white-space: nowrap;
+    }
+    .dial-label.selected .dial-label-text { color: #39ff14; text-shadow: 0 0 6px rgba(57,255,20,.5); }
+    .dial-label:hover .dial-label-text { color: #ccc; }
+
+    /* Sockets */
+    .meter-sockets {
+      display: flex; justify-content: space-around; align-items: center;
+      padding: 6px 0 0;
+    }
+    .socket-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .socket {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 2px solid; display: flex; align-items: center; justify-content: center;
+    }
+    .socket-com { border-color: #555; background: #111; }
+    .socket-vom { border-color: #c0392b; background: #2d0a08; }
+    .socket-10a { border-color: #b73030; background: #2d0a08; }
+    .socket-label { font-size: 8px; color: #888; letter-spacing: .5px; text-align: center; }
+
+    /* Probe indicators */
+    .probe-indicators {
+      background: rgba(0,0,0,.3); border: 1px solid rgba(30,41,59,.8);
+      border-radius: 6px; padding: 8px 10px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    }
+    .probe-ind { font-size: 10px; letter-spacing: .5px; }
+    .probe-ind .label { color: var(--muted); margin-bottom: 2px; }
+    .probe-ind .value { font-size: 9px; }
+    .probe-ind.red .label { color: #f87171; }
+    .probe-ind.red .value { color: #fca5a5; }
+    .probe-ind.blk .label { color: #94a3b8; }
+    .probe-ind.blk .value { color: #cbd5e1; }
+
+    /* Clear probes btn */
+    .clear-btn {
+      width: 100%; padding: 6px; font-family: var(--font-m); font-size: 10px;
+      letter-spacing: 1px; background: transparent;
+      border: 1px solid rgba(30,41,59,.8); color: var(--muted);
+      cursor: pointer; transition: all .15s; border-radius: 3px;
+    }
+    .clear-btn:hover { border-color: rgba(6,182,212,.4); color: var(--cyan); }
+
+    /* ═══════════════════════════════════
+       TEST BENCH (right column)
+    ═══════════════════════════════════ */
+    .bench-col {
+      flex: 1; display: flex; flex-direction: column;
+      min-width: 0; overflow-y: auto;
+    }
+
+    /* Scenario tabs */
+    .scenario-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: rgba(13,17,23,.8); flex-shrink: 0;
+      padding: 0 20px; gap: 0;
+    }
+    .stab {
+      padding: 14px 18px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--muted); background: transparent; border: none;
+      border-bottom: 2px solid transparent; cursor: pointer;
+      transition: color .15s, border-color .15s; font-family: var(--font-m);
+      margin-bottom: -1px;
+    }
+    .stab:hover { color: var(--text); }
+    .stab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+
+    /* Bench content area */
+    .bench-content { padding: 20px; display: flex; flex-direction: column; gap: 16px; flex: 1; }
+
+    /* Scenario header */
+    .scenario-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
+    .scenario-title { font-family: var(--font-d); font-size: 30px; color: #fff; letter-spacing: 2px; }
+    .scenario-desc { font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: .5px; }
+    .state-toggle {
+      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .state-btn {
+      font-family: var(--font-m); font-size: 10px; letter-spacing: 1px;
+      padding: 5px 12px; background: rgba(30,41,59,.6); color: var(--muted);
+      border: 1px solid rgba(30,41,59,.8); cursor: pointer; transition: all .15s;
+    }
+    .state-btn:hover { border-color: rgba(6,182,212,.4); color: var(--text); }
+    .state-btn.active { background: rgba(6,182,212,.15); color: var(--cyan); border-color: rgba(6,182,212,.5); }
+
+    /* Circuit diagram */
+    .circuit-area {
+      background: rgba(13,17,23,.5); border: 1px solid var(--border);
+      border-radius: 4px; padding: 20px;
+      position: relative; min-height: 200px;
+    }
+    .circuit-title {
+      font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-bottom: 16px;
+    }
+    .circuit-svg-wrap { overflow-x: auto; }
+    .circuit-svg-wrap svg { display: block; min-width: 400px; }
+
+    /* Test point */
+    .tp {
+      cursor: pointer; transition: all .15s;
+    }
+    .tp:hover circle { stroke-width: 3; }
+    .tp.red-probe circle { fill: rgba(239,68,68,.4) !important; stroke: #ef4444 !important; stroke-width: 3; }
+    .tp.black-probe circle { fill: rgba(100,116,139,.4) !important; stroke: #94a3b8 !important; stroke-width: 3; }
+    .tp.red-probe text { fill: #f87171 !important; }
+    .tp.black-probe text { fill: #cbd5e1 !important; }
+
+    /* Probe instructions */
+    .probe-instr {
+      background: rgba(6,182,212,.06); border: 1px solid rgba(6,182,212,.2);
+      padding: 10px 14px; font-size: 11px; color: var(--cyan); letter-spacing: 1px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .probe-instr-icon { font-size: 16px; flex-shrink: 0; }
+
+    /* Reading card */
+    .reading-card {
+      border: 1px solid var(--border); padding: 16px;
+      background: rgba(15,23,42,.4);
+    }
+    .reading-header {
+      font-family: var(--font-d); font-size: 20px; color: #fff; letter-spacing: 2px; margin-bottom: 12px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(30,41,59,.8);
+    }
+    .reading-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .reading-item { }
+    .reading-label { font-size: 9px; color: var(--muted); letter-spacing: 2px; margin-bottom: 4px; }
+    .reading-val { font-size: 28px; font-family: var(--font-d); letter-spacing: 1px; }
+    .reading-val.ok   { color: var(--green); }
+    .reading-val.warn { color: var(--amber); }
+    .reading-val.err  { color: var(--red); }
+    .reading-val.info { color: var(--cyan); }
+    .reading-analysis { font-size: 12px; color: var(--text); line-height: 1.6; grid-column: 1/-1; }
+    .reading-expected { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .verdict {
+      grid-column: 1/-1; padding: 8px 12px;
+      border-left: 3px solid; font-size: 11px; letter-spacing: .5px; margin-top: 4px;
+    }
+    .verdict.pass { border-color: var(--green); background: rgba(34,197,94,.08); color: #86efac; }
+    .verdict.fail { border-color: var(--red); background: rgba(239,68,68,.08); color: #fca5a5; }
+    .verdict.info { border-color: var(--cyan); background: rgba(6,182,212,.08); color: #67e8f9; }
+    .verdict.warn { border-color: var(--amber); background: rgba(245,158,11,.08); color: #fcd34d; }
+
+    /* Test point legend */
+    .tp-legend { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
+    .tp-legend-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 10px; background: rgba(15,23,42,.4); border: 1px solid rgba(30,41,59,.8);
+      cursor: pointer; transition: border-color .15s;
+    }
+    .tp-legend-item:hover { border-color: rgba(6,182,212,.3); }
+    .tp-legend-item.selected-red { border-color: #ef4444; background: rgba(239,68,68,.08); }
+    .tp-legend-item.selected-blk { border-color: #94a3b8; background: rgba(148,163,184,.08); }
+    .tp-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid; flex-shrink: 0; }
+    .tp-name { font-size: 10px; letter-spacing: .5px; }
+    .tp-lbl  { font-size: 9px; color: var(--muted); }
+
+    /* Legend area label */
+    .section-label {
+      font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::after { content:''; flex:1; height:1px; background:rgba(30,41,59,.8); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(30,41,59,.8); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(6,182,212,.3); }
+
+    /* Skip link */
+    .skip-link { position:absolute;top:-50px;left:16px;z-index:9999;padding:8px 16px;background:var(--cyan);color:var(--bg);font-weight:700;border-radius:0 0 4px 4px;transition:top .15s; }
+    .skip-link:focus { top:0; }
+    .sr-only { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+    :focus-visible { outline:2px solid var(--cyan);outline-offset:3px; }
+
+    @media (max-width: 700px) {
+      .main { flex-direction: column; }
+      .meter-col { width: 100%; position: static; height: auto; flex-direction: row; flex-wrap: wrap; justify-content: center; }
+      .meter-body { width: 220px; }
+    }
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main-content">Skip to main content</a>
+
+<!-- ── HEADER ── -->
+<header>
+  <a href="index.html" class="back-link" aria-label="Back to mission select">← BACK</a>
+  <div style="width:1px;height:24px;background:rgba(30,41,59,.8);flex-shrink:0;"></div>
+  <div class="header-title">DIGITAL <em>MULTIMETER</em></div>
+  <span class="header-badge">TOOL</span>
+  <a href="multimeter-lesson.html" class="lesson-link">📖 READ LESSON →</a>
+  <a href="level1.html" class="lesson-link" style="border-color:rgba(59,130,246,.4);color:var(--blue);">▶ LEVEL 1 →</a>
+</header>
+
+<!-- ── MAIN ── -->
+<main id="main-content" class="main">
+
+  <!-- ════════════ METER COLUMN ════════════ -->
+  <aside class="meter-col" aria-label="Multimeter controls">
+
+    <div class="meter-body" role="group" aria-label="Digital multimeter simulator">
+
+      <!-- Brand -->
+      <div class="meter-brand">
+        <div class="meter-brand-name">DMM<span style="color:#888;font-size:14px;">-9000</span></div>
+        <div class="meter-brand-model">TRUE RMS</div>
+      </div>
+
+      <!-- LCD Display -->
+      <div class="meter-lcd" role="status" aria-live="polite" aria-label="Multimeter display">
+        <div class="lcd-top">
+          <div class="lcd-mode" id="lcd-mode">--- SELECT MODE ---</div>
+          <div class="lcd-indicators">
+            <span class="lcd-ind" id="ind-auto">AUTO</span>
+            <span class="lcd-ind" id="ind-hold">HOLD</span>
+            <span class="lcd-ind" id="ind-dc">DC</span>
+            <span class="lcd-ind" id="ind-ac">AC</span>
+          </div>
+        </div>
+        <div class="lcd-main" id="lcd-main">- - - -</div>
+        <div class="lcd-unit"  id="lcd-unit"></div>
+        <div class="lcd-status" id="lcd-status">SELECT DIAL MODE THEN PLACE PROBES</div>
+      </div>
+
+      <!-- Function buttons -->
+      <div class="meter-btns">
+        <button class="meter-btn" id="btn-hold" onclick="toggleHold()" title="Freeze current reading" aria-pressed="false">HOLD</button>
+        <button class="meter-btn" id="btn-rel"  onclick="toggleRel()"  title="Relative mode" aria-pressed="false">REL</button>
+        <button class="meter-btn" id="btn-range" onclick="void 0"       title="Auto range (always on)">AUTO</button>
+      </div>
+
+      <!-- Rotary Dial -->
+      <div class="dial-area" role="group" aria-label="Measurement mode dial">
+        <div class="dial-surround"></div>
+
+        <!-- Mode labels — positioned via JS -->
+        <div id="dial-labels-container"></div>
+
+        <!-- Pointer -->
+        <div class="dial-indicator" id="dial-indicator" aria-hidden="true"></div>
+        <div class="dial-center-dot"  aria-hidden="true"></div>
+        <div class="dial-knob"        aria-hidden="true"></div>
+      </div>
+
+      <!-- Sockets -->
+      <div class="meter-sockets" role="group" aria-label="Measurement terminals">
+        <div class="socket-group">
+          <div class="socket socket-com" aria-hidden="true"></div>
+          <div class="socket-label">COM<br>⏚</div>
+        </div>
+        <div class="socket-group">
+          <div class="socket socket-vom" aria-hidden="true"></div>
+          <div class="socket-label">VΩmA<br>+</div>
+        </div>
+        <div class="socket-group">
+          <div class="socket socket-10a" aria-hidden="true"></div>
+          <div class="socket-label">10A<br>+</div>
+        </div>
+      </div>
+
+    </div><!-- /meter-body -->
+
+    <!-- Probe indicators (outside body) -->
+    <div style="margin-top:16px;width:100%;">
+      <div class="section-label">PROBE PLACEMENT</div>
+      <div class="probe-indicators">
+        <div class="probe-ind red">
+          <div class="label">🔴 RED (+)</div>
+          <div class="value" id="pi-red">— not placed</div>
+        </div>
+        <div class="probe-ind blk">
+          <div class="label">⚫ BLACK (−)</div>
+          <div class="value" id="pi-blk">— not placed</div>
+        </div>
+      </div>
+      <button class="clear-btn" onclick="clearProbes()" style="margin-top:6px;">⟳ CLEAR PROBES</button>
+    </div>
+
+  </aside><!-- /meter-col -->
+
+  <!-- ════════════ TEST BENCH ════════════ -->
+  <section class="bench-col" aria-label="Test bench">
+
+    <!-- Scenario tabs -->
+    <div class="scenario-tabs" role="tablist" aria-label="Measurement scenario">
+      <button class="stab active" role="tab" aria-selected="true"  onclick="loadScenario('psu')"    id="tab-psu">PSU</button>
+      <button class="stab"        role="tab" aria-selected="false" onclick="loadScenario('input')"   id="tab-input">INPUT CARD</button>
+      <button class="stab"        role="tab" aria-selected="false" onclick="loadScenario('output')"  id="tab-output">OUTPUT / COIL</button>
+      <button class="stab"        role="tab" aria-selected="false" onclick="loadScenario('wiring')"  id="tab-wiring">WIRING</button>
+    </div>
+
+    <div class="bench-content" role="tabpanel" aria-labelledby="tab-psu" id="bench-panel">
+
+      <!-- Scenario header -->
+      <div class="scenario-header">
+        <div>
+          <div class="scenario-title" id="sc-title">POWER SUPPLY CHECK</div>
+          <div class="scenario-desc"  id="sc-desc">Verify 24V DC output from a 230V AC power supply unit.</div>
+        </div>
+        <div class="state-toggle" id="state-controls" role="group" aria-label="Circuit state"></div>
+      </div>
+
+      <!-- Circuit diagram -->
+      <div class="circuit-area">
+        <div class="circuit-title">CIRCUIT SCHEMATIC — CLICK TEST POINTS TO PLACE PROBES</div>
+        <div class="circuit-svg-wrap" id="circuit-svg-wrap">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+
+      <!-- Test point list (alternative to SVG clicking) -->
+      <div>
+        <div class="section-label">TEST POINTS</div>
+        <div class="tp-legend" id="tp-legend"><!-- filled by JS --></div>
+      </div>
+
+      <!-- Probe instruction -->
+      <div class="probe-instr" id="probe-instr" role="status" aria-live="polite">
+        <div class="probe-instr-icon">🔴</div>
+        <div id="probe-instr-text">Click a test point above to place the RED (+) probe, then click another for BLACK (−).</div>
+      </div>
+
+      <!-- Reading card -->
+      <div class="reading-card" id="reading-card" aria-live="polite">
+        <div class="reading-header">READING ANALYSIS</div>
+        <div class="reading-grid" id="reading-grid">
+          <div class="reading-item" style="grid-column:1/-1;color:var(--muted);font-size:12px;">
+            Set the dial mode and place both probes to see the reading analysis.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+</main>
+
+<script>
+// ════════════════════════════════════════════════════
+//  MODES
+// ════════════════════════════════════════════════════
+const MODES = [
+  { id:'off',    label:'OFF',      angle:0,   type:null,   range:0,      unit:'',      sub:'' },
+  { id:'vdc200', label:'200\nV—',  angle:36,  type:'VDC',  range:200,    unit:'V DC',  sub:'RANGE 200V' },
+  { id:'vdc20',  label:'20\nV—',   angle:72,  type:'VDC',  range:20,     unit:'V DC',  sub:'RANGE 20V' },
+  { id:'vdc2',   label:'2\nV—',    angle:108, type:'VDC',  range:2,      unit:'V DC',  sub:'RANGE 2V' },
+  { id:'ohm200k',label:'200k\nΩ',  angle:144, type:'OHM',  range:200000, unit:'Ω',     sub:'RANGE 200kΩ' },
+  { id:'ohm2k',  label:'2k\nΩ',    angle:180, type:'OHM',  range:2000,   unit:'Ω',     sub:'RANGE 2kΩ' },
+  { id:'ohm200', label:'200\nΩ',   angle:216, type:'OHM',  range:200,    unit:'Ω',     sub:'RANGE 200Ω' },
+  { id:'cont',   label:'))))\nCONT',angle:252, type:'CONT', range:50,     unit:'',      sub:'CONTINUITY' },
+  { id:'adc',    label:'200m\nmA—', angle:288, type:'ADC',  range:0.2,    unit:'mA',    sub:'RANGE 200mA' },
+  { id:'vac',    label:'200\nV~',   angle:324, type:'VAC',  range:200,    unit:'V AC',  sub:'RANGE 200V AC' },
+];
+
+// ════════════════════════════════════════════════════
+//  SCENARIOS
+// ════════════════════════════════════════════════════
+const SCENARIOS = {
+  psu: {
+    name: 'POWER SUPPLY CHECK',
+    desc: 'Verify 24V DC output from a 230V AC power supply unit.',
+    stateLabels: null,
+    getPoints: () => ({
+      T1: { label:'Mains Live (L)',    color:'#ef4444', vac:230, vdc:0,    rx:{} },
+      T2: { label:'Mains Neutral (N)', color:'#94a3b8', vac:0,   vdc:0,    rx:{}, isRef:true },
+      T3: { label:'DC Output (+)',     color:'#f59e0b', vac:0,   vdc:24.1, rx:{T4:0} },
+      T4: { label:'DC Common (−)',     color:'#64748b', vac:0,   vdc:0,    rx:{T3:0}, isRef:true },
+    }),
+    svg: () => `
+      <svg viewBox="0 0 480 160" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono,monospace" font-size="10" fill="none">
+        <!-- AC side wires -->
+        <line x1="60" y1="55" x2="160" y2="55" stroke="#ef4444" stroke-width="1.5"/>
+        <line x1="60" y1="95" x2="160" y2="95" stroke="#94a3b8" stroke-width="1.5"/>
+        <!-- PSU box -->
+        <rect x="160" y="35" width="120" height="90" rx="4" fill="rgba(30,41,59,.6)" stroke="#475569" stroke-width="1.5"/>
+        <text x="220" y="76" text-anchor="middle" fill="#94a3b8" font-size="12">PSU</text>
+        <text x="220" y="92" text-anchor="middle" fill="#64748b" font-size="9">230V AC → 24V DC</text>
+        <!-- DC side wires -->
+        <line x1="280" y1="55" x2="400" y2="55" stroke="#f59e0b" stroke-width="1.5"/>
+        <line x1="280" y1="95" x2="400" y2="95" stroke="#64748b" stroke-width="1.5"/>
+        <!-- Polarity marks -->
+        <text x="290" y="50" fill="#f59e0b" font-size="10">+</text>
+        <text x="290" y="110" fill="#64748b" font-size="10">−</text>
+        <!-- Test point T1 -->
+        <g class="tp" id="svgtp-T1" onclick="clickTP('T1')" role="button" aria-label="Test point T1: Mains Live">
+          <circle cx="60" cy="55" r="10" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="60" y="59" text-anchor="middle" fill="#ef4444" font-weight="bold">T1</text>
+          <text x="60" y="38" text-anchor="middle" fill="#f87171" font-size="9">L (230VAC)</text>
+        </g>
+        <!-- Test point T2 -->
+        <g class="tp" id="svgtp-T2" onclick="clickTP('T2')" role="button" aria-label="Test point T2: Mains Neutral">
+          <circle cx="60" cy="95" r="10" fill="rgba(148,163,184,.15)" stroke="#94a3b8" stroke-width="1.5"/>
+          <text x="60" y="99" text-anchor="middle" fill="#94a3b8" font-weight="bold">T2</text>
+          <text x="60" y="115" text-anchor="middle" fill="#94a3b8" font-size="9">N (Neutral)</text>
+        </g>
+        <!-- Test point T3 -->
+        <g class="tp" id="svgtp-T3" onclick="clickTP('T3')" role="button" aria-label="Test point T3: DC positive output">
+          <circle cx="400" cy="55" r="10" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="400" y="59" text-anchor="middle" fill="#f59e0b" font-weight="bold">T3</text>
+          <text x="400" y="38" text-anchor="middle" fill="#fbbf24" font-size="9">+24V DC</text>
+        </g>
+        <!-- Test point T4 -->
+        <g class="tp" id="svgtp-T4" onclick="clickTP('T4')" role="button" aria-label="Test point T4: DC common ground">
+          <circle cx="400" cy="95" r="10" fill="rgba(100,116,139,.15)" stroke="#64748b" stroke-width="1.5"/>
+          <text x="400" y="99" text-anchor="middle" fill="#64748b" font-weight="bold">T4</text>
+          <text x="400" y="115" text-anchor="middle" fill="#94a3b8" font-size="9">0V Common</text>
+        </g>
+        <!-- Safety warning for T1 -->
+        <text x="30" y="148" fill="#f87171" font-size="9">⚠ T1 is live mains — VAC mode only!</text>
+      </svg>`,
+    interpret(rp, bp, mode, points) {
+      return getStdInterpretation(rp, bp, mode, points, {
+        T3_T4_vdc: { min:23, max:25.5, msg:'PSU output is within specification (24V ±6%).' },
+        T1_T2_vac: { min:200, max:240, msg:'Mains supply is present and within normal range.' },
+      });
+    }
+  },
+
+  input: {
+    name: 'PLC INPUT CARD',
+    desc: 'Verify that a field device signal reaches the PLC input terminal.',
+    stateLabels: ['FIELD DEVICE: OPEN', 'FIELD DEVICE: CLOSED'],
+    getPoints: (s) => {
+      const on = s === 1;
+      return {
+        T3: { label:'+24V Rail',           color:'#f59e0b', vac:0, vdc:24.1, rx:{} },
+        T5: { label:'Field Device Output', color:'#06b6d4', vac:0, vdc:on?24.1:0, rx:{} },
+        T6: { label:'PLC I0.0 Terminal',   color:'#a855f7', vac:0, vdc:on?24.1:0, rx:{} },
+        T4: { label:'Common (0V)',          color:'#64748b', vac:0, vdc:0,    rx:{}, isRef:true },
+      };
+    },
+    svg: (s) => {
+      const on = s === 1;
+      const wireColor = on ? '#06b6d4' : '#334155';
+      return `
+      <svg viewBox="0 0 500 160" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono,monospace" font-size="10" fill="none">
+        <!-- Power rail -->
+        <line x1="50" y1="40" x2="150" y2="40" stroke="#f59e0b" stroke-width="1.5"/>
+        <!-- Field device (switch) -->
+        <line x1="150" y1="40" x2="190" y2="40" stroke="#f59e0b" stroke-width="1.5"/>
+        <line x1="230" y1="40" x2="280" y2="40" stroke="${wireColor}" stroke-width="1.5"/>
+        <circle cx="210" cy="40" r="16" fill="rgba(15,23,42,.6)" stroke="${on?'#06b6d4':'#475569'}" stroke-width="1.5"/>
+        <text x="210" y="44" text-anchor="middle" fill="${on?'#22d3ee':'#64748b'}" font-size="9">${on?'SW ●':'SW ○'}</text>
+        <text x="210" y="72" text-anchor="middle" fill="${on?'#22d3ee':'#64748b'}" font-size="8">SENSOR</text>
+        <!-- PLC input block -->
+        <rect x="310" y="25" width="80" height="70" rx="3" fill="rgba(30,41,59,.5)" stroke="#475569" stroke-width="1.5"/>
+        <text x="350" y="56" text-anchor="middle" fill="#94a3b8" font-size="11">PLC</text>
+        <text x="350" y="70" text-anchor="middle" fill="#64748b" font-size="9">IN CARD</text>
+        <line x1="280" y1="40" x2="310" y2="40" stroke="${wireColor}" stroke-width="1.5"/>
+        <!-- Common -->
+        <line x1="50" y1="110" x2="430" y2="110" stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="240" y="128" text-anchor="middle" fill="#475569" font-size="9">0V COMMON</text>
+        <!-- T3 -->
+        <g class="tp" id="svgtp-T3" onclick="clickTP('T3')" role="button" aria-label="T3 +24V Rail">
+          <circle cx="50" cy="40" r="10" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="50" y="44" text-anchor="middle" fill="#f59e0b" font-weight="bold">T3</text>
+          <text x="50" y="24" text-anchor="middle" fill="#fbbf24" font-size="9">+24V</text>
+        </g>
+        <!-- T5 -->
+        <g class="tp" id="svgtp-T5" onclick="clickTP('T5')" role="button" aria-label="T5 Field Device Output">
+          <circle cx="258" cy="40" r="10" fill="rgba(6,182,212,.15)" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="258" y="44" text-anchor="middle" fill="#06b6d4" font-weight="bold">T5</text>
+          <text x="258" y="24" text-anchor="middle" fill="#22d3ee" font-size="9">DEV OUT</text>
+        </g>
+        <!-- T6 -->
+        <g class="tp" id="svgtp-T6" onclick="clickTP('T6')" role="button" aria-label="T6 PLC I0.0">
+          <circle cx="310" cy="40" r="10" fill="rgba(168,85,247,.15)" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="310" y="44" text-anchor="middle" fill="#a855f7" font-weight="bold">T6</text>
+          <text x="310" y="24" text-anchor="middle" fill="#c084fc" font-size="9">PLC I0.0</text>
+        </g>
+        <!-- T4 -->
+        <g class="tp" id="svgtp-T4" onclick="clickTP('T4')" role="button" aria-label="T4 Common 0V">
+          <circle cx="430" cy="110" r="10" fill="rgba(100,116,139,.15)" stroke="#64748b" stroke-width="1.5"/>
+          <text x="430" y="114" text-anchor="middle" fill="#64748b" font-weight="bold">T4</text>
+          <text x="430" y="130" text-anchor="middle" fill="#94a3b8" font-size="9">0V</text>
+        </g>
+        <text x="15" y="150" fill="${on?'#22c55e':'#ef4444'}" font-size="9">${on?'✓ Field device CLOSED — signal present':'✗ Field device OPEN — no signal'}</text>
+      </svg>`;
+    },
+    interpret: (rp, bp, mode, points) => getStdInterpretation(rp, bp, mode, points, {})
+  },
+
+  output: {
+    name: 'OUTPUT & SOLENOID',
+    desc: 'Check PLC output terminal voltage and measure solenoid coil resistance.',
+    stateLabels: ['PLC OUTPUT: OFF', 'PLC OUTPUT: ON'],
+    getPoints: (s) => {
+      const on = s === 1;
+      return {
+        T3: { label:'+24V Rail',           color:'#f59e0b', vac:0, vdc:24.1,    rx:{} },
+        T7: { label:'PLC Q0.0 Terminal',   color:'#a855f7', vac:0, vdc:on?24.1:0, rx:{} },
+        T8: { label:'Solenoid A-terminal', color:'#06b6d4', vac:0, vdc:on?24.1:0, rx:{T9:150} },
+        T9: { label:'Solenoid B-terminal', color:'#22d3ee', vac:0, vdc:0,         rx:{T8:150} },
+        T4: { label:'Common (0V)',          color:'#64748b', vac:0, vdc:0,         rx:{}, isRef:true },
+      };
+    },
+    svg: (s) => {
+      const on = s === 1;
+      const outColor = on ? '#a855f7' : '#334155';
+      const coilColor = on ? '#06b6d4' : '#334155';
+      return `
+      <svg viewBox="0 0 520 180" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono,monospace" font-size="10" fill="none">
+        <!-- PLC output block -->
+        <rect x="40" y="30" width="80" height="80" rx="3" fill="rgba(30,41,59,.5)" stroke="#475569" stroke-width="1.5"/>
+        <text x="80" y="66" text-anchor="middle" fill="#94a3b8" font-size="11">PLC</text>
+        <text x="80" y="80" text-anchor="middle" fill="#64748b" font-size="9">OUT CARD</text>
+        <rect x="115" y="58" width="8" height="8" rx="1" fill="${on?'#a855f7':'#334155'}"/>
+        <!-- Output wire -->
+        <line x1="120" y1="60" x2="220" y2="60" stroke="${outColor}" stroke-width="1.5"/>
+        <!-- Solenoid coil symbol -->
+        <rect x="220" y="42" width="100" height="40" rx="4" fill="rgba(30,41,59,.5)" stroke="${coilColor}" stroke-width="1.5"/>
+        <path d="M230 62 Q240 48 250 62 Q260 76 270 62 Q280 48 290 62 Q300 76 310 62" stroke="${coilColor}" stroke-width="1.5"/>
+        <text x="270" y="100" text-anchor="middle" fill="#64748b" font-size="9">SOLENOID (~150Ω)</text>
+        <!-- Return wire -->
+        <line x1="320" y1="62" x2="380" y2="62" stroke="#64748b" stroke-width="1"/>
+        <line x1="380" y1="62" x2="380" y2="130" stroke="#64748b" stroke-width="1"/>
+        <line x1="40" y1="130" x2="380" y2="130"  stroke="#64748b" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="210" y="148" text-anchor="middle" fill="#475569" font-size="9">0V COMMON RETURN</text>
+        <!-- Power in -->
+        <line x1="40" y1="60" x2="40" y2="130" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,3"/>
+        <!-- T3 -->
+        <g class="tp" id="svgtp-T3" onclick="clickTP('T3')" role="button" aria-label="T3 +24V">
+          <circle cx="40" cy="60" r="10" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="40" y="64" text-anchor="middle" fill="#f59e0b" font-weight="bold">T3</text>
+          <text x="40" y="42" text-anchor="middle" fill="#fbbf24" font-size="9">+24V</text>
+        </g>
+        <!-- T7 -->
+        <g class="tp" id="svgtp-T7" onclick="clickTP('T7')" role="button" aria-label="T7 Q0.0 Terminal">
+          <circle cx="120" cy="60" r="10" fill="rgba(168,85,247,.15)" stroke="#a855f7" stroke-width="1.5"/>
+          <text x="120" y="64" text-anchor="middle" fill="#a855f7" font-weight="bold">T7</text>
+          <text x="120" y="42" text-anchor="middle" fill="#c084fc" font-size="9">Q0.0</text>
+        </g>
+        <!-- T8 -->
+        <g class="tp" id="svgtp-T8" onclick="clickTP('T8')" role="button" aria-label="T8 Solenoid A">
+          <circle cx="218" cy="62" r="10" fill="rgba(6,182,212,.15)" stroke="#06b6d4" stroke-width="1.5"/>
+          <text x="218" y="66" text-anchor="middle" fill="#06b6d4" font-weight="bold">T8</text>
+          <text x="218" y="44" text-anchor="middle" fill="#22d3ee" font-size="9">SOL A</text>
+        </g>
+        <!-- T9 -->
+        <g class="tp" id="svgtp-T9" onclick="clickTP('T9')" role="button" aria-label="T9 Solenoid B">
+          <circle cx="322" cy="62" r="10" fill="rgba(34,211,238,.1)" stroke="#22d3ee" stroke-width="1.5"/>
+          <text x="322" y="66" text-anchor="middle" fill="#22d3ee" font-weight="bold">T9</text>
+          <text x="322" y="44" text-anchor="middle" fill="#22d3ee" font-size="9">SOL B</text>
+        </g>
+        <!-- T4 -->
+        <g class="tp" id="svgtp-T4" onclick="clickTP('T4')" role="button" aria-label="T4 Common 0V">
+          <circle cx="450" cy="130" r="10" fill="rgba(100,116,139,.15)" stroke="#64748b" stroke-width="1.5"/>
+          <text x="450" y="134" text-anchor="middle" fill="#64748b" font-weight="bold">T4</text>
+          <text x="450" y="152" text-anchor="middle" fill="#94a3b8" font-size="9">0V</text>
+        </g>
+        <text x="15" y="172" fill="${on?'#22c55e':'#f87171'}" font-size="9">${on?'✓ Output ENERGIZED — coil active':'✗ Output OFF — coil de-energized'}</text>
+      </svg>`;
+    },
+    interpret: (rp, bp, mode, points) => getStdInterpretation(rp, bp, mode, points, {})
+  },
+
+  wiring: {
+    name: 'CONTINUITY & WIRING',
+    desc: 'Check wire integrity, fuse continuity, and trace circuit paths.',
+    stateLabels: null,
+    getPoints: () => ({
+      T10: { label:'Wire A — End 1',   color:'#22c55e', vac:0, vdc:0, rx:{T11:0.2}, continuityTo:['T11'] },
+      T11: { label:'Wire A — End 2',   color:'#22c55e', vac:0, vdc:0, rx:{T10:0.2}, continuityTo:['T10'] },
+      T12: { label:'Wire B (broken)',   color:'#ef4444', vac:0, vdc:0, rx:{},        continuityTo:[] },
+      T13: { label:'Fuse F1 — IN',     color:'#f59e0b', vac:0, vdc:0, rx:{T14:0.05},continuityTo:['T14'] },
+      T14: { label:'Fuse F1 — OUT',    color:'#f59e0b', vac:0, vdc:0, rx:{T13:0.05},continuityTo:['T13'] },
+    }),
+    svg: () => `
+      <svg viewBox="0 0 480 180" xmlns="http://www.w3.org/2000/svg" font-family="Share Tech Mono,monospace" font-size="10" fill="none">
+        <!-- Wire A (good) -->
+        <line x1="60" y1="50" x2="220" y2="50" stroke="#22c55e" stroke-width="2"/>
+        <text x="140" y="40" text-anchor="middle" fill="#4ade80" font-size="9">WIRE A — INTACT</text>
+        <!-- Wire B (broken) -->
+        <line x1="60" y1="100" x2="130" y2="100" stroke="#ef4444" stroke-width="2"/>
+        <text x="150" y="100" text-anchor="middle" fill="#f87171" font-size="14">✕</text>
+        <line x1="170" y1="100" x2="220" y2="100" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,3" opacity=".4"/>
+        <text x="140" y="88" text-anchor="middle" fill="#f87171" font-size="9">WIRE B — BROKEN</text>
+        <!-- Fuse F1 -->
+        <line x1="280" y1="50" x2="320" y2="50" stroke="#f59e0b" stroke-width="1.5"/>
+        <rect x="320" y="40" width="50" height="20" rx="4" fill="rgba(245,158,11,.1)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="345" y="54" text-anchor="middle" fill="#fbbf24" font-size="9">FUSE</text>
+        <line x1="370" y1="50" x2="420" y2="50" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="345" y="38" text-anchor="middle" fill="#fbbf24" font-size="9">F1 — GOOD</text>
+        <!-- T10 -->
+        <g class="tp" id="svgtp-T10" onclick="clickTP('T10')" role="button" aria-label="T10 Wire A End 1">
+          <circle cx="60" cy="50" r="10" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/>
+          <text x="60" y="54" text-anchor="middle" fill="#22c55e" font-weight="bold" font-size="9">T10</text>
+          <text x="60" y="30" text-anchor="middle" fill="#4ade80" font-size="9">END1</text>
+        </g>
+        <!-- T11 -->
+        <g class="tp" id="svgtp-T11" onclick="clickTP('T11')" role="button" aria-label="T11 Wire A End 2">
+          <circle cx="220" cy="50" r="10" fill="rgba(34,197,94,.2)" stroke="#22c55e" stroke-width="1.5"/>
+          <text x="220" y="54" text-anchor="middle" fill="#22c55e" font-weight="bold" font-size="9">T11</text>
+          <text x="220" y="30" text-anchor="middle" fill="#4ade80" font-size="9">END2</text>
+        </g>
+        <!-- T12 -->
+        <g class="tp" id="svgtp-T12" onclick="clickTP('T12')" role="button" aria-label="T12 Wire B broken">
+          <circle cx="60" cy="100" r="10" fill="rgba(239,68,68,.2)" stroke="#ef4444" stroke-width="1.5"/>
+          <text x="60" y="104" text-anchor="middle" fill="#ef4444" font-weight="bold" font-size="9">T12</text>
+          <text x="60" y="120" text-anchor="middle" fill="#f87171" font-size="9">BROKEN</text>
+        </g>
+        <!-- T13 -->
+        <g class="tp" id="svgtp-T13" onclick="clickTP('T13')" role="button" aria-label="T13 Fuse IN">
+          <circle cx="280" cy="50" r="10" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="280" y="54" text-anchor="middle" fill="#f59e0b" font-weight="bold" font-size="9">T13</text>
+          <text x="280" y="30" text-anchor="middle" fill="#fbbf24" font-size="9">FUSE IN</text>
+        </g>
+        <!-- T14 -->
+        <g class="tp" id="svgtp-T14" onclick="clickTP('T14')" role="button" aria-label="T14 Fuse OUT">
+          <circle cx="420" cy="50" r="10" fill="rgba(245,158,11,.2)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="420" y="54" text-anchor="middle" fill="#f59e0b" font-weight="bold" font-size="9">T14</text>
+          <text x="420" y="30" text-anchor="middle" fill="#fbbf24" font-size="9">FUSE OUT</text>
+        </g>
+        <text x="240" y="145" text-anchor="middle" fill="#64748b" font-size="9">Tip: Use CONT mode to verify wire paths — beep = connected</text>
+        <text x="240" y="160" text-anchor="middle" fill="#64748b" font-size="9">Use Ω 200Ω to check fuse resistance (&lt;1Ω = good, OL = blown)</text>
+      </svg>`,
+    interpret: (rp, bp, mode, points) => getStdInterpretation(rp, bp, mode, points, {})
+  }
+};
+
+// ════════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════════
+let activeScenario = 'psu';
+let circuitState   = 0;    // index into stateLabels
+let dialMode       = 'off';
+let redProbe       = null;
+let blackProbe     = null;
+let holdMode       = false;
+let relMode        = false;
+let relBase        = null;
+
+// ════════════════════════════════════════════════════
+//  MEASUREMENT ENGINE
+// ════════════════════════════════════════════════════
+function getResistance(rk, bk, pts) {
+  if (rk === bk) return 0;
+  const r = pts[rk], b = pts[bk];
+  if (!r || !b) return null;
+  if (r.rx && r.rx[bk] !== undefined) return r.rx[bk];
+  if (b.rx && b.rx[rk] !== undefined) return b.rx[rk];
+  return null;
+}
+
+function hasContinuity(rk, bk, pts) {
+  if (rk === bk) return false;
+  const r = pts[rk];
+  if (r && r.continuityTo && r.continuityTo.includes(bk)) return true;
+  const b = pts[bk];
+  if (b && b.continuityTo && b.continuityTo.includes(rk)) return true;
+  const res = getResistance(rk, bk, pts);
+  return res !== null && res < 50;
+}
+
+function measure() {
+  const mode = MODES.find(m => m.id === dialMode);
+  const sc   = SCENARIOS[activeScenario];
+  const pts  = sc.getPoints(circuitState);
+
+  if (!mode || mode.type === null) {
+    return { main:'------', unit:'', status:'METER IS OFF', cls:'info', analysis:'Turn the dial to a measurement mode.', verdict:null };
+  }
+  if (!redProbe || !blackProbe) {
+    return { main:'  - - - -', unit:mode.unit||'', status:'PROBES NOT PLACED', cls:'info', analysis:'Place both RED and BLACK probes on test points.', verdict:null };
+  }
+  if (redProbe === blackProbe) {
+    return { main:'  0.000', unit:mode.unit||'', status:'SAME POINT', cls:'warn', analysis:'Red and black probes are on the same test point. No useful reading.', verdict:null };
+  }
+
+  const rp = pts[redProbe], bp = pts[blackProbe];
+  if (!rp || !bp) return { main:'-----', unit:'', status:'ERR', cls:'err', analysis:'Unknown test point.', verdict:null };
+
+  switch (mode.type) {
+    case 'VDC': {
+      const diff = (rp.vdc||0) - (bp.vdc||0);
+      if (Math.abs(diff) > mode.range) return { main:'OL', unit:'V', status:'OVERLOAD — USE HIGHER RANGE', cls:'err', analysis:`Reading exceeds ${mode.range}V range. Select a higher voltage range on the dial.`, verdict:'warn' };
+      const dec  = mode.range <= 2 ? 3 : mode.range <= 20 ? 2 : 1;
+      const disp = (diff < 0 ? '-' : ' ') + Math.abs(diff).toFixed(dec);
+      const abs  = Math.abs(diff);
+      let analysis = `DC voltage between ${rp.label} and ${bp.label} is ${diff.toFixed(dec)} V.`;
+      let vrd = null;
+      if (abs > 22 && abs < 26) { analysis += ' ✓ Healthy 24V DC supply voltage.'; vrd = 'pass'; }
+      else if (abs > 200 && abs < 240 && mode.type === 'VDC') { analysis += ' ⚠ This appears to be AC measured on DC mode — switch to VAC.'; vrd = 'warn'; }
+      else if (abs < 1 && rp.vdc === 0 && bp.vdc === 0) { analysis += ' Both terminals are at 0V — no voltage present.'; vrd = 'info'; }
+      else if (abs < 1) { analysis += ' ⚠ No voltage detected — check wiring or upstream supply.'; vrd = 'warn'; }
+      return { main:disp, unit:'V DC', status:`VDC — RANGE ${mode.range}V`, cls: abs > 0.5 ? 'ok' : 'warn', analysis, verdict:vrd };
+    }
+    case 'VAC': {
+      const diff = Math.abs((rp.vac||0) - (bp.vac||0));
+      if (diff > mode.range) return { main:'OL', unit:'V AC', status:'OVERLOAD', cls:'err', analysis:`Exceeds ${mode.range}V AC range.`, verdict:'warn' };
+      const analysis = diff > 100 ? `${diff.toFixed(0)}V AC — mains voltage present. ⚠ Treat as LIVE — use appropriate PPE.` : diff < 1 ? 'No AC voltage. Check that power is on.' : `${diff.toFixed(0)}V AC detected.`;
+      return { main:' '+diff.toFixed(0), unit:'V AC', status:`VAC — RANGE ${mode.range}V~`, cls: diff > 1 ? 'warn' : 'info', analysis, verdict: diff > 100 ? 'warn' : null };
+    }
+    case 'OHM': {
+      const res = getResistance(redProbe, blackProbe, pts);
+      if (res === null) return { main:'OL', unit:'Ω', status:'OPEN CIRCUIT', cls:'err', analysis:'No conductive path between these points. Check for broken wire or switch open.', verdict:'fail' };
+      if (res > mode.range) return { main:'OL', unit:'Ω', status:'OVERLOAD — USE HIGHER RANGE', cls:'err', analysis:`Resistance > ${mode.range}Ω. Select Ω 200k or higher.`, verdict:'warn' };
+      let disp, unit;
+      if (res >= 1000) { disp = (res/1000).toFixed(2); unit = 'kΩ'; }
+      else             { disp = res.toFixed(res < 10 ? 2 : 1); unit = 'Ω'; }
+      let analysis = `Resistance: ${disp} ${unit} between ${rp.label} and ${bp.label}.`;
+      let vrd = 'info';
+      if (res < 1)        { analysis += ' Near-zero — good wire/connection.'; vrd = 'pass'; }
+      else if (res < 5)   { analysis += ' Very low resistance — healthy conductor.'; vrd = 'pass'; }
+      else if (res > 100 && res < 200) { analysis += ' ~150Ω — consistent with a solenoid coil. Coil is intact.'; vrd = 'pass'; }
+      else if (res > 200) { analysis += ' High resistance — possible dirty contact or coil damage.'; vrd = 'warn'; }
+      return { main:' '+disp, unit, status:`Ω — RANGE ${mode.range >= 1000 ? (mode.range/1000)+'kΩ' : mode.range+'Ω'}`, cls:'ok', analysis, verdict:vrd };
+    }
+    case 'CONT': {
+      const ok = hasContinuity(redProbe, blackProbe, pts);
+      if (ok) {
+        playBeep();
+        return { main:' •)))', unit:'', status:'CONTINUITY DETECTED — BEEP!', cls:'ok', analysis:`Continuity confirmed between ${rp.label} and ${bp.label}. Resistance < 50Ω — circuit path is complete.`, verdict:'pass' };
+      }
+      return { main:'OL', unit:'', status:'OPEN — NO CONTINUITY', cls:'err', analysis:`No continuity between ${rp.label} and ${bp.label}. The circuit path is broken — check for open switch, broken wire, or blown fuse.`, verdict:'fail' };
+    }
+    case 'ADC': {
+      return { main:'---', unit:'mA', status:'INSERT IN SERIES', cls:'info', analysis:'To measure current: break the circuit, insert the meter in series (red → load, black → return). Note: 10A socket for high current.', verdict:null };
+    }
+  }
+  return { main:'-----', unit:'', status:'', cls:'info', analysis:'', verdict:null };
+}
+
+function getStdInterpretation() { /* used inline above */ }
+
+function updateDisplay() {
+  if (holdMode) return; // frozen
+  const r = measure();
+  const mode = MODES.find(m => m.id === dialMode);
+
+  document.getElementById('lcd-main').textContent   = r.main;
+  document.getElementById('lcd-unit').textContent   = r.unit;
+  document.getElementById('lcd-status').textContent = r.status;
+  document.getElementById('lcd-mode').textContent   = mode ? (mode.type ? mode.type : 'OFF') : 'OFF';
+
+  const dcEl = document.getElementById('ind-dc');
+  const acEl = document.getElementById('ind-ac');
+  const autoEl = document.getElementById('ind-auto');
+  dcEl.classList.toggle('active', mode && (mode.type === 'VDC' || mode.type === 'OHM' || mode.type === 'CONT' || mode.type === 'ADC'));
+  acEl.classList.toggle('active', mode && mode.type === 'VAC');
+  autoEl.classList.toggle('active', true);
+
+  // Reading card
+  const grid = document.getElementById('reading-grid');
+  if (r.verdict !== undefined) {
+    const verdictClass = r.verdict || 'info';
+    const verdictMsg   = { pass:'✓ MEASUREMENT WITHIN NORMAL RANGE', fail:'✗ FAULT DETECTED', warn:'⚠ CHECK CONFIGURATION', info:'ℹ INFORMATIONAL' }[verdictClass] || '';
+    grid.innerHTML = `
+      <div class="reading-item">
+        <div class="reading-label">READING</div>
+        <div class="reading-val ${r.cls}">${r.main} ${r.unit}</div>
+      </div>
+      <div class="reading-item">
+        <div class="reading-label">MODE</div>
+        <div class="reading-val info" style="font-size:18px;">${mode ? mode.sub : '---'}</div>
+      </div>
+      <div class="reading-analysis">${r.analysis}</div>
+      ${r.verdict ? `<div class="verdict ${verdictClass}">${verdictMsg}</div>` : ''}
+    `;
+  }
+}
+
+// ════════════════════════════════════════════════════
+//  DIAL
+// ════════════════════════════════════════════════════
+function buildDial() {
+  const container = document.getElementById('dial-labels-container');
+  const radius = 78; // px from dial center
+  const cx = 105, cy = 105; // center of dial-area div
+
+  container.innerHTML = '';
+  MODES.forEach(mode => {
+    const rad = (mode.angle - 90) * Math.PI / 180;
+    const x   = cx + radius * Math.cos(rad);
+    const y   = cy + radius * Math.sin(rad);
+
+    const el = document.createElement('div');
+    el.className = 'dial-label';
+    el.id = 'dlbl-' + mode.id;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', 'Select mode: ' + mode.label.replace('\n', ' '));
+    el.style.cssText = `left:${x}px;top:${y}px;transform:translate(-50%,-50%);position:absolute;`;
+    el.innerHTML = `<div class="dial-label-text">${mode.label.replace('\n','<br>')}</div>`;
+    el.onclick  = () => setMode(mode.id);
+    el.onkeydown = (e) => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); setMode(mode.id); } };
+    container.appendChild(el);
+  });
+}
+
+function setMode(id) {
+  dialMode = id;
+  const mode = MODES.find(m => m.id === id);
+
+  // Rotate pointer
+  const indicator = document.getElementById('dial-indicator');
+  indicator.style.transform = `translateX(-50%) translateY(-100%) rotate(${mode.angle}deg)`;
+
+  // Highlight label
+  document.querySelectorAll('.dial-label').forEach(el => el.classList.remove('selected'));
+  const lbl = document.getElementById('dlbl-' + id);
+  if (lbl) lbl.classList.add('selected');
+
+  updateDisplay();
+}
+
+// ════════════════════════════════════════════════════
+//  PROBE PLACEMENT
+// ════════════════════════════════════════════════════
+function clickTP(id) {
+  if (!redProbe) {
+    redProbe = id;
+    updateProbeUI();
+    updateProbeInstr('⚫ Now click a test point to place the BLACK (−) probe.');
+  } else if (!blackProbe && id !== redProbe) {
+    blackProbe = id;
+    updateProbeUI();
+    updateProbeInstr('✓ Both probes placed. Read the measurement above.');
+  } else if (id === redProbe) {
+    // tap same — deselect red
+    redProbe = null; blackProbe = null;
+    updateProbeUI();
+    updateProbeInstr('🔴 Click a test point to place the RED (+) probe.');
+  } else {
+    // Replace black
+    blackProbe = id;
+    updateProbeUI();
+    updateProbeInstr('✓ Both probes placed. Read the measurement above.');
+  }
+  updateDisplay();
+  syncSVGProbeClasses();
+}
+
+function updateProbeUI() {
+  const sc  = SCENARIOS[activeScenario];
+  const pts = sc.getPoints(circuitState);
+  document.getElementById('pi-red').textContent = redProbe   ? (pts[redProbe]?.label   || redProbe)   : '— not placed';
+  document.getElementById('pi-blk').textContent = blackProbe ? (pts[blackProbe]?.label || blackProbe) : '— not placed';
+  // Legend
+  document.querySelectorAll('.tp-legend-item').forEach(el => {
+    const id = el.dataset.tp;
+    el.classList.remove('selected-red','selected-blk');
+    if (id === redProbe)   el.classList.add('selected-red');
+    if (id === blackProbe) el.classList.add('selected-blk');
+  });
+}
+
+function syncSVGProbeClasses() {
+  document.querySelectorAll('.tp').forEach(el => {
+    const id = el.id.replace('svgtp-','');
+    el.classList.remove('red-probe','black-probe');
+    if (id === redProbe)   el.classList.add('red-probe');
+    if (id === blackProbe) el.classList.add('black-probe');
+  });
+}
+
+function updateProbeInstr(msg) {
+  document.getElementById('probe-instr-text').textContent = msg;
+  const icon = document.querySelector('#probe-instr .probe-instr-icon');
+  if (icon) icon.textContent = !redProbe ? '🔴' : !blackProbe ? '⚫' : '✓';
+}
+
+function clearProbes() {
+  redProbe = null; blackProbe = null;
+  updateProbeUI(); syncSVGProbeClasses();
+  updateProbeInstr('🔴 Click a test point to place the RED (+) probe.');
+  updateDisplay();
+}
+
+// ════════════════════════════════════════════════════
+//  SCENARIO LOADING
+// ════════════════════════════════════════════════════
+function loadScenario(id) {
+  activeScenario = id;
+  circuitState   = 0;
+  clearProbes();
+
+  const sc = SCENARIOS[id];
+  document.getElementById('sc-title').textContent = sc.name;
+  document.getElementById('sc-desc').textContent  = sc.desc;
+
+  // Tabs
+  document.querySelectorAll('.stab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('tab-' + id);
+  if (tab) { tab.classList.add('active'); tab.setAttribute('aria-selected','true'); }
+
+  // State controls
+  const stCtrl = document.getElementById('state-controls');
+  stCtrl.innerHTML = '';
+  if (sc.stateLabels) {
+    sc.stateLabels.forEach((lbl, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'state-btn' + (i === 0 ? ' active' : '');
+      btn.textContent = lbl;
+      btn.onclick = () => {
+        circuitState = i;
+        document.querySelectorAll('.state-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        clearProbes();
+        renderDiagram();
+        buildLegend();
+        updateDisplay();
+      };
+      stCtrl.appendChild(btn);
+    });
+  }
+
+  renderDiagram();
+  buildLegend();
+  updateDisplay();
+}
+
+function renderDiagram() {
+  const sc  = SCENARIOS[activeScenario];
+  const svg = sc.svg(circuitState);
+  document.getElementById('circuit-svg-wrap').innerHTML = svg;
+}
+
+function buildLegend() {
+  const sc  = SCENARIOS[activeScenario];
+  const pts = sc.getPoints(circuitState);
+  const container = document.getElementById('tp-legend');
+  container.innerHTML = '';
+  Object.entries(pts).forEach(([id, pt]) => {
+    const el = document.createElement('div');
+    el.className = 'tp-legend-item';
+    el.dataset.tp = id;
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', `Test point ${id}: ${pt.label}`);
+    el.innerHTML = `
+      <div class="tp-dot" style="border-color:${pt.color};background:${pt.color}22;"></div>
+      <div>
+        <div class="tp-name" style="color:${pt.color};">${id}</div>
+        <div class="tp-lbl">${pt.label}</div>
+      </div>`;
+    el.onclick  = () => clickTP(id);
+    el.onkeydown = (e) => { if (e.key==='Enter'||e.key===' '){ e.preventDefault(); clickTP(id); } };
+    container.appendChild(el);
+  });
+}
+
+// ════════════════════════════════════════════════════
+//  HOLD / REL
+// ════════════════════════════════════════════════════
+function toggleHold() {
+  holdMode = !holdMode;
+  const btn = document.getElementById('btn-hold');
+  btn.classList.toggle('active', holdMode);
+  btn.setAttribute('aria-pressed', String(holdMode));
+  document.getElementById('ind-hold').classList.toggle('active', holdMode);
+}
+function toggleRel() {
+  relMode = !relMode;
+  const btn = document.getElementById('btn-rel');
+  btn.classList.toggle('active', relMode);
+  btn.setAttribute('aria-pressed', String(relMode));
+}
+
+// ════════════════════════════════════════════════════
+//  AUDIO — continuity beep
+// ════════════════════════════════════════════════════
+let audioCtx = null;
+function playBeep() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc  = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.25);
+  } catch(e) { /* no audio context */ }
+}
+
+// ════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════
+buildDial();
+loadScenario('psu');
+</script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'🎛️',v:'',tx:'<strong>Start with the PSU scenario.</strong> Set the dial to VDC 200, click T4 (0V Common) for the black probe, then T3 (+24V DC) for the red. You should read approximately 24V.'},
+    {ic:'🔴',v:'warn',tx:'<strong>Red probe → VΩmA socket. Black probe → COM.</strong> This never changes for voltage or resistance. Check probe socket placement on the diagram before interpreting any reading.'},
+    {ic:'👆',v:'',tx:'<strong>Click a test point to place the red probe first,</strong> then click a second test point for the black. The meter measures automatically when both probes are placed.'},
+    {ic:'📺',v:'warn',tx:'<strong>OL on the display?</strong> The measured value exceeds the selected range. Switch to a higher range (e.g. VDC 200 instead of VDC 20) and probe again.'},
+    {ic:'🔊',v:'good',tx:'<strong>Continuity mode ()))):</strong> listen for the beep. A beep means resistance is below ~50Ω — the wire or component is intact. Silence (OL) means open circuit.'},
+    {ic:'⛔',v:'danger',tx:'<strong>For coil resistance measurement:</strong> the simulator de-energises the circuit automatically. In the real world, always de-energise, LOTO, and verify dead before switching to Ω mode.'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

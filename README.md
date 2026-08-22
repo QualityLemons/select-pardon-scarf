@@ -1,6 +1,6 @@
 # PLeC — Programmable Logic Controller Engineering (Interactive Training Platform)
 
-> **PLeC** is a browser-based PLC training platform designed to grow awareness and understanding of industrial automation *before* learners interact with real hardware or professional software. Learners create their own free account and progress at their own pace.
+> **PLeC** is a free, browser-based PLC training platform designed to grow awareness and understanding of industrial automation *before* learners interact with real hardware or professional software. No installation required.
 >
 > *Project 4 — Level 5 Diploma in Web Application Development, Dudley College of Technology (2025–2026)*
 > *Author: John E. Parman — [github.com/QualityLemons](https://github.com/QualityLemons)*
@@ -12,11 +12,9 @@
 - [Why PLeC Exists](#why-plec-exists)
 - [Educational Philosophy](#educational-philosophy)
 - [Who PLeC Is For](#who-plec-is-for)
-- [User Stories](#user-stories)
 - [Features](#features)
 - [Missions & Content](#missions--content)
 - [Architecture](#architecture)
-- [Accounts & Authentication](#accounts--authentication)
 - [Entity Relationship Diagram](#entity-relationship-diagram)
 - [Technology Stack](#technology-stack)
 - [Accessibility](#accessibility)
@@ -24,6 +22,7 @@
 - [Wireframes](#wireframes)
 - [Getting Started](#getting-started)
 - [Deployment](#deployment)
+- [Validation & Quality](#validation--quality)
 - [Testing](#testing)
 - [OpenPLC Connection](#openplc-connection)
 - [Licence](#licence)
@@ -59,7 +58,7 @@ From this, PLeC was built around three principles:
 Every mission opens with an explicit set of things the learner is going to understand or be able to do by the end. There are no hidden pass conditions.
 
 **2. Encourage learners to check their own progress.**
-Milestone checklists, self-assessment scoring, and a personal Mission Performance Log are all designed to make progress visible to the learner — not just to a teacher or system. The learner decides when they feel ready to move forward.
+Milestone checklists, self-assessment scoring, and the Mission Log are all designed to make progress visible to the learner — not just to a teacher or system. The learner decides when they feel ready to move forward.
 
 **3. Adjust based on feedback.**
 The Supervisor widget provides contextual hints from a Senior Control Engineer character. Hints are specific to the current page and task, giving targeted support without giving answers away. The pace of PLeC is set by the learner — there are no time limits on any mission.
@@ -78,49 +77,8 @@ PLeC is potentially useful at any age and in any setting. However, it is likely 
 | Apprentice engineers | Creates a conceptual foundation before first contact with real PLC hardware |
 | Adult career changers | Supports re-skilling into industrial automation at a self-directed pace |
 | Job seekers in manufacturing | Demonstrates practical awareness of PLC fundamentals to prospective employers |
-| Trainers and educators | A zero-cost platform to assign, demonstrate, and discuss PLC concepts, with an admin panel to oversee learner activity |
+| Trainers and educators | A zero-cost, zero-setup platform to assign, demonstrate, and discuss PLC concepts |
 | Supervising engineers | A structured starting point to use alongside a learner they are mentoring |
-
----
-
-## User Stories
-
-User stories were used throughout development to keep every feature grounded in real learner and admin needs. Each story follows the standard format: *As a [role], I can [action], so that [benefit].*
-
-### Learner
-
-| # | Story |
-|---|---|
-| L1 | As a **learner**, I can register for a free account using my email address and a password, so that I can save my progress and access all missions |
-| L2 | As a **learner**, I can sign in and out from any page, so that my session is under my control |
-| L3 | As a **learner**, I can reset my forgotten password via an email link, so that I can regain access to my account without contacting an admin |
-| L4 | As a **learner**, I can complete interactive PLC challenges and receive an instant scored Manager's Review, so that I know exactly how well I understand each topic |
-| L5 | As a **learner**, I can view my full submission history on my profile page in reverse-chronological order, so that I can track my improvement across multiple attempts |
-| L6 | As a **learner**, I can see my personal best grade and score for each of the 6 levels in a summary table, so that I know where I've achieved my strongest performance at a glance |
-| L7 | As a **learner**, I can see a "YOUR PROGRESS X / 6" counter on the home page after signing in, so that I know how many levels I have attempted without navigating away |
-| L8 | As a **learner**, I can write a reflection on what I learned after completing a mission — choosing the level, skill area, and a 1–5 confidence rating — so that I have a structured personal development record |
-| L9 | As a **learner**, I can edit a reflection I previously wrote, so that I can correct mistakes or add detail as my understanding grows |
-| L10 | As a **learner**, I can delete a reflection entry I no longer want, with a confirmation step that shows me a preview of the entry before it is removed permanently, so that I cannot accidentally delete the wrong entry |
-| L11 | As a **learner**, I can only see and modify my own reflections and submitted results — never another learner's — so that my data is private |
-| L12 | As a **learner**, I can update my first name, last name, and email address from my profile page, so that my account details stay accurate |
-| L13 | As a **learner**, I can change my password while logged in, so that I can keep my account secure |
-
-### Supervisor / Trainer
-
-| # | Story |
-|---|---|
-| S1 | As a **supervisor**, I can access the Django admin panel to view all learner accounts and submitted results, so that I can monitor learner progress across the cohort |
-| S2 | As a **supervisor**, I can reset a learner's password from the admin panel, so that I can help a learner who has been locked out or forgotten their credentials |
-| S3 | As a **supervisor**, I can view an audit log of all admin password changes — showing the acting admin, the target account, and the timestamp — so that I have a record of administrative activity |
-| S4 | As a **supervisor**, I receive an email alert whenever a learner's account is locked out after repeated failed login attempts, so that I am aware of potential access problems or security incidents |
-
-### Security
-
-| # | Story |
-|---|---|
-| SC1 | As a **learner**, my account is locked for 1 hour after 5 failed login attempts, with a visible countdown, so that my account is protected from brute-force password attacks |
-| SC2 | As a **learner**, I cannot be enumerated through the registration or password-reset flows — the platform gives no indication of whether a given email address is registered, so that my account existence is not exposed |
-| SC3 | As a **platform**, all CSRF tokens, session cookies, and password-reset links are signed with a strong secret key, so that they cannot be forged or replayed |
 
 ---
 
@@ -129,21 +87,12 @@ User stories were used throughout development to keep every feature grounded in 
 - 🎮 **Arcade / mission theme** — Teko + Share Tech Mono typefaces, chamfered clip-path cards, cyan/blue palette
 - 🌓 **Light / dark theme toggle** — FOUC-safe, persisted in `localStorage`
 - ♿ **WCAG 2.1 AA** — skip links, ARIA landmarks, live regions, keyboard navigation throughout
-- 🔐 **Self-service accounts** — anyone can register with an email and password; no admin involvement required
-- 🛡️ **Brute-force protection** — django-axes locks an account after 5 failed login attempts, with a live countdown page
-- 🔒 **Rate-limited password reset** — reset emails are throttled to 3 requests per hour per address, preventing abuse
 - 👷 **Supervisor widget** — page-specific hints from a Senior Control Engineer character, slide-in panel, Escape-to-close
 - 📊 **Real-time ladder logic** — animated SVG rungs, live I/O register table, PLC scan cycle simulation
 - 🔧 **Interactive DMM simulator** — rotary dial, probe placement, multi-scenario fault finding
 - 📝 **Documentation lessons** — learn maintenance logging, regulatory requirements, audit compliance
 - 🏆 **Milestone tracking** — per-page progress stored in `localStorage`, completion banners
-- 📋 **Personal submission history** — every "Manager's Review" a learner submits is saved to their account and viewable on their `/profile/` page
-- 🥇 **Best scores by level** — the profile page shows each learner's personal best grade and score across all attempts at each level, sortable by level or grade
-- 📈 **Course progress bar** — the home page shows how many of the 6 levels the learner has attempted ("YOUR PROGRESS 3/6"), calculated server-side on every login
-- 📓 **Reflection log** — full CRUD: learners can create, edit, and delete personal written reflections per level and skill area; 30–1,000 character notes with a 1–5 confidence rating; paginated list with creation timestamps
-- ✏️ **Edit profile** — learners can update their display name and email address from any authenticated page via the main nav
-- 🛠️ **Admin panel** — Django admin lets staff manage learner accounts, reset passwords, and review submitted assessment results
-- 📒 **Admin audit log** — every admin password change is recorded with the acting admin's name, target account, and timestamp; viewable from the admin panel
+- 📋 **Mission Log** — per-level reflective journal (skill practiced, difficulty rating, notes) stored in `localStorage`
 
 ---
 
@@ -167,236 +116,188 @@ User stories were used throughout development to keep every feature grounded in 
 
 ## Architecture
 
-PLeC is a **Django 5.2 application**. The interactive challenge pages remain plain, dependency-free HTML/CSS/JS files, but they are now served, authenticated, and backed by a real database through Django rather than a hand-rolled Python HTTP server.
-
 ```
 plec/
-├── manage.py                  ← Django management entry point
-├── plec.db                    ← SQLite database (local dev fallback only; created automatically if DATABASE_URL is unset — not committed to git)
-├── create_db.py                ← Legacy, dev-only script — builds a standalone local SQLite file, unrelated to production Postgres
-├── requirements.txt
-├── Procfile                    ← Heroku processes: release-phase migrations + gunicorn web server
-├── .python-version              ← Pins Python 3.11 for the Heroku buildpack
-├── scripts/
-│   └── post-merge.sh           ← Runs on every merge: pip install, migrate, collectstatic
-├── plec_project/                ← Django project package
-│   ├── settings.py              ← Installed apps, axes config, static files, email, ADMINS
-│   ├── urls.py                  ← Root URL routing (auth, admin, API, challenge pages)
-│   ├── wsgi.py / asgi.py
+├── serve.py                   ← Python http.server, port 5000 + REST API
+├── plec.db                    ← SQLite database (pre-seeded content)
+├── create_db.py               ← Script to recreate plec.db from source data
+├── README.md
+├── CONTRIBUTING.md
+├── CHANGELOG.txt
+├── .gitignore
+├── .github/
+│   └── workflows/
+│       ├── w3c-validate.yml   ← CI: W3C Nu validation on push/PR
+│       └── deploy-pages.yml   ← CI: GitHub Pages deploy on push to main
 ├── apps/
-│   ├── accounts/                ← Custom email-based user model & authentication
-│   │   ├── models.py             ← CustomUser (email as username field)
-│   │   ├── forms.py               ← RegistrationForm, EditProfileForm
-│   │   ├── views.py                ← LoginView, RegisterView, LockoutView, LogoutView, EditProfileView
-│   │   ├── signals.py               ← Emails admins when an account is locked out
-│   │   ├── admin.py                  ← Custom admin with in-panel password change + audit log
-│   │   └── tests.py                   ← Automated tests for lockout, cooldown & audit log behaviour
-│   └── assessment/               ← Challenge scoring engine, learner history & reflection log
-│       ├── models.py              ← Module, Milestone, SupervisorTip, AssessmentResult, Reflection
-│       ├── forms.py               ← ReflectionForm (level, skill, notes min-30, confidence 1–5)
-│       ├── scorer.py               ← Scoring algorithm (milestones, efficiency, bonus, grade)
-│       ├── reviewer.py              ← Written "Manager's Review" paragraph generator
-│       ├── api_views.py              ← JSON API — modules, tips, assess, results CRUD
-│       ├── views.py                   ← ResultHistoryView, ReflectionCreateView, ReflectionListView, ReflectionUpdateView, ReflectionDeleteView
-│       └── admin.py                    ← Admin views onto seeded content, saved results and reflections
-├── templates/
-│   ├── accounts/                 ← Login, register, lockout, password-change, edit-profile pages
-│   ├── registration/               ← Django's built-in password-reset flow templates
-│   └── assessment/                  ← Learner submission history, reflection log (create/edit/delete)
-└── challenge/                    ← Static challenge pages (unchanged philosophy: no build step)
-    ├── index.html                 ← Mission grid (arcade theme)
-    ├── plc-primer.html             ← PLC Boot Camp foundations
-    ├── level1.html … level6.html    ← The six PLC challenges
-    ├── multimeter.html / multimeter-lesson.html
-    ├── learn-your-log.html / maintenance-log.html
-    ├── supervisor.css / assess.js / assess.css / mission-log.css / mission-log.js
-    └── .jshintrc
+│   └── assessment/
+│       ├── gold_standards.py  ← Milestone definitions per level
+│       ├── scorer.py          ← Scoring logic
+│       └── reviewer.py        ← Feedback generator
+├── docs/
+│   └── wireframes/            ← Original hand-drawn design wireframes
+└── challenge/
+    ├── index.html             ← Mission grid (arcade theme)
+    ├── plc-primer.html        ← PLC Boot Camp foundations
+    ├── supervisor.css         ← Shared Supervisor widget styles
+    ├── assess.js              ← Shared milestone assessment engine
+    ├── assess.css             ← Assessment panel styles
+    ├── mission-log.css        ← Shared Mission Log styles
+    ├── mission-log.js         ← Shared Mission Log logic
+    ├── .jshintrc              ← JSHint ES6 config
+    ├── multimeter.html        ← Interactive DMM simulator
+    ├── multimeter-lesson.html ← 7-section DMM lesson + quiz
+    ├── level1.html            ← Start/Stop Latching Circuit
+    ├── level2.html            ← Tank Filling System
+    ├── level3.html            ← Modbus TCP
+    ├── level4.html            ← Safety Interlock
+    ├── level5.html            ← Timed Conveyor (TON)
+    ├── level6.html            ← Sequential Batching
+    ├── learn-your-log.html    ← Maintenance log lesson
+    └── maintenance-log.html   ← Practice log template
 ```
 
-**No build step for the challenge pages.** Each mission is still a self-contained HTML5 document using vanilla CSS/JS — the only thing that changed is *how* the page is served and *where* a learner's results are stored.
+**No build step. No framework. No dependencies beyond two Google Font families.**
 
-### How a page is served
+Each page is a fully standalone HTML5 document. Shared behaviour (milestone tracking, theme persistence, mission log) is handled via `localStorage` and the shared CSS/JS files in `challenge/`.
 
-| Environment | Behaviour |
-|---|---|
-| Development (`DJANGO_DEBUG=True`) | Django's `serve` view reads directly from the `challenge/` folder on every request — instant reflection of file edits |
-| Production (`DJANGO_DEBUG=False`) | Pages are collected by `collectstatic` into `staticfiles/` and served by **WhiteNoise** with cache-busting manifest hashes |
+### API endpoints (served by `serve.py`)
 
-### API endpoints (`apps/assessment/api_views.py`, mounted at `/api/`)
-
-#### Public / read-only
+#### Read-only endpoints
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `GET` | `/api/me` | Returns the current session's auth state (`{authenticated, email, is_staff}`) — used by the static challenge pages to swap the header between Sign In/Register and email + Sign Out |
-| `GET` | `/api/modules` | Returns all 11 modules with metadata and milestone counts |
-| `GET` | `/api/tips/:module_id` | Returns Supervisor tips for a given module |
+| `GET` | `/api/modules` | Returns all 11 modules with metadata and milestone counts from `plec.db` |
+| `GET` | `/api/tips/:module_id` | Returns Supervisor tips for a given module from `plec.db` |
 | `POST` | `/api/assess` | Scores a challenge attempt and returns grade, review paragraphs, and breakdown |
 
-#### Authenticated — Learner Assessment Results
-
-Every result endpoint below requires a logged-in session and is automatically scoped to `request.user` — one learner can never see or modify another learner's results.
+#### CRUD endpoints — Assessment Results
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/results` | **Create** — saves a Manager's Review result against the current user; `401` if not logged in |
-| `GET` | `/api/results` | **Read (list)** — returns the current user's saved results, newest-first |
-| `GET` | `/api/results/:id` | **Read (single)** — `404` if the result does not exist or belongs to someone else |
-| `PUT` | `/api/results/:id` | **Update** — replaces the `note` field on the current user's own result |
-| `DELETE` | `/api/results/:id` | **Delete** — removes a result permanently, only if it belongs to the current user |
+| `POST` | `/api/results` | **Create** — saves a Manager's Review result to `assessment_results` table; returns `201` with the new record |
+| `GET` | `/api/results` | **Read (list)** — returns all saved results ordered newest-first |
+| `GET` | `/api/results/:id` | **Read (single)** — returns one result by id; `404` if not found |
+| `PUT` | `/api/results/:id` | **Update** — replaces the `note` field on an existing result; returns updated record |
+| `DELETE` | `/api/results/:id` | **Delete** — removes a result permanently; returns `{"deleted": id}` |
+
+All endpoints return JSON. CORS headers allow `GET, POST, PUT, DELETE, OPTIONS` from any origin.
 
 #### CRUD user flow
 
 1. Learner completes a challenge and clicks **Get Manager's Review** on the completion banner.
 2. `assess.js` calls `POST /api/assess` → score and review paragraphs displayed in the modal.
-3. If the learner is logged in, `assess.js` calls `POST /api/results` (silent on failure) to persist the result against their account.
-4. On `/profile/`, the **Result History** page lists every attempt the logged-in learner has saved.
-5. Learners can edit their reflection note or delete a past result — always scoped to their own account.
+3. `assess.js` immediately calls `POST /api/results` (best-effort, silent on failure) to persist the result.
+4. On the homepage (`index.html`), the **Mission Performance Log** section fetches `GET /api/results` on page load and renders every saved attempt in a table.
+5. Each row shows Mission, Score, Grade, Milestones, Date, and a Reflection note field.
+6. Clicking **✏ Edit** makes the note cell editable inline — saving calls `PUT /api/results/:id` and updates the cell immediately without a page reload.
+7. Clicking **🗑 Delete** calls `DELETE /api/results/:id`; the row fades out and the count updates instantly.
 
----
+### Database (`plec.db`)
 
-## Accounts & Authentication
+A pre-seeded SQLite database committed to the repository. It is the single source of truth for structured content data and learner result history.
 
-PLeC accounts are backed by a **custom email-based user model** (`apps.accounts.CustomUser`) rather than Django's default username field.
-
-| Capability | URL | Notes |
+| Table | Rows | Contents |
 |---|---|---|
-| Self-registration | `/register/` | Anyone can create an account with an email + password. Every valid submission redirects to the login page without establishing a session (deliberate — prevents account-existence probing) |
-| Sign in | `/login/` | Staff are sent to `/admin/`; regular learners are sent to the challenge homepage |
-| Sign out | `/logout/` (POST) | The challenge homepage header shows the signed-in email and a Sign Out button (backed by `/api/me`) |
-| Forgot password | `/password-reset/` | Standard Django email-based reset flow; throttled to 3 reset emails per hour per address |
-| Change password | `/password-change/` | For logged-in users |
-| Edit profile | `/profile/edit/` | Learners can update first name, last name, and email address; email uniqueness is enforced |
-| Learner result history | `/profile/` | Shows the current user's personal best scores by level and full submission history |
-| Reflection log | `/reflect/` | Learners create and manage personal written reflections per level and skill area |
-| Admin panel | `/admin/` | Staff/superuser only — manage accounts, reset passwords in-panel, review any learner's saved results |
-| Admin audit log | `/admin/accounts/adminauditlog/` | Records every admin password-change with actor, target, and timestamp |
+| `modules` | 11 | All missions — id, title, type, html file, difficulty, description, role title |
+| `milestones` | 38 | Per-level assessment goals with weights |
+| `efficiency_thresholds` | 6 | Scan-count bands (exceptional → poor) per challenge level |
+| `bonus_criteria` | 6 | Optional bonus tasks with point values |
+| `supervisor_tips` | 56 | All contextual hint text, icons, and variants per module |
+| `grade_descriptors` | 5 | A–F grade labels and descriptions |
+| `assessment_results` | dynamic | Learner results — score, grade, milestones, efficiency label, bonus, reflection note, timestamp |
 
-### Brute-force protection
+To rebuild the database from scratch (e.g. after editing `create_db.py`):
 
-Login attempts are protected by **django-axes**:
+```bash
+python create_db.py
+```
 
-- 5 failed attempts on the same email locks that account for 1 hour (`AXES_FAILURE_LIMIT` / `AXES_COOLOFF_TIME` in `plec_project/settings.py`)
-- Lockout is scoped **per username**, not per IP — rotating IP addresses does not reset the counter, and one user's lockout never affects another account
-- A locked-out visitor is shown a dedicated countdown page (`/lockout/`) rather than a generic error
-- The lockout page deliberately shows the same duration for a genuinely-locked account and an unknown email, so an attacker cannot use response differences to enumerate valid accounts
-- A successful login resets the failure counter
-- Admins configured via the `DJANGO_ADMINS` environment variable receive an email whenever an account is locked out (`apps/accounts/signals.py`)
-
-### Registration safeguards
-
-`RegistrationForm` (`apps/accounts/forms.py`) rejects duplicate emails and runs Django's standard password validators (minimum length, not entirely numeric, not a common password, not too similar to the email).
+> **Note:** `create_db.py` drops and recreates all tables including `assessment_results` — any saved results are lost. On existing deployments (e.g. Heroku), `serve.py` runs `CREATE TABLE IF NOT EXISTS assessment_results` at startup so the CRUD table is added automatically without deleting other data.
 
 ---
 
 ## Entity Relationship Diagram
 
+The logical data model describes how content entities relate within the platform. Because PLeC is a static site, all "storage" is client-side in the browser's `localStorage`.
+
 ```mermaid
 erDiagram
-
-    CUSTOM_USER {
-        int      id           PK
-        string   email        "unique — used as the login identifier"
-        string   password     "hashed"
-        boolean  is_staff
-        boolean  is_active
-        datetime date_joined
-    }
 
     MODULE {
         string id         PK "e.g. level1, multimeter"
         string title
         string type       "challenge | lesson | tool"
-        string html_file
+        string file       "HTML filename"
         int    difficulty "1–6"
-        int    sort_order
+        string tags       "comma-separated topic tags"
     }
 
     MILESTONE {
-        int    id            PK
-        string module_id     FK
-        string milestone_key
-        string label
-        int    weight
+        string id          PK
+        string module_id   FK
+        int    order
+        string label       "user-visible task description"
+        string dom_id      "HTML element id for tracking"
+    }
+
+    LESSON_SECTION {
+        string id           PK
+        string module_id    FK
+        int    order
+        string title
+        string mark_btn_id  "DOM id of Mark-as-Read button"
     }
 
     SUPERVISOR_TIP {
-        int    id          PK
+        string id          PK
         string module_id   FK
-        int    sort_order
-        string icon
+        int    order
+        string icon        "emoji character"
         string variant     "default | warn | danger | good | purple"
-        string tip_text
+        string text        "HTML tip body"
     }
 
-    EFFICIENCY_THRESHOLD {
-        string module_id  PK, FK
-        int    exceptional
-        int    proficient
-        int    satisfactory
-        int    poor
+    MISSION_LOG_ENTRY {
+        string   id          PK "timestamp-based"
+        string   module_id   FK
+        string   skill       "skill the learner practiced"
+        int      difficulty  "1–5 star rating"
+        string   notes       "free-text reflection"
+        datetime saved_at
     }
 
-    BONUS_CATEGORY {
-        int    id         PK
-        string module_id  FK
-        string bonus_key
-        string label
-        int    points
+    USER_PROGRESS {
+        string   module_id       FK
+        string   milestones_done "JSON array of completed milestone IDs"
+        datetime last_visited
     }
 
-    GRADE_DESCRIPTOR {
-        string grade      PK
-        int    min_score
-        string label
-        string description
+    USER_PREFERENCES {
+        string theme       "dark | light"
+        string storage_key "localStorage key: plc-theme"
     }
 
-    ASSESSMENT_RESULT {
-        int      id                PK
-        int      user_id           FK "nullable — kept if user is deleted"
-        string   level_key
-        int      score
-        string   grade
-        string   tier_label
-        int      milestones_done
-        int      milestones_total
-        string   efficiency_label
-        int      bonus_earned
-        string   note
-        datetime created_at
-    }
-
-    REFLECTION {
-        int      id            PK
-        int      user_id       FK "scoped to owner — other users cannot read or write"
-        string   level_key     "e.g. level1, multimeter"
-        string   skill_area    "e.g. Ladder Logic & Circuit Behaviour"
-        text     notes         "30–1000 characters"
-        int      confidence    "1–5 self-rating"
-        datetime created_at
-        datetime updated_at
-    }
-
-    ADMIN_AUDIT_LOG {
-        int      id            PK
-        int      admin_id      FK "the staff member who performed the action"
-        string   action        "e.g. password_change"
-        string   target_email  "the account that was modified"
-        datetime performed_at
-    }
-
-    CUSTOM_USER      ||--o{ ASSESSMENT_RESULT    : "submits"
-    CUSTOM_USER      ||--o{ REFLECTION           : "writes"
-    CUSTOM_USER      ||--o{ ADMIN_AUDIT_LOG      : "recorded as actor in"
-    MODULE           ||--o{ MILESTONE            : "defines"
-    MODULE           ||--o{ SUPERVISOR_TIP       : "provides hints via"
-    MODULE           ||--o{ BONUS_CATEGORY       : "offers"
-    MODULE           ||--o| EFFICIENCY_THRESHOLD : "scored against"
-    MODULE           ||--o{ ASSESSMENT_RESULT    : "scored by"
+    MODULE           ||--o{ MILESTONE          : "defines"
+    MODULE           ||--o{ LESSON_SECTION     : "structures"
+    MODULE           ||--o{ SUPERVISOR_TIP     : "provides hints via"
+    MODULE           ||--o{ MISSION_LOG_ENTRY  : "logged in"
+    MODULE           ||--o| USER_PROGRESS      : "tracks learner in"
+    USER_PROGRESS    }o--|| MODULE             : "belongs to"
+    USER_PREFERENCES ||--o{ USER_PROGRESS      : "applies alongside"
 ```
 
-Client-side state that never touches the server — the theme choice, per-page milestone checkboxes, and the free-text Mission Log widget — still lives in `localStorage`, exactly as before. **Manager's Review results**, **reflection log entries**, and **admin audit log entries** are all persisted server-side, per-account.
+### Entity descriptions
+
+| Entity | Storage | Description |
+|---|---|---|
+| **MODULE** | HTML file | A single page — challenge (interactive ladder logic), lesson (reading + quiz), or tool (simulator). |
+| **MILESTONE** | DOM + `localStorage` | A discrete learning goal within a module. Completion state held in `localStorage`. |
+| **LESSON_SECTION** | DOM | A scrollable content section within a lesson page, marked as read by the user. |
+| **SUPERVISOR_TIP** | JS array (per page) | A contextual hint shown when the user opens the Supervisor widget. |
+| **MISSION_LOG_ENTRY** | `localStorage` | A reflective journal entry the learner writes after completing a mission. |
+| **USER_PROGRESS** | `localStorage` | Record of which milestones are complete for each module, per browser. |
+| **USER_PREFERENCES** | `localStorage` | User's chosen colour theme (`dark` / `light`), persisted across sessions. |
 
 ---
 
@@ -404,17 +305,13 @@ Client-side state that never touches the server — the theme choice, per-page m
 
 | Layer | Technology |
 |---|---|
-| Backend framework | Django 5.2 |
-| Authentication | Django sessions + custom `CustomUser` (email login) + django-axes 8.x brute-force protection |
-| Database | PostgreSQL via Django ORM (`dj-database-url` + `psycopg2`), with SQLite (`plec.db`) as a local-only fallback when `DATABASE_URL` is unset |
-| Static file serving | WhiteNoise (`CompressedManifestStaticFilesStorage`) |
 | Content | HTML5 — semantic, landmark-based structure |
 | Styling | CSS custom properties (design tokens), no preprocessor |
 | Interactivity | Vanilla ES6 JavaScript — no frameworks, no bundler |
 | Animation | SVG + CSS `@keyframes` |
 | Fonts | Google Fonts — Teko (display), Share Tech Mono (data) |
-| Client persistence | `window.localStorage` — theme, milestone progress, mission log |
-| Server-side persistence | Django ORM / PostgreSQL — user accounts, sessions, saved assessment results |
+| Persistence | `window.localStorage` — theme, milestone progress, mission log |
+| Server (dev) | Python 3 `http.server` |
 | Validation | W3C Nu HTML Checker · JSHint ES6 · Google Lighthouse |
 
 ---
@@ -445,7 +342,7 @@ PLeC targets **WCAG 2.1 Level AA** across all pages.
 --bg:    #0a0e1a   /* page background — deep navy */
 --cyan:  #06b6d4   /* primary accent */
 --blue:  #3b82f6   /* secondary accent / ladder rail colour */
---amber: #f59e0b   /* warning states / auth call-to-actions */
+--amber: #f59e0b   /* warning states */
 --green: #22c55e   /* success / milestone complete */
 --red:   #ef4444   /* danger / E-Stop */
 
@@ -465,8 +362,6 @@ clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px),
 clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px),
                    calc(100% - 10px) 100%, 0 100%, 0 10px);
 ```
-
-Amber (`#f59e0b`) is used consistently across the app as the "authentication" colour — the Sign In and Register links on every challenge page share this styling so the entry point to an account is instantly recognisable.
 
 ---
 
@@ -502,7 +397,7 @@ A three-column layout was planned from the start: simulated interactive PLC (lad
 
 ![Wireframe: Maintenance Log](docs/wireframes/wireframe-maintenance-log.jpg)
 
-The maintenance log wireframe specified the eight form fields (Name, Job No., Date, Site, Supervisor, problem description, faults found, parts replaced, fix demonstrated), a Submit for Review button, and a Hint button tied to the Supervisor character. The note "graded based on a central record in Django" reflects the server-side design the project has since implemented in full.
+The maintenance log wireframe specified the eight form fields (Name, Job No., Date, Site, Supervisor, problem description, faults found, parts replaced, fix demonstrated), a Submit for Review button, and a Hint button tied to the Supervisor character. The note "graded based on a central record in Django" reflects an earlier server-side design that was later simplified to a client-side implementation.
 
 ---
 
@@ -510,788 +405,631 @@ The maintenance log wireframe specified the eight form fields (Name, Job No., Da
 
 ### Requirements
 
-- Python 3.11+
+- Python 3.x (any version with `http.server`)
 - A modern browser (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
-
-### Environment variables
-
-PLeC requires a `DJANGO_SECRET_KEY` to start. All other variables have safe defaults for local development.
-
-| Variable | Required | Default | Purpose |
-|---|---|---|---|
-| `DJANGO_SECRET_KEY` | ✅ | — | Django cryptographic signing key; the app refuses to start without it |
-| `DJANGO_DEBUG` | | `False` | `True` enables live-reload serving of `challenge/` and Django's debug pages |
-| `DATABASE_URL` | prod | *(unset)* | PostgreSQL connection URL. If unset, the app also checks Heroku's `HEROKU_POSTGRESQL_*_URL` attachment variables; in local development (`DJANGO_DEBUG=True`) it falls back to SQLite |
-| `ALLOWED_HOSTS` | | *(empty)* | Comma-separated list of allowed hostnames in production |
-| `CSRF_TRUSTED_ORIGINS` | prod | *(empty)* | Comma-separated origins allowed to POST forms, e.g. `https://your-app.herokuapp.com` |
-| `DJANGO_ADMINS` | | *(empty)* | Comma-separated `Name:email@example.com` list — receives lockout alert emails |
-| `EMAIL_BACKEND` / `EMAIL_HOST` / `EMAIL_PORT` / `EMAIL_HOST_USER` / `EMAIL_HOST_PASSWORD` / `EMAIL_USE_TLS` | | console backend | SMTP settings for password-reset and admin-alert emails |
-| `DEFAULT_FROM_EMAIL` | | `noreply@plec.local` | From-address on outgoing email |
 
 ### Run locally
 
 ```bash
 git clone https://github.com/QualityLemons/plec.git
 cd plec
-pip install -r requirements.txt
-export DJANGO_SECRET_KEY="a-long-random-string"
-export DJANGO_DEBUG=True
-python manage.py migrate
-python manage.py runserver 0.0.0.0:5000
+python serve.py
 # Open http://localhost:5000
 ```
 
-Create an admin account for the Django admin panel:
+### No server? No problem.
 
-```bash
-python manage.py createsuperuser
-```
-
-Ordinary learner accounts do **not** need this step — anyone can create one at `/register/`.
+Open `challenge/index.html` directly in a browser. All pages work from the local filesystem — there are no server-side dependencies for the challenge content.
 
 ---
 
 ## Deployment
 
-### Why deploy?
+PLeC is a static site and can be deployed to any platform that serves HTML files.
 
-Right now PLeC runs inside a Replit development workspace — accessible to you as the developer, but not to learners. **Deploying** moves the application to a public, persistent server so that learners at Dudley College (or anywhere else) can open it in a browser without any developer involvement.
+### Option 1 — GitHub Pages (recommended, free)
 
-Deploying gives you:
+GitHub Pages is the simplest zero-cost deployment option. The repository includes a ready-made workflow at `.github/workflows/deploy-pages.yml` that deploys automatically on every push to `main`.
 
-- **A permanent URL** — learners bookmark one address that always works, regardless of whether the Replit workspace is open.
-- **Persistent learner data** — accounts, assessment results, and mission-log entries are stored in a production PostgreSQL database that survives server restarts and redeploys. The development SQLite file would silently wipe everything on a container restart; PostgreSQL does not.
-- **Always-on availability** — the development server stops when the workspace goes to sleep. A deployed app runs 24/7 without you needing to be logged in.
-- **Production-grade security** — `DEBUG` is off, HTTPS is enforced, HSTS headers are set, and session cookies are marked `Secure`. These protections are intentionally disabled in development to make local testing easier; deployment switches them all on automatically.
-- **Institutional credibility** — a live URL is the deliverable you hand to Dudley College. It is also what assessors, supervisors, and the young people from the Powered by CAN evaluation actually visit.
+**Setup steps:**
 
-PLeC is a Django application and needs a Python host capable of running `manage.py`/WSGI — plain static hosting (GitHub Pages, Netlify, S3, etc.) is not sufficient, because authentication, the admin panel, and the assessment API all require a running Django process.
+1. Fork or push this repository to your GitHub account.
+2. Go to **Settings → Pages** in your repository.
+3. Under **Build and deployment**, set the source to **GitHub Actions**.
+4. Push any commit to `main` — the workflow will build and deploy automatically.
+5. Your site will be live at `https://<your-username>.github.io/<repo-name>/challenge/`
 
-### Heroku (or any Python buildpack host)
+The workflow file (`.github/workflows/deploy-pages.yml`) handles everything:
 
-The included `Procfile` runs migrations in Heroku's release phase and serves the app with gunicorn:
-
+```yaml
+# Deploys challenge/ directory to GitHub Pages on push to main
+on:
+  push:
+    branches: [main]
 ```
-release: python manage.py migrate --noinput
-web: gunicorn plec_project.wsgi --bind 0.0.0.0:$PORT --workers 2 --timeout 60
+
+### Option 2 — Run the Python server directly
+
+The included `serve.py` runs Python's built-in HTTP server on port 5000 and serves the `challenge/` directory.
+
+```bash
+python serve.py
+# Listening on http://0.0.0.0:5000
 ```
 
-`.python-version` pins Python 3.11 for the buildpack, and `requirements.txt` already includes gunicorn.
+This works on any machine with Python 3 installed — including Raspberry Pi, which makes PLeC usable in classrooms and workshops without internet access.
 
-Static files are collected automatically during Heroku's **build** phase (do **not** set `DISABLE_COLLECTSTATIC` — release-phase dynos have a throwaway filesystem, so files collected there never reach the web dyno). `settings.py` is written so `collectstatic` works without a database connection, which is exactly the situation during a Heroku build.
+**To run on a different port:**
 
-### Required production configuration
+```bash
+# Edit serve.py — change the port variable near the top
+PORT = 8080
+```
 
-1. Attach a PostgreSQL database. On Heroku, add the **Heroku Postgres** add-on (Resources tab) — it sets `DATABASE_URL` automatically. The app also accepts Heroku's colored attachment variables (e.g. `HEROKU_POSTGRESQL_SILVER_URL`) when `DATABASE_URL` is missing, refuses to guess if several are present, and rejects non-PostgreSQL databases in production. The release log prints which variable it connected from.
-2. Set `DJANGO_SECRET_KEY` to a long random string (never reuse the development value).
-3. Set `DJANGO_DEBUG=False` (or leave unset — `False` is the default).
-4. Set `ALLOWED_HOSTS` to your exact production domain, e.g. `your-app.replit.app`. Do **not** use a wildcard pattern such as `.replit.app` — that accepts requests addressed to any app on that platform, not just yours. The server logs a `SecurityWarning` at startup if a wildcard is detected in non-DEBUG mode.
-5. Set `CSRF_TRUSTED_ORIGINS` to the full origin matching that domain, e.g. `https://your-app.replit.app`. This must include the scheme (`https://`) and must not contain wildcards.
-6. Configure SMTP `EMAIL_*` variables so password-reset links and admin lockout alerts are actually delivered (the default console backend only prints emails to the server log).
-7. Optionally set `DJANGO_ADMINS` so staff are notified by email when an account is locked out.
-8. One-time, after the first deploy (Heroku dashboard → More → Run console):
-   ```bash
-   python manage.py load_seed_data     # modules, milestones, supervisor tips
-   python manage.py createsuperuser    # your admin account
-   ```
+### Option 3 — Static hosting services
 
-> **Reverse-proxy SSL:** Heroku terminates HTTPS at its router and forwards plain HTTP to the dyno. `settings.py` sets `SECURE_PROXY_SSL_HEADER` so Django trusts `X-Forwarded-Proto`, preventing redirect loops with `SECURE_SSL_REDIRECT`.
+Because PLeC has no server-side logic in the challenge pages, any static hosting service will work. Drop the contents of the `challenge/` folder into:
 
-> **Database:** The app uses PostgreSQL in production, configured entirely through the `DATABASE_URL` environment variable (parsed via `dj-database-url`). This is required on any host with an ephemeral filesystem (e.g. container restarts, redeploys) — a file-based SQLite database would silently lose all user accounts and saved results on every restart, and cannot safely handle concurrent writes. The SQLite fallback (`plec.db`) only activates in local development with `DJANGO_DEBUG=True`; in production, a missing database is caught at first use (build steps like `collectstatic` still work), and the release-phase `migrate` fails loudly rather than silently writing to an ephemeral file.
+| Service | How to deploy |
+|---|---|
+| **Netlify** | Drag and drop the `challenge/` folder onto netlify.com/drop |
+| **Vercel** | `vercel --cwd challenge` from the command line |
+| **Cloudflare Pages** | Connect the repo; set build output to `challenge/` |
+| **AWS S3** | Upload `challenge/` to a bucket with static website hosting enabled |
+| **USB / offline** | Copy `challenge/` to a USB stick; open `index.html` in any browser |
+
+### Deploying the assessment API (optional)
+
+The `/api/assess` endpoint in `serve.py` powers the performance review feature on each level. This is not required for the core missions — all ladder logic, simulations, and lesson content run entirely in the browser.
+
+If you want the assessment endpoint active in production, deploy `serve.py` as a Python WSGI application using **Gunicorn** or a similar server:
+
+```bash
+pip install gunicorn
+gunicorn --bind 0.0.0.0:5000 --workers 2 serve:app
+```
+
+> **Note:** `serve.py` uses Python's `http.server` module and is not suitable for high-traffic production use as-is. For a production environment with many concurrent users, wrap it in Gunicorn or replace with a lightweight Flask app.
+
+### Environment variables
+
+PLeC has no required environment variables. All configuration is in source files.
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `PORT` | `5000` | Port the Python server listens on (edit `serve.py`) |
 
 ### CI — W3C validation on every push
 
-The repository includes a W3C validation workflow at `.github/workflows/w3c-validate.yml`. It runs automatically on every push and pull request, checking the challenge pages against the W3C Nu HTML Checker.
+The repository includes a W3C validation workflow at `.github/workflows/w3c-validate.yml`. It runs automatically on every push and pull request, checking all HTML pages against the W3C Nu HTML Checker. A failing check means a page has introduced HTML errors.
+
+---
+
+## Validation & Quality
+
+[![W3C HTML5 Validated](https://img.shields.io/badge/W3C-HTML5%20Validated-0068B3?style=flat&logo=w3c&logoColor=white)](https://validator.w3.org/nu/?doc=https://plec-game-5a687326fd9d.herokuapp.com/)
+[![JSHint Passing](https://img.shields.io/badge/JSHint-ES6%20Clean-4EAA25?style=flat&logo=javascript&logoColor=white)](https://jshint.com/)
+[![Lighthouse ≥90](https://img.shields.io/badge/Lighthouse-%E2%89%A590%2F100-F97316?style=flat&logo=googlechrome&logoColor=white)](https://developer.chrome.com/docs/lighthouse/)
+
+---
+
+### W3C HTML Validation (Nu HTML Checker)
+
+All pages validated against the [W3C Nu HTML Checker](https://validator.w3.org/nu/) — 0 errors and 0 warnings across all 11 pages. Any items flagged as *Info* (e.g. trailing slash on void elements) are informational only and do not affect HTML validity.
+
+[![W3C Nu Checker — live result for deployed app](docs/validation/w3c-validation-result.png)](https://validator.w3.org/nu/?doc=https://plec-game-5a687326fd9d.herokuapp.com/)
+
+*Screenshot: W3C Nu HTML Checker validating the deployed PLeC application. Click image to run a live check.*
+
+| Page | Status |
+|---|---|
+| `index.html` — Mission Grid | ✅ 0 errors, 0 warnings |
+| `plc-primer.html` — PLC Boot Camp | ✅ 0 errors, 0 warnings |
+| `level1.html` — Start/Stop Latching | ✅ 0 errors, 0 warnings |
+| `level2.html` — Tank Filling | ✅ 0 errors, 0 warnings |
+| `level3.html` — Modbus TCP | ✅ 0 errors, 0 warnings |
+| `level4.html` — Safety Interlock | ✅ 0 errors, 0 warnings |
+| `level5.html` — TON Timer | ✅ 0 errors, 0 warnings |
+| `level6.html` — Sequential Batch | ✅ 0 errors, 0 warnings |
+| `learn-your-log.html` | ✅ 0 errors, 0 warnings |
+| `multimeter-lesson.html` | ✅ 0 errors, 0 warnings |
+| `multimeter.html` | ✅ 0 errors, 0 warnings |
+
+To re-validate any page locally:
+
+```bash
+# Install the Python html5validator wrapper
+pip install html5validator
+html5validator --root challenge/
+```
+
+---
+
+### JSHint (ES6)
+
+All standalone JavaScript files lint clean under ES6 rules. Run from the project root:
+
+```bash
+jshint challenge/assess.js challenge/mission-log.js --config challenge/.jshintrc
+# No output = no errors (exit code 0)
+```
+
+[![JSHint — the linting tool used](docs/validation/jshint-logo.png)](https://jshint.com/)
+
+*Screenshot: JSHint.com — the linter used to verify all PLeC JavaScript. Version 2.13.6.*
+
+Configuration (`challenge/.jshintrc`):
+
+```json
+{
+  "esversion": 6,
+  "browser": true,
+  "undef": false,
+  "unused": false
+}
+```
+
+All scripts use ES6 features (`const`, `let`, arrow functions, destructuring) within IIFEs — no global namespace pollution beyond the intentionally-shared `svOpen` / `svClose` supervisor functions.
+
+### Google Lighthouse
+
+Lighthouse audits run against the local dev server (`python serve.py`, port 5000).
+
+| Category | Score |
+|---|---|
+| Performance | ≥ 90 |
+| Accessibility | ≥ 95 |
+| Best Practices | ≥ 90 |
+| SEO | ≥ 90 |
+
+Key optimisations:
+
+- Google Fonts loaded with `media="print" onload="this.media='all'"` — eliminates render-blocking font requests
+- FOUC prevention via inline `<script>` in `<head>` reading `localStorage` before first paint
+- All imagery is inline SVG — zero external image requests
+- No JavaScript frameworks or bundlers — zero KB of framework overhead
+- `will-change: transform` applied only to actively animating SVG elements
 
 ---
 
 ## Testing
 
-PLeC uses a two-layer test strategy: **automated Django tests** for authentication and server-side logic, plus a **legacy automated suite** covering the original scoring/content-seeding logic, and **manual test procedures** for the browser-based frontend.
+PLeC uses a two-layer test strategy: **automated tests** for all server-side logic and **manual test procedures** for the browser-based frontend. This section documents both layers in full, including real results, every bug found during development, how each was fixed, and an honest list of known remaining limitations.
 
-### Automated — Django (`apps/accounts/tests.py`)
+---
 
-Run with:
+### 1. Testing Strategy
 
-```bash
-python manage.py test apps.accounts
+| Layer | Scope | Tool | How to run |
+|---|---|---|---|
+| Automated | Database integrity, scoring logic, review generation, all HTTP endpoints (inc. full CRUD cycle) | Python `unittest` | `python -m unittest discover -s tests -v` |
+| Manual — Functionality | PLC simulation correctness, milestone detection, assessment modal, CRUD UI | Browser (Chrome, Firefox) | Follow procedures in §3 |
+| Manual — Usability | Keyboard navigation, ARIA live regions, theme persistence, copy clarity | Browser + keyboard, VoiceOver | Follow procedures in §3 |
+| Manual — Responsiveness | Layout at 375 px, 768 px, 1440 px; touch events | DevTools device emulation | Follow procedures in §3 |
+| Manual — Data Management | localStorage, API responses, CRUD operations end-to-end | Browser DevTools Network tab | Follow procedures in §3 |
+
+The automated suite runs against a **dedicated test database** (`tests/test_plec.db`) that is created fresh for each run and deleted on teardown. It never reads from or writes to `plec.db`.
+
+---
+
+### 2. Automated Test Results
+
+#### 2.1 Full test run output
+
+Command run from the project root on 22 June 2026:
+
+```
+python -m unittest tests/test_plec.py -v
 ```
 
-This suite (39 tests) exercises the authentication and lockout system end-to-end using Django's test client — not just unit-level helpers:
+```
+Created tests/test_plec.db (4,096 bytes)
+  modules                    11 rows
+  milestones                 38 rows
+  efficiency_thresholds       6 rows
+  bonus_criteria              6 rows
+  supervisor_tips            56 rows
+  grade_descriptors           5 rows
 
-- Lockout engages after exactly 5 failed attempts, and stays locked even against the correct password
-- Lockout is scoped per-username — rotating IP addresses does not reset the counter, and locking one account never affects another
-- A successful login resets the failure counter
-- The `/lockout/` countdown page renders the correct duration for every supported `AXES_COOLOFF_TIME` shape (int, `timedelta`, or callable)
-- The lockout page intentionally shows the *same* duration for a genuinely-locked account and a completely unknown email, so a probing attacker cannot use timing differences to enumerate valid accounts
-- `_cooldown_remaining()` always reads `attempt_time` fresh from the database rather than caching it, so the countdown is accurate even across a server restart mid-cooldown
+test_assess_endpoint_invalid_json ... ok
+test_assess_endpoint_score_range ... ok
+test_assess_endpoint_valid_submission ... ok
+test_assess_returns_review_paragraphs ... ok
+test_modules_contain_required_fields ... ok
+test_modules_endpoint_returns_200 ... ok
+test_modules_endpoint_structure ... ok
+test_results_create_missing_field_returns_400 ... ok
+test_results_create_persists_fields ... ok
+test_results_create_returns_201 ... ok
+test_results_delete_nonexistent_returns_404 ... ok
+test_results_delete_removes_record ... ok
+test_results_delete_returns_200 ... ok
+test_results_get_nonexistent_returns_404 ... ok
+test_results_get_single_returns_200 ... ok
+test_results_list_contains_created_record ... ok
+test_results_list_ordered_newest_first ... ok
+test_results_list_returns_200 ... ok
+test_results_update_nonexistent_returns_404 ... ok
+test_results_update_note_persists ... ok
+test_results_update_note_returns_200 ... ok
+test_tips_each_level_has_tips ... ok
+test_tips_endpoint_invalid_module ... ok
+test_tips_endpoint_valid_module ... ok
+test_all_modules_have_html_file ... ok
+test_all_tables_exist ... ok
+test_each_challenge_has_milestones ... ok
+test_efficiency_thresholds_present ... ok
+test_grade_descriptors_count ... ok
+test_milestone_count ... ok
+test_module_count ... ok
+test_module_types_valid ... ok
+test_rebuild_is_idempotent ... ok
+test_supervisor_tip_variants_valid ... ok
+test_supervisor_tips_count ... ok
+test_all_tiers_reachable ... ok
+test_exceptional_tier_label ... ok
+test_fail_tier_label ... ok
+test_paragraphs_are_non_empty_strings ... ok
+test_review_has_required_keys ... ok
+test_summary_line_contains_score ... ok
+test_all_levels_scoreable ... ok
+test_bonus_score_capped_at_5 ... ok
+test_efficiency_labels ... ok
+test_grade_boundaries ... ok
+test_milestone_detail_completeness ... ok
+test_partial_milestones_counted_correctly ... ok
+test_perfect_score_level1 ... ok
+test_score_capped_at_100 ... ok
+test_unknown_level_returns_grade_f ... ok
+test_zero_milestones_gives_low_score ... ok
 
-### Automated — legacy content/scoring suite (`tests/test_plec.py`)
+----------------------------------------------------------------------
+Ran 51 tests in 1.561s
+
+OK
+```
+
+**Result: 51 passed, 0 failed, 0 errors.**
+
+#### 2.2 Test class summaries
+
+| Class | Tests | Scope | Result |
+|---|---|---|---|
+| `TestDatabase` | 11 | Schema completeness, row counts, data-type constraints, idempotent rebuild | ✅ 11/11 |
+| `TestScorer` | 10 | Grade boundaries, score cap at 100, partial milestones, efficiency labels, all six levels | ✅ 10/10 |
+| `TestReviewer` | 6 | Response shape, all five tier labels reachable, non-empty paragraphs, summary line contains score | ✅ 6/6 |
+| `TestAPIEndpoints` | 24 | HTTP status codes, JSON structure, live server round-trips, full CRUD lifecycle | ✅ 24/24 |
+
+#### 2.3 Detailed test descriptions
+
+| Test | Class | What it asserts |
+|---|---|---|
+| `test_all_tables_exist` | Database | All 7 tables present after `build()`: modules, milestones, efficiency_thresholds, bonus_criteria, supervisor_tips, grade_descriptors, assessment_results |
+| `test_module_count` | Database | Exactly 11 module rows |
+| `test_supervisor_tips_count` | Database | ≥ 56 supervisor tip rows |
+| `test_rebuild_is_idempotent` | Database | Calling `build()` twice produces identical row counts |
+| `test_supervisor_tip_variants_valid` | Database | Every tip variant is one of the 5 allowed values |
+| `test_each_challenge_has_milestones` | Database | All 6 challenge levels have ≥ 5 milestones each |
+| `test_efficiency_thresholds_present` | Database | All 6 challenge levels have scan-count thresholds |
+| `test_all_modules_have_html_file` | Database | No module has a blank `html_file` field |
+| `test_grade_descriptors_count` | Database | Exactly 5 grade descriptors (A–F) |
+| `test_module_types_valid` | Database | Every module type is `challenge`, `lesson`, or `tool` |
+| `test_perfect_score_level1` | Scorer | All 5 milestones + 200 scans (exceptional) → score ≥ 90, grade A |
+| `test_score_capped_at_100` | Scorer | Score never exceeds 100 regardless of bonus stack |
+| `test_zero_milestones_gives_low_score` | Scorer | 0 milestones → score < 45 (F or D) |
+| `test_unknown_level_returns_grade_f` | Scorer | Unrecognised level key → score 0, grade F |
+| `test_efficiency_labels` | Scorer | Each scan-count band maps to the correct string label |
+| `test_grade_boundaries` | Scorer | All A/B/C/D/F threshold values produce the documented grade |
+| `test_partial_milestones_counted_correctly` | Scorer | Submitted milestone IDs are counted exactly |
+| `test_milestone_detail_completeness` | Scorer | `milestone_detail` contains one entry per milestone |
+| `test_bonus_score_capped_at_5` | Scorer | Bonus cannot exceed the 5-point cap |
+| `test_all_levels_scoreable` | Scorer | `score_attempt()` returns a valid dict for all 6 levels |
+| `test_exceptional_tier_label` | Reviewer | Score ≥ 90 → `tier_label` == `"Exceptional"` |
+| `test_fail_tier_label` | Reviewer | Score < 45 → `tier_label` == `"Unsatisfactory"` |
+| `test_all_tiers_reachable` | Reviewer | All 5 tier labels appear across the score range |
+| `test_paragraphs_are_non_empty_strings` | Reviewer | `paragraph_1`, `paragraph_2`, `paragraph_3` always non-empty |
+| `test_review_has_required_keys` | Reviewer | Response always contains all 6 required keys |
+| `test_summary_line_contains_score` | Reviewer | `summary_line` includes the numeric score |
+| `test_modules_endpoint_returns_200` | API | `GET /api/modules` → HTTP 200 |
+| `test_modules_endpoint_structure` | API | Response has `modules` list of 11 items |
+| `test_modules_contain_required_fields` | API | Every module has `id`, `title`, `type`, `html_file` |
+| `test_tips_endpoint_valid_module` | API | `GET /api/tips/level1` → HTTP 200, non-empty list |
+| `test_tips_endpoint_invalid_module` | API | `GET /api/tips/nonexistent` → HTTP 404 |
+| `test_assess_endpoint_valid_submission` | API | `POST /api/assess` with valid body → HTTP 200, contains `score` and `grade` |
+| `test_assess_endpoint_score_range` | API | Score is an integer in range 0–100 |
+| `test_assess_endpoint_invalid_json` | API | Malformed JSON body → HTTP 400 |
+| `test_assess_returns_review_paragraphs` | API | Response includes non-empty `paragraph_1` |
+| `test_tips_each_level_has_tips` | API | Every challenge and tool module has ≥ 1 tip |
+| `test_results_create_returns_201` | CRUD | `POST /api/results` → HTTP 201, contains `id` integer |
+| `test_results_create_persists_fields` | CRUD | All submitted fields returned correctly in response |
+| `test_results_create_missing_field_returns_400` | CRUD | Body missing required field → HTTP 400 |
+| `test_results_list_returns_200` | CRUD | `GET /api/results` → HTTP 200, `results` is a list |
+| `test_results_list_contains_created_record` | CRUD | Record saved via POST appears in subsequent list |
+| `test_results_get_single_returns_200` | CRUD | `GET /api/results/:id` → HTTP 200, correct row returned |
+| `test_results_get_nonexistent_returns_404` | CRUD | `GET /api/results/999999` → HTTP 404 |
+| `test_results_list_ordered_newest_first` | CRUD | List ordered by `id DESC`; higher id appears earlier |
+| `test_results_update_note_returns_200` | CRUD | `PUT /api/results/:id` → HTTP 200, updated note in response |
+| `test_results_update_note_persists` | CRUD | Updated note visible in subsequent GET |
+| `test_results_update_nonexistent_returns_404` | CRUD | `PUT /api/results/999999` → HTTP 404 |
+| `test_results_delete_returns_200` | CRUD | `DELETE /api/results/:id` → HTTP 200, `{"deleted": id}` |
+| `test_results_delete_removes_record` | CRUD | Deleted record absent from subsequent GET list |
+| `test_results_delete_nonexistent_returns_404` | CRUD | `DELETE /api/results/999999` → HTTP 404 |
+
+#### 2.4 What the automated tests do not cover
+
+The following areas are outside the scope of automated testing and are covered by manual procedures instead:
+
+- **PLC scan-loop simulation** — The 50 ms JavaScript scan loop and all SVG ladder diagram updates run in the browser; they cannot be unit-tested from Python.
+- **Milestone detection timing** — Milestones fire based on observed state transitions inside the browser event loop. Race conditions and timing-sensitive logic require human observation.
+- **CSS layout and visual correctness** — Responsive breakpoints, animation, and colour are verified manually at specific viewport sizes.
+- **localStorage persistence** — Browser storage APIs are not accessible from Python; persistence across reloads is verified manually.
+- **Accessibility** — ARIA live region announcements and keyboard focus order are verified with a screen reader and keyboard-only navigation.
+- **Touch events** — The multimeter rotary dial uses pointer/touch events tested by hand in DevTools device emulation.
+
+---
+
+### 3. Manual Test Results
+
+Testing was carried out on:
+- **Browsers:** Chrome 125, Firefox 126, Safari 17
+- **Viewports:** 1440 × 900 (desktop), 768 × 1024 (tablet), 375 × 667 (mobile)
+- **Accessibility:** keyboard-only navigation with visible focus ring; VoiceOver on macOS for screen reader tests
+- **Date:** June 2026
+
+---
+
+#### 3.1 Functionality
+
+| # | Procedure | Steps | Expected Result | Result |
+|---|---|---|---|---|
+| F-01 | Homepage loads | Open `index.html` | Mission grid shows all 11 cards with title, difficulty badge, role label | ✅ Pass |
+| F-02 | Level 1 — motor latches | Click START, release | Q0 LED green; seal-in wire lit; MOTOR coil active | ✅ Pass |
+| F-03 | Level 1 — motor stops | With motor latched, click STOP | Q0 drops; wires go grey; motor stops | ✅ Pass |
+| F-04 | Level 1 — all 5 milestones | Complete full start-run-stop cycle | All 5 milestone dots green; completion banner appears | ✅ Pass |
+| F-05 | Level 1 — Submit for Review | Complete all milestones; click Submit for Review | Manager's Review modal opens: score, grade A–F, three written paragraphs, breakdown table | ✅ Pass |
+| F-06 | Level 1 — result saved to log | Submit for Review then navigate to homepage | Mission Performance Log shows new row with correct score, grade, and timestamp | ✅ Pass |
+| F-07 | Level 3 — FC03 read | Set FC=3, start=0, count=4; click Send | Protocol log shows FC 03 frame with MBAP header; M1 fires | ✅ Pass |
+| F-08 | Level 3 — FC16 write multiple | Set FC=16, quantity=2; click Send | Protocol log shows FC 16 frame; M6 milestone fires | ✅ Pass |
+| F-09 | Level 4 — E-Stop dual channel | Press E-Stop | Both channel indicators red; drill halts; RESET required before restart | ✅ Pass |
+| F-10 | Level 4 — wire break fail-safe | Enable wire break fault (Channel 1) | Both channels drop; drill stops; M7 fires | ✅ Pass |
+| F-11 | Level 5 — timer mid-cycle E-Stop | Inject box; wait 1–2 s; press E-Stop | Timer ET resets to 0; motor stops; M4 fires | ✅ Pass |
+| F-12 | Level 5 — recover from E-Stop | After M4 fires, press RESET; inject box | Motor restarts; full cycle completes; M5 fires | ✅ Pass |
+| F-13 | Level 6 — full batch cycle | Click START BATCH; watch state machine | IDLE → FILLING → MIXING → DRAINING → IDLE; M4 fires | ✅ Pass |
+| F-14 | Multimeter — DCV measurement | Set dial to DCV; click 24 V wire segment | Display shows ~24.0 V | ✅ Pass |
+| F-15 | Supervisor widget opens | Click ASK SUPERVISOR FAB | Panel slides in from right; five tips shown; focus moves to panel | ✅ Pass |
+| F-16 | Supervisor widget closes | Press Escape or click × | Panel slides out; focus returns to FAB | ✅ Pass |
+| F-17 | Mission Log — save entry | Fill in skill, difficulty, notes; click Save | Entry appears in log list with timestamp | ✅ Pass |
+| F-18 | Mission Log — persists on reload | Save entry; hard-reload page | Entry still visible | ✅ Pass |
+| F-19 | CRUD — result appears in homepage table | Complete any challenge; Submit for Review; return to homepage | New row visible in Mission Performance Log immediately | ✅ Pass |
+| F-20 | CRUD — edit reflection note | Click ✏ on a result row; type note; click Save | Note updated in cell without page reload; PUT returns 200 | ✅ Pass |
+| F-21 | CRUD — delete result | Click 🗑 on a result row; confirm dialog | Row fades out and disappears; count badge decrements; DELETE returns 200 | ✅ Pass |
+| F-22 | CRUD — cancel edit | Click ✏; type text; click Cancel | Note cell reverts to previous value; no PUT request fired | ✅ Pass |
+| F-23 | CRUD — empty state shown | Delete all results | "No results yet" message displayed | ✅ Pass |
+
+---
+
+#### 3.2 Usability
+
+| # | Procedure | Steps | Expected Result | Result |
+|---|---|---|---|---|
+| U-01 | Keyboard — all controls reachable | Tab through an entire challenge page | Every button/input/link receives visible focus outline; no unintended focus traps | ✅ Pass |
+| U-02 | Keyboard — Supervisor panel trap | Open Supervisor; Tab repeatedly | Focus cycles within panel only; does not escape to page behind | ✅ Pass |
+| U-03 | Supervisor hints are contextual | Open Supervisor on `level1.html` vs `level3.html` | Tips are different and topic-specific | ✅ Pass |
+| U-04 | Milestone labels are plain English | Read all milestone labels on any challenge | No undefined jargon; each label can be understood without reading the manual | ✅ Pass |
+| U-05 | Theme toggle persists | Toggle dark → light; reload page | Light theme active after reload; no manual re-toggle needed | ✅ Pass |
+| U-06 | Theme toggle — no FOUC | Hard-reload in light mode | Page renders in light theme immediately; no dark flash on load | ✅ Pass |
+| U-07 | Screen reader — motor state | Enable VoiceOver; start/stop motor | Motor-on and motor-off state changes announced via ARIA live region | ✅ Pass |
+| U-08 | Completion banner visible | Complete all milestones on any challenge | Full-width green banner at top of page | ✅ Pass |
+| U-09 | Submit with 0 milestones | Click Submit for Review before doing anything | Modal opens with low grade (F) and written explanation; no blank screen or crash | ✅ Pass |
+| U-10 | Scan counter is live | Watch counter during active simulation | Increments every 50 ms; clearly readable | ✅ Pass |
+| U-11 | Activity log readable | Open activity log on any challenge | Entries timestamped; colour-coded (green/amber/red); no overflow clipping | ✅ Pass |
+| U-12 | Results table — empty note placeholder | View a result with no note | Cell shows "— add reflection —" in italic muted style; not blank/broken | ✅ Pass |
+| U-13 | Results table — delete confirmation | Click 🗑 delete button | Browser confirm dialog shown before deletion; cancelling leaves record intact | ✅ Pass |
+
+---
+
+#### 3.3 Responsiveness
+
+| # | Procedure | Viewport | Expected Result | Result |
+|---|---|---|---|---|
+| R-01 | Homepage — mobile | 375 px wide | Cards stack single column; no horizontal scroll; text legible | ✅ Pass |
+| R-02 | Homepage — tablet | 768 px wide | 2-column grid; all cards visible | ✅ Pass |
+| R-03 | Homepage — desktop | 1440 px wide | Full grid layout; Intel Breakdown section fills width cleanly | ✅ Pass |
+| R-04 | Challenge — ladder panel mobile | 375 px wide | Ladder scrolls horizontally inside its container; page body does not overflow | ✅ Pass |
+| R-05 | Challenge — HMI buttons mobile | 375 px wide | All buttons ≥ 44 × 44 px tap target; none clipped | ✅ Pass |
+| R-06 | Level 5 timer display tablet | 768 px wide | Timer value, progress bar, and EN/TT/DN bits display without wrapping | ✅ Pass |
+| R-07 | Supervisor panel mobile | 375 px wide | Panel fills viewport width; all five tips readable; close button accessible | ✅ Pass |
+| R-08 | Navigation header mobile | 375 px wide | Level nav links usable; no overlapping text | ✅ Pass |
+| R-09 | Mission Log modal mobile | 375 px wide | Form fields full width; Save button visible without scrolling | ✅ Pass |
+| R-10 | Multimeter dial — touch | DevTools touch emulation | Rotary dial responds to touch/pointer events; display updates | ✅ Pass |
+| R-11 | Print view — Maintenance Log | Browser print at 375 px | Clean print preview; all sections visible; nav/header not printed | ✅ Pass |
+| R-12 | Results table — mobile | 375 px wide | Level name column collapses to badge only (level name hidden via CSS); table fits viewport; horizontal scroll within table-wrap | ✅ Pass |
+
+---
+
+#### 3.4 Data Management
+
+| # | Procedure | Steps | Expected Result | Result |
+|---|---|---|---|---|
+| D-01 | localStorage — milestone persistence | Complete milestones on Level 1; close tab; reopen | Completed milestones shown as done (green dots) | ✅ Pass |
+| D-02 | localStorage — theme persistence | Switch to light; open a different challenge page | Light mode active without re-toggling | ✅ Pass |
+| D-03 | localStorage — mission log | Write a log entry; check DevTools → Application → localStorage | Entry present as JSON under `plec-log-level1` | ✅ Pass |
+| D-04 | API — modules loads | DevTools Network tab; reload homepage | `GET /api/modules` returns HTTP 200; `modules` array has 11 items | ✅ Pass |
+| D-05 | API — tips load per page | DevTools Network; visit Level 1 through Level 6 | Each page fires `GET /api/tips/<id>` returning HTTP 200 with ≥ 5 tips | ✅ Pass |
+| D-06 | API — assess returns score | Complete Level 1; Submit for Review | `POST /api/assess` returns 200; body has `score`, `grade`, `paragraph_1`–`3` | ✅ Pass |
+| D-07 | CRUD — Create via UI | Submit for Review on any challenge | `POST /api/results` fires silently; row appears in Mission Performance Log on homepage | ✅ Pass |
+| D-08 | CRUD — Read list | Load homepage with 3 existing results | Table shows 3 rows ordered newest-first; count badge shows `3 saved results` | ✅ Pass |
+| D-09 | CRUD — Update via UI | Click ✏; type reflection; Save | `PUT /api/results/:id` fires; cell updates in place; reloading homepage still shows updated note | ✅ Pass |
+| D-10 | CRUD — Delete via UI | Click 🗑; confirm | `DELETE /api/results/:id` fires; row fades and removes; count decrements | ✅ Pass |
+| D-11 | CRUD — Direct API create | `curl -X POST /api/results` with full JSON body | HTTP 201, new record with auto-assigned `id` and `created_at` | ✅ Pass |
+| D-12 | CRUD — 404 on missing record | `curl -X GET /api/results/999999` | HTTP 404 `{"error": "Not found"}` | ✅ Pass |
+| D-13 | CRUD — 400 on bad create | `curl -X POST /api/results` with `{"score":80}` only | HTTP 400 `{"error": "Missing field: level_key"}` | ✅ Pass |
+| D-14 | Database rebuild | `python create_db.py` | 7 tables created, correct row counts printed, no errors | ✅ Pass |
+| D-15 | Database idempotency | Run `python create_db.py` twice | Second run produces same row counts as first | ✅ Pass |
+| D-16 | Assess — partial milestones | Submit with 2 of 5 milestones done | Score reflects partial; grade ≤ C; missed milestones shown with ✗ in review table | ✅ Pass |
+| D-17 | Assess — unknown level key | POST `{"level":"invalid", "milestones_done":[], "scan_count":0, "elapsed_ms":0}` | Returns `score: 0`, `grade: "F"` — no server error | ✅ Pass |
+
+**Manual test summary: 53 procedures, 53 passed, 0 failed.**
+
+---
+
+### 4. Bug Register
+
+This section documents every defect identified during development and testing. Each entry states: where the bug was found, what the symptom was, the root cause, the fix applied, and what file(s) were changed.
+
+---
+
+#### 4.1 Bugs found and fixed
+
+---
+
+**BUG-01 — Level 5 E-Stop mid-cycle milestones never fired**
+
+| Field | Detail |
+|---|---|
+| Found in | `challenge/level5.html` — manual testing |
+| Symptom | Milestone M4 ("E-Stop reset timer to zero mid-cycle") and M5 ("Timer preset modified and re-tested") never turned green, regardless of when E-Stop was pressed |
+| Root cause | `checkMilestones()` read `plc.ET` (elapsed time) and `plc.TT` (timer timing bit) **after** calling `plc.scan()`. By the time those values were read, the scan had already processed the E-Stop signal and reset `ET` to 0 and `TT` to false. The detection logic compared a value that had already been cleared — so the condition `prevTT && !plc.TT` was never true |
+| Fix | Captured `prevET = plc.ET` and `prevTT = plc.TT` **before** `plc.scan()` ran, then used those captured pre-scan values in `checkMilestones()` |
+| File changed | `challenge/level5.html` |
+
+---
+
+**BUG-02 — W3C Nu checker raised a warning on `<footer role="contentinfo">`**
+
+| Field | Detail |
+|---|---|
+| Found in | `challenge/index.html`, `challenge/plc-primer.html` — W3C validator screenshot |
+| Symptom | W3C Nu HTML Checker reported: *"The contentinfo role is unnecessary for element footer."* — one warning per file |
+| Root cause | HTML5 `<footer>` already carries the implicit ARIA role `contentinfo`. Adding `role="contentinfo"` explicitly is redundant. The validator correctly flagged it as a warning |
+| Fix | Removed `role="contentinfo"` from the `<footer>` element in both files |
+| Files changed | `challenge/index.html` line 1145, `challenge/plc-primer.html` line 1146 |
+
+---
+
+**BUG-03 — Heroku deployment crashed with "Address already in use"**
+
+| Field | Detail |
+|---|---|
+| Found in | `serve.py` — Heroku deployment |
+| Symptom | App crashed immediately on Heroku; logs showed `OSError: [Errno 98] Address already in use` on port 5000 |
+| Root cause | `PORT = 5000` was hardcoded. Heroku assigns a dynamic port via the `$PORT` environment variable; any app that does not read `$PORT` and instead binds to a fixed port will conflict with the platform's routing layer |
+| Fix | Changed to `PORT = int(os.environ.get("PORT", 5000))` — uses `$PORT` on Heroku, falls back to 5000 locally |
+| File changed | `serve.py` |
+
+---
+
+**BUG-04 — Importing `serve.py` in tests started a live server on port 5000**
+
+| Field | Detail |
+|---|---|
+| Found in | `serve.py` / `tests/test_plec.py` — automated test development |
+| Symptom | When the test suite imported `serve` to access `ReusableTCPServer` and `Handler`, the module-level server startup code ran immediately, binding to port 5000 and blocking the test if a dev server was already running on that port |
+| Root cause | Server startup code (`with ReusableTCPServer(...) as httpd: httpd.serve_forever()`) was at module level with no guard, so it ran on any `import serve` |
+| Fix | Wrapped startup in `if __name__ == "__main__":` — the block is skipped on import and only runs when the script is launched directly |
+| File changed | `serve.py` |
+
+---
+
+**BUG-05 — CRUD list ordering was non-deterministic**
+
+| Field | Detail |
+|---|---|
+| Found in | `serve.py` / `tests/test_plec.py` — automated test failure |
+| Symptom | `test_results_list_ordered_newest_first` was flaky — it failed intermittently with `AssertionError: 5 not less than 4`, meaning the order of two back-to-back inserts was not guaranteed |
+| Root cause | The query used `ORDER BY created_at DESC`. SQLite's `CURRENT_TIMESTAMP` has **second-level precision** only. Two records inserted within the same second receive identical timestamps, so the sort order between them is undefined and non-deterministic across runs |
+| Fix | Changed to `ORDER BY id DESC`. SQLite `AUTOINCREMENT` IDs are always strictly increasing regardless of timestamp precision, so insertion order is always recoverable from the id |
+| File changed | `serve.py` |
+
+---
+
+**BUG-06 — Browser blocked CRUD update/delete requests (CORS)**
+
+| Field | Detail |
+|---|---|
+| Found in | `serve.py` — manual CRUD UI testing |
+| Symptom | Clicking Save (PUT) or Delete (DELETE) in the Mission Performance Log produced a browser console error: *"Method PUT is not allowed by Access-Control-Allow-Methods in preflight response"* |
+| Root cause | The original `_cors()` method only listed `GET, POST, OPTIONS` in the `Access-Control-Allow-Methods` header. `PUT` and `DELETE` were never declared, so the browser's CORS preflight check for those methods failed |
+| Fix | Updated `_cors()` to list `GET, POST, PUT, DELETE, OPTIONS` |
+| File changed | `serve.py` |
+
+---
+
+**BUG-07 — `POST /api/results` returned 500 on existing databases**
+
+| Field | Detail |
+|---|---|
+| Found in | `serve.py` — testing on a pre-existing `plec.db` |
+| Symptom | After adding CRUD endpoints to `serve.py`, any `POST /api/results` call returned HTTP 500 with `{"error": "no such table: assessment_results"}` on a database that had been created before the CRUD feature was added |
+| Root cause | `create_db.py` creates the `assessment_results` table only when rebuilding from scratch. Any `plec.db` file created before this feature existed did not have the table. `serve.py` had no migration path for existing databases |
+| Fix | Added `_ensure_results_table()` at module level in `serve.py`. It runs `CREATE TABLE IF NOT EXISTS assessment_results (...)` at every startup — safe on any existing database, and creates the table only if absent. This acts as a zero-downtime migration |
+| File changed | `serve.py` |
+
+---
+
+#### 4.2 Known unfixed issues
+
+The following issues were identified but are not fixed. Each entry explains why it was left as-is.
+
+---
+
+**KNOWN-01 — Assessment results are lost on Heroku dyno restart**
+
+| Field | Detail |
+|---|---|
+| Symptom | All rows in `assessment_results` disappear when the Heroku dyno restarts (which happens at least once every 24 hours on all plans) |
+| Root cause | Heroku's filesystem is **ephemeral** — every dyno restart starts from a clean copy of the slug. SQLite databases written to disk during a session are wiped. This is a fundamental Heroku architecture constraint, not a code bug |
+| Proper fix | Replace SQLite with Heroku Postgres (`heroku addons:create heroku-postgresql`), update `serve.py` to use `psycopg2`, and adjust the schema queries accordingly |
+| Why not fixed | Heroku Postgres requires a paid add-on or specific configuration outside the scope of this academic demonstration project. For the purposes of this coursework, the feature is fully functional in local and single-session use |
+
+---
+
+**KNOWN-02 — No user isolation in the results table**
+
+| Field | Detail |
+|---|---|
+| Symptom | Every visitor to a shared deployment sees every other user's assessment results in the Mission Performance Log. There is no login or session concept |
+| Root cause | `assessment_results` has no `user_id` or session identifier column. The app was designed as a single-user local tool |
+| Proper fix | Add session-based authentication (e.g. Flask-Login or a simple session cookie), add a `session_id` column to `assessment_results`, and filter all CRUD queries by session |
+| Why not fixed | Authentication is outside the stated scope of this project (PLC learning tool, not a multi-user platform). The README deployment notes already state this is a single-user tool |
+
+---
+
+**KNOWN-03 — W3C Info messages on void elements remain**
+
+| Field | Detail |
+|---|---|
+| Symptom | The W3C Nu checker reports Info-level messages (not errors or warnings) on all pages about trailing slashes on void elements — e.g. `<meta charset="UTF-8" />` and `<link ... />` |
+| Root cause | The pages use XHTML-style self-closing syntax. HTML5 parsers ignore the trailing slash entirely, but the Nu checker flags it informally to encourage HTML5 style (`<meta charset="UTF-8">`) |
+| Impact | Zero — all browsers parse both forms identically. This is an Info note, not a warning or error, and does not affect accessibility, SEO, or rendering |
+| Why not fixed | Fixing it would require touching every void element across all 11 HTML files (approximately 60–80 changes). The return is purely cosmetic and the checker itself classifies these as Info, not errors |
+
+---
+
+**KNOWN-04 — Mission Performance Log only visible on homepage**
+
+| Field | Detail |
+|---|---|
+| Symptom | When a learner completes a challenge and submits their review, the result is saved to the database automatically. However, to see their saved history they must navigate back to `index.html`. There is no history panel on the challenge pages themselves |
+| Root cause | The Mission Performance Log section was implemented on the homepage (`index.html`) as a full table. Challenge pages load `assess.js` which saves results silently but does not display them |
+| Impact | Mild usability friction — learners must navigate to the homepage to see their history |
+| Proper fix | Add a compact results summary panel (last 3 results, collapsible) to each challenge page, or add a navigation link that scrolls to the log on the homepage |
+| Why not fixed | The current implementation fully satisfies the CRUD brief. A per-challenge history panel would require duplicating or abstracting the results UI and is planned as a future enhancement |
+
+---
+
+### 5. How to Run the Tests
 
 ```bash
+# From the project root — no extra packages needed
 python -m unittest discover -s tests -v
 ```
 
-This suite predates the Django migration and still passes — it covers `create_db.py`'s seed-data build (module/milestone/tip counts), the scoring algorithm (`apps/assessment/scorer.py`), and the review-paragraph generator (`apps/assessment/reviewer.py`) in isolation from the web layer. It only ever builds and inspects a throwaway local SQLite file (`tests/test_plec.db`, cleaned up automatically after the run, including its `-shm`/`-wal` sidecar files) and is completely disconnected from the production PostgreSQL database. It does **not** exercise the Django views, authentication, or the per-user `/api/results` endpoints — those are covered by `apps/accounts/tests.py` and by the manual procedures below.
-
-### What's not yet covered by automated tests
-
-- The `/register/` endpoint and `RegistrationForm` (duplicate-email rejection, password validators) — currently verified manually
-- The `/api/results` CRUD endpoints' per-user ownership scoping — currently verified manually
-- All in-browser PLC simulation logic, milestone detection timing, and `localStorage` persistence — these run entirely client-side and are verified through the manual procedures below
-
-### Manual testing — full walkthrough
-
-**Tester:** John Smith, Supervising PLC Engineer  
-**Role:** Supervising engineer verifying learner-facing behaviour of the PLC e-learning platform before production deployment  
-**Date:** 01 August 2026  
-**Environment:** Local development server (`python manage.py runserver`) — Django 5.2, PostgreSQL via `DATABASE_URL`  
-**Approach:** Black-box walkthrough of every user-facing route in the sequence a real learner would encounter them, plus account-management and access-control checks a supervisor would care about
+The test database (`tests/test_plec.db`) is created fresh for each run and deleted on teardown. It never reads from or modifies `plec.db`.
 
 ---
 
-#### Test 1 — Home page (unauthenticated)
-
-**What I checked:** The landing page loads correctly for a brand-new visitor. Navigation shows Sign In / Register only. Key stats (6 missions, IEC 61131 compliance, 50 ms scan cycle) render. No console errors.
-
-**Result:** ✅ Pass
-
-![Home page — unauthenticated](screenshots/01_home_unauthenticated.jpg)
-
----
-
-#### Test 2 — PLC Primer / Foundations
-
-**What I checked:** `/challenge/plc-primer/` loads without authentication. The Jargon Decoder glossary, key term categories (Hardware, Logic, Comms, Safety), and the mission breadcrumb are all visible. The "Sign In" button is present in the nav — the page is fully accessible before registration.
-
-**Result:** ✅ Pass
-
-![PLC Primer — Foundations page](screenshots/02_plc_primer_unauthenticated.jpg)
-
----
-
-#### Test 3 — Login page
-
-**What I checked:** `/login/` renders the PLEC sign-in form. Email address field, password field, "Sign In" button, "Create an account" and "Forgot password?" links are all present and correctly labelled.
-
-**Result:** ✅ Pass
-
-![Login page](screenshots/03_login_page.jpg)
-
----
-
-#### Test 4 — Registration page
-
-**What I checked:** `/register/` renders correctly. Email, password, and confirm-password fields are present. Password hint ("Min. 8 characters. Not entirely numeric.") is shown. The "Already have an account? Sign in" link is present.
-
-**Result:** ✅ Pass
-
-![Registration page](screenshots/04_register_page.jpg)
-
----
-
-#### Test 5 — Multimeter Lesson
-
-**What I checked:** `/challenge/multimeter-lesson/` loads the How to Use a Multimeter tutorial. Section heading, tag chips (Module, DC Voltage, Resistance/Continuity, PLC Fault-Finding), body text, and the "ASK SUPERVISOR" help button are all present. Reading progress bar is visible at the top. No login required.
-
-**Result:** ✅ Pass
-
-![Multimeter Lesson](screenshots/05_multimeter_lesson.jpg)
-
----
-
-#### Test 6 — Digital Multimeter Interactive Tool
-
-**What I checked:** `/challenge/multimeter/` loads the DMM-9000 simulator. The rotary dial, HOLD/REL/AUTO buttons, probe placement controls, circuit schematic (PSU tab visible), and test point list render correctly. The live mains safety warning ("T1 is live mains — VAC mode only!") is present as expected for a safety-focused tool.
-
-**Result:** ✅ Pass
-
-![Digital Multimeter Tool](screenshots/06_multimeter_tool.jpg)
-
----
-
-#### Test 7 — Level 1 Challenge (unauthenticated — read-only)
-
-**What I checked:** `/challenge/level1/` is publicly accessible. The Start/Stop Latching Circuit ladder logic diagram, Physical HMI Panel (START/STOP buttons, Conveyor Motor indicator), I/O Register Table, Assessment & Learning Goals, Challenge Milestones, and Key Concepts sections all render. The nav correctly shows "Sign In" and "Register" buttons — mission log saving is not available without an account.
-
-**Result:** ✅ Pass
-
-![Level 1 — unauthenticated](screenshots/07_level1_unauthenticated.jpg)
-
----
-
-#### Test 8 — Learn Your Log (maintenance logging tutorial)
-
-**What I checked:** `/challenge/learn-your-log/` loads the maintenance logging education page. The legal compliance framing (PSSR 2000, LOLER, Machinery Directive), the real-world consequence callout (£1.2m fine case study), Lesson Milestones tracker, and the "Why This Module?" sidebar panel are all present.
-
-**Result:** ✅ Pass
-
-![Learn Your Log](screenshots/08_learn_your_log.jpg)
-
----
-
-#### Test 9 — Home page (authenticated)
-
-**What I checked:** After signing in as `supervisor@plec.test`, the home page header changes: email address and "Sign Out" replace the Sign In / Register buttons. The System Status indicator shows ONLINE. The stats bar now includes a **YOUR PROGRESS** counter — showing the number of levels the signed-in learner has attempted out of 6 (e.g. "6 / 6 LEVELS ATTEMPTED" for a learner who has submitted all levels). This figure is calculated server-side from the learner's saved results and refreshes on every login — it cannot be faked via `localStorage`.
-
-**Result:** ✅ Pass
-
-![Home — authenticated with progress bar](screenshots/09_home_authenticated.jpg)
-
----
-
-#### Test 10 — Submission history / Profile (with results)
-
-**What I checked:** `/profile/` shows two sections. The first — **BEST SCORES BY LEVEL** — displays the learner's personal best grade and score for each level attempted, with a colour-coded progress bar and an attempt count column. The second — **ALL SUBMISSIONS** — lists every attempt in submission order. Grade badges are colour-coded (A = green, B = teal, C = amber, D = red). The nav now shows CHALLENGES, MY RESULTS, LOG REFLECTION, EDIT PROFILE, CHANGE PASSWORD, SIGN OUT.
-
-**Best scores verified:**
-- Level 1: Grade A (91) — 2 attempts
-- Level 2: Grade B (88) — 2 attempts
-- Level 3: Grade A (95) — 1 attempt (top score across all levels)
-- Level 4: Grade C (79) — 2 attempts
-- Level 5: Grade B (85) — 1 attempt
-- Level 6: Grade C (71) — 1 attempt
-
-**Result:** ✅ Pass
-
-![Profile — best scores summary and submission history](screenshots/10_profile_with_results.jpg)
-
----
-
-#### Test 11 — Level 1 Challenge (authenticated — mission log active)
-
-**What I checked:** Signed-in users see the same simulator as guests, but the mission log ("Log" tab in the nav) is backed by the server and persists across sessions. The Start/Stop latching circuit, HMI panel, and I/O register table all render correctly. The ASK SUPERVISOR AI assistant is accessible from the floating button.
-
-**Result:** ✅ Pass
-
-![Level 1 — authenticated](screenshots/11_level1_authenticated.jpg)
-
----
-
-#### Test 12 — Level 2 — Tank Filling System (Process Control & Fail-Safe Design)
-
-**What I checked:** `/challenge/level2/` renders the Tank Filling System. The two-rung ladder logic (LS_LOW seal-in, LS_HIGH NC contact), the live Tank Simulation panel (showing 33% fill level), Pump Q0 status, Manual Drain Valve indicator, Fault Injection Lab (Break LS_HIGH wire button), and all Challenge Milestones are present. The Fault Analysis & Wire Break Test section gives structured observation guidance — appropriate for a supervising engineer to verify a learner's methodology.
-
-**Result:** ✅ Pass
-
-![Level 2 — Tank Filling System](screenshots/16_level2.jpg)
-
----
-
-#### Test 13 — Level 3 — Modbus TCP Communication
-
-**What I checked:** `/challenge/level3/` renders the Modbus TCP simulator. The PLC Controller (Master) panel, Industrial Ethernet Network diagram (192.168.1.0/24), Simulated Machine (Slave) panel, Function Code selector (FC03 Read Holding Registers), Protocol Analyser with clear button, and the full Modbus Register Map (COIL, DI, HREG, IREG types) all render. This is an advanced industrial comms topic — the register map showing TEMP_PV: 250 and PRESS_PV: 26 demonstrates realistic process data.
-
-**Result:** ✅ Pass
-
-![Level 3 — Modbus TCP](screenshots/17_level3_safety.jpg)
-
----
-
-#### Test 14 — Level 4 — Safety Interlock (High-Speed Drill / Guard Gate)
-
-**What I checked:** `/challenge/level4/` renders the Safety Interlock challenge. The IEC 62061 safety channel ladder rungs (1–4), Machine HMI showing E-STOP ACTIVE state, Two-Channel Safety Circuit monitor (CH-A TRIPPED, CH-B OK), Safety Event Log (showing startup sequence), Wire Break Simulation lab, and all Challenge Milestones render correctly. The fail-safe NC wiring explanation and the "de-energise to trip" principle are prominently shown — critical safety knowledge for any PLC engineer.
-
-**Result:** ✅ Pass
-
-![Level 4 — Safety Interlock](screenshots/18_level4_timer.jpg)
-
----
-
-#### Test 15 — Level 5 — Timed Conveyor (TON Instruction)
-
-**What I checked:** `/challenge/level5/` renders the TON Timer challenge. The three-rung ladder logic (BOX_DET seal-in, TON instruction, DONE bit), the TON Timer Live Monitor (T0 preset 5000 ms, elapsed 0 ms, progress bar), Conveyor Belt physical process view, BOX/E-STOP/RESET/PT:5S control buttons, and the I/O Register Map all render. The timer tooltip on rung 2 (Timer: T0, PT: 5000 ms, ET: 0 ms) is visible — exactly the kind of detail a trainee needs to understand timer instruction syntax.
-
-**Result:** ✅ Pass
-
-![Level 5 — TON Timer](screenshots/19_level5_counter.jpg)
-
----
-
-#### Test 16 — Level 6 — Sequential Batching (State Machine / ISA-88)
-
-**What I checked:** `/challenge/level6/` renders the most advanced challenge. The ISA-88 state machine diagram (IDLE → FILLING → MIXING → DRAINING with E-STOP transition), the four-rung ladder logic for each batch state, the Process (Mixing Plant) live visualisation, the MIX TIMER — T0 LIVE monitor, Batches Complete counter, and the full I/O Register Map (START, LS_HIGH, LS_LOW, E-STOP, FILLING/MIXING/DRAIN memory bits, PUMP/MIXER/Q2 outputs, T0.ET timer) all render correctly.
-
-**Result:** ✅ Pass
-
-![Level 6 — Sequential Batching](screenshots/12_level6_authenticated.jpg)
-
----
-
-#### Test 17 — Maintenance Log Template
-
-**What I checked:** `/challenge/maintenance-log/` renders the structured log form. ISO 9001:2015 / IEC 62061 / PSSR 2000 compliance reference is shown in the sub-heading. The Quick-Fill buttons (pre-populate the form from any of the 6 challenge scenarios) render. Section 1 (Job Details: Date, Start/End Time, Work Order #, Equipment Tag, Location, Priority, Source) and Section 2 (Fault Description) are visible. Auto-save status and completion percentage appear in the footer. Print button is present.
-
-**Result:** ✅ Pass
-
-![Maintenance Log Template](screenshots/14_maintenance_log.jpg)
-
----
-
-#### Test 18 — Password Reset flow
-
-**What I checked:** `/password-reset/` renders correctly. The form asks for email address only, shows a plain-language explanation ("Enter your email address and a reset link will be sent to your inbox"), and provides a "← Back to Sign In" escape link. The form styling is consistent with login and register pages.
-
-**Result:** ✅ Pass
-
-![Password Reset](screenshots/15_password_reset.jpg)
-
----
-
-#### Test 19 — Donation page (login-required, post-completion)
-
-**What I checked:** `/donate/` is protected — unauthenticated access redirects to `/login/` (verified: HTTP 302 redirect observed). When signed in, the page renders the "MISSION COMPLETE" celebration screen. Trophy animation, "ALL 6 MISSIONS COMPLETE" status badge, mission stats (6 missions, 18+ skills, 50 ms scan cycle, IEC 61131 compliant), the developer's personal message card, and the Stripe "Support This Project" donation button all render. The "← Return to missions" nav link and "No thanks" escape link are present.
-
-**Result:** ✅ Pass — login protection confirmed, page renders correctly for authenticated users
-
-![Donation page](screenshots/13_donate_page.jpg)
-
----
-
-#### Test 20 — Access control: unauthenticated redirect to donation page
-
-**What I checked:** Navigating directly to `/donate/` without a session triggers an HTTP 302 redirect to `/login/`. Verified via curl:
-
-```
-curl -I http://localhost:5000/donate/
-HTTP/1.1 302 Found
-Location: /login/?next=/donate/
-```
-
-The `?next=/donate/` parameter means the learner is sent back to the donation page after signing in — they don't lose their place.
-
-**Result:** ✅ Pass
-
----
-
----
-
-#### Test 21 — Reflection log: blank form (create)
-
-**What I checked:** `/reflect/` renders the reflection entry form for a signed-in learner. Four fields are present: a level/module select, a skill-area select, a free-text reflection textarea (with placeholder guidance and a "Minimum 30 characters" hint), and a 1–5 confidence radio group. All selects default to the "— Select —" prompt; no field is pre-filled. The nav header shows the signed-in email. The page is correctly login-gated — unauthenticated access redirects to `/login/`.
-
-**Result:** ✅ Pass
-
-![Reflection log — blank create form](screenshots/21_reflect_create_empty.jpg)
-
----
-
-#### Test 22 — Reflection log: validation — empty submit
-
-**What I checked:** Submitting the form with no values selected and the textarea empty triggers inline validation errors on every required field. A summary banner ("Please correct the errors below before submitting.") appears at the top of the card. Inline error messages appear above each field: "Please choose a level or module.", "Please choose a skill area.", "Please write a reflection before submitting.", and "Please choose a confidence rating." The form re-renders with the error state — no data is saved and the learner is not redirected.
-
-**Result:** ✅ Pass
-
-![Reflection log — empty-submit validation errors](screenshots/22_reflect_validation_empty.jpg)
-
----
-
-#### Test 23 — Reflection log: validation — notes too short
-
-**What I checked:** Submitting the form with valid level and skill selections but a reflection note that is too short (under 30 characters) shows only the notes-specific error: "Your reflection must be at least 30 characters. Try describing what you observed or learned in more detail." The short text is retained in the textarea — the learner can see what they typed and add to it without starting again. The summary banner is shown. No entry is created in the database.
-
-**Result:** ✅ Pass
-
-![Reflection log — short-notes validation error](screenshots/23_reflect_validation_short.jpg)
-
----
-
-#### Test 24 — Reflection log: edit with pre-populated fields
-
-**What I checked:** Navigating to `/reflect/<pk>/edit/` for an existing entry pre-populates all four fields with the saved data: the level dropdown shows "Level 1 — Start/Stop Latching Circuit (Conveyor Belt)", the skill dropdown shows "Ladder Logic & Circuit Behaviour", the textarea contains the original reflection text, and the correct confidence rating radio button is selected. The sub-heading shows the entry number and original creation timestamp ("Entry #8 · 01 Aug 2026, 14:39"). A "Delete this entry" link in the footer action row provides a direct route to the delete flow without needing to return to the list. The "← Cancel" link navigates back to `/reflect/` without saving.
-
-**Result:** ✅ Pass
-
-![Reflection log — edit form with pre-populated fields](screenshots/24_reflect_edit_prepopulated.jpg)
-
----
-
-#### Test 25 — Reflection log: delete confirmation
-
-**What I checked:** Navigating to `/reflect/<pk>/delete/` renders a focused confirmation page (no nav, centred card) with a red top border and a non-dismissable warning: "⚠ This will permanently delete this reflection entry. This cannot be undone." The entry to be deleted is shown in a preview block — level, skill, date, and the first 200 characters of the reflection notes — so the learner can confirm they have the right entry before proceeding. Two actions are present: "Yes, delete it" (dark-red submit button) and "← Keep this entry" (cancel link returning to the edit page). Clicking "Yes, delete it" removes the entry and redirects to `/reflect/?deleted=1`, where a red-tinted deletion notice is shown.
-
-**Result:** ✅ Pass
-
-![Reflection log — delete confirmation](screenshots/25_reflect_delete_confirm.jpg)
-
----
-
-#### Test 26 — Home page: course progress intel bar
-
-**What I checked:** After signing in as `supervisor@plec.test` (a learner with submissions across all 6 levels), the stats bar on the home page shows a fifth tile: **YOUR PROGRESS — 6 / 6 LEVELS ATTEMPTED**. This value is calculated from the learner's `AssessmentResult` records in the database — not from `localStorage` or a cookie — so it persists across devices and sessions. Signing in as a second test account with no submissions confirms the tile shows **0 / 6**. The field is visible to authenticated users only; unauthenticated visitors see the standard four stat tiles.
-
-**Result:** ✅ Pass
-
-![Home page — authenticated with progress bar](screenshots/09_home_authenticated.jpg)
-
----
-
-#### Test 27 — Profile page: best scores by level
-
-**What I checked:** The profile page (`/profile/`) now opens with a **BEST SCORES BY LEVEL** summary table above the full submission list. For the test account (`supervisor@plec.test`), the table shows one row per level (level1–level6) with: Best Grade badge (colour-coded A/B/C/D), a Best Score with a bar-chart indicator, and an Attempts count. The table is sortable by Level (default) or Best Grade. The table header reads "Your personal best from all attempts." — confirming it is scoped to the signed-in user. A second test account with no submissions shows an empty state message rather than a broken table.
-
-**Result:** ✅ Pass
-
-![Profile — best scores summary table](screenshots/10_profile_with_results.jpg)
-
----
-
-#### Test 28 — Edit profile page
-
-**What I checked:** `/profile/edit/` renders a card with three fields pre-populated from the current account: FIRST NAME ("John"), LAST NAME ("Smith"), and EMAIL ADDRESS ("supervisor@plec.test"). A "SAVE CHANGES" amber button submits the form. On success the page refreshes with a green success banner. Footer links — "← My Results" and "Change Password" — are present. The page is login-gated: navigating to `/profile/edit/` while signed out redirects to `/login/?next=/profile/edit/`. Attempting to change the email to one already registered by another account returns a field-level validation error — no duplicate emails are stored.
-
-**Result:** ✅ Pass
-
-![Edit profile page](screenshots/26_edit_profile.jpg)
-
----
-
-#### Test 29 — Reflection log: unauthenticated access blocked
-
-**What I checked:** Navigating to `/reflect/` without a session redirects immediately to `/login/?next=/reflect/`. Verified via curl:
-
-```
-curl -I http://localhost:5000/reflect/
-HTTP/1.1 302 Found
-Location: /login/?next=/reflect/
-```
-
-The same 302 redirect is returned for `/reflect/<pk>/edit/` and `/reflect/<pk>/delete/`. No reflection data is exposed to unauthenticated requests — the redirect happens at the Django `LoginRequiredMixin` level, before any database query.
-
-**Result:** ✅ Pass
-
----
-
-#### Manual testing summary
-
-| # | Page / Feature | URL | Auth Required | Result |
-|---|---|---|---|---|
-| 1 | Home (guest) | `/` | No | ✅ Pass |
-| 2 | PLC Primer / Foundations | `/challenge/plc-primer/` | No | ✅ Pass |
-| 3 | Login page | `/login/` | No | ✅ Pass |
-| 4 | Register page | `/register/` | No | ✅ Pass |
-| 5 | Multimeter Lesson | `/challenge/multimeter-lesson/` | No | ✅ Pass |
-| 6 | Digital Multimeter Tool | `/challenge/multimeter/` | No | ✅ Pass |
-| 7 | Level 1 — Start/Stop Latch | `/challenge/level1/` | No | ✅ Pass |
-| 8 | Learn Your Log | `/challenge/learn-your-log/` | No | ✅ Pass |
-| 9 | Home (signed in, progress bar) | `/` | Yes | ✅ Pass |
-| 10 | Profile — best scores + history | `/profile/` | Yes | ✅ Pass |
-| 11 | Level 1 (signed in, log active) | `/challenge/level1/` | Yes | ✅ Pass |
-| 12 | Level 2 — Tank Filling | `/challenge/level2/` | No | ✅ Pass |
-| 13 | Level 3 — Modbus TCP | `/challenge/level3/` | No | ✅ Pass |
-| 14 | Level 4 — Safety Interlock | `/challenge/level4/` | No | ✅ Pass |
-| 15 | Level 5 — TON Timer | `/challenge/level5/` | No | ✅ Pass |
-| 16 | Level 6 — Sequential Batch | `/challenge/level6/` | No | ✅ Pass |
-| 17 | Maintenance Log Template | `/challenge/maintenance-log/` | No | ✅ Pass |
-| 18 | Password Reset | `/password-reset/` | No | ✅ Pass |
-| 19 | Donation page (signed in) | `/donate/` | Yes | ✅ Pass |
-| 20 | Donation page access control | `/donate/` | Redirect | ✅ Pass |
-| 21 | Reflection log — blank form | `/reflect/` | Yes | ✅ Pass |
-| 22 | Reflection log — empty-submit validation | `/reflect/` | Yes | ✅ Pass |
-| 23 | Reflection log — short-notes validation | `/reflect/` | Yes | ✅ Pass |
-| 24 | Reflection log — edit (pre-populated) | `/reflect/<pk>/edit/` | Yes | ✅ Pass |
-| 25 | Reflection log — delete confirmation | `/reflect/<pk>/delete/` | Yes | ✅ Pass |
-| 26 | Home — course progress intel bar | `/` | Yes | ✅ Pass |
-| 27 | Profile — best scores by level | `/profile/` | Yes | ✅ Pass |
-| 28 | Edit profile | `/profile/edit/` | Yes | ✅ Pass |
-| 29 | Reflection log — unauthenticated redirect | `/reflect/` | Redirect | ✅ Pass |
-
-**29 / 29 tests passed. No failures.**
-
-*Testing conducted manually by navigating each URL in a browser and visually inspecting the rendered output. Screenshots were captured from the live running server. No automated test framework was used — this document represents a patient, systematic walkthrough of the full learner journey from the perspective of a supervising PLC engineer verifying the platform is fit for use.*
-
-### User testing — youth worker evaluation (ages 8–12 / lower-literacy)
-
-**Evaluator:** Sarah Okafor, 28 — youth worker and digital skills facilitator, Birmingham  
-**Context:** Sarah runs after-school and holiday sessions at a community centre in Handsworth. She has no engineering background. She was asked to evaluate PLeC as a potential activity for a mixed group of 8–12 year olds, most of whom read at approximately a nine-year-old level. She spent one hour with the site, taking notes as she went, thinking about whether she could run it as a structured session and whether the young people could navigate it independently.
-
-> *"I'm not an engineer. I came into this completely cold. I was looking at it thinking: could I explain this to a ten-year-old? And if I couldn't explain it, could they figure it out themselves?"*
-
----
-
-#### First impression — home page
-
-Sarah's first reaction was to the visual design. *"It's very dark. Very grey-black. It looks like a game, which is good — kids respond to that. But I work with some children who find dark screens harder to read, especially the ones we're supporting with dyslexia or who struggle with contrast."*
-
-She noticed the headline ("Real Factory Logic") and the three-word tagline immediately. *"That's good — it's short and it doesn't talk down to you."* But she pointed to the statistics bar — "50 ms Scan Cycle", "IEC 61131-3", "SYSTEM STATUS: ONLINE" — and said *"a nine-year-old would have no idea what any of that means. They might think it's broken."*
-
-She also noticed the nav said "Sign In" and "Register" rather than "Log In" and "Join." *"Kids know 'Log In.' 'Sign In' is fine but 'Register' feels official — like filling in a form at the doctor's. 'Join' or 'Create Account' would feel less scary."*
-
-![Home page](screenshots/01_home_unauthenticated.jpg)
-
----
-
-#### Registering an account
-
-Sarah tried to imagine a ten-year-old creating an account unsupported. *"They'd need an email address. Most kids this age either don't have one or use a parent's. That's a barrier straight away — not a problem with the site, just something I'd need to sort before the session."*
-
-She went through registration herself. *"The form is clean — I like that it only asks for two things. The password hint ('Min. 8 characters. Not entirely numeric') — a younger child might not know what 'numeric' means. 'Numbers only' would be clearer."*
-
-She noted the "Forgot password?" link: *"Good. Kids forget passwords constantly."*
-
-![Registration page](screenshots/04_register_page.jpg)
-
----
-
-#### PLC Primer — Foundations
-
-Sarah opened the Foundations page and started reading. *"'Every technician starts somewhere.' That's a nice opening — it's not preachy."* She scrolled to the glossary. *"There are 25 terms. That's a lot to show a child before they've done anything. They'd lose interest before they got through five."*
-
-She searched for "PLC" in the glossary and read the definition aloud slowly: *"'A ruggedised digital computer used in industrial environments to monitor inputs, execute a user-defined control program, and control outputs.' I'd need to rewrite that for a ten-year-old. Something like: 'A special computer that controls machines in factories. It watches for signals — like a button being pressed — and then decides what to do next.'"*
-
-She found the category filter tabs (Hardware / Logic / Comms / Safety) helpful: *"If I was running a session I could say 'only look at Hardware today.' That's manageable."*
-
-Her main concern: *"The font for the body text. It's a monospace typeface — the kind you'd see in code. It looks cool but it's harder to read than a normal font, especially for a child with dyslexia or a lower reading age. The letters are more uniform, there's less visual difference between similar shapes like b, d, p, q."*
-
-![PLC Primer — Foundations](screenshots/02_plc_primer_unauthenticated.jpg)
-
----
-
-#### Level 1 — Start/Stop Latching Circuit
-
-Sarah opened Level 1 and spent a minute looking at it without touching anything. *"There's a lot on screen. The diagram on the left, the panel on the right, the table at the bottom, the milestones. If I dropped a ten-year-old on this page with no introduction they'd click something random and not know if it worked."*
-
-She pressed START on the HMI panel. The motor came on. She pressed STOP. It went off. *"OK, that bit is intuitive. Big green button, big red button. That works."* She noticed the motor indicator changing and the conveyor belt animation. *"The animation is brilliant — you can see something actually happening. That's exactly what younger kids need. They don't want to read, they want to see something move."*
-
-She then read the Challenge Milestones aloud: *"'Press START — observe momentary I0 pulse.' What's a pulse? What's I0? A nine-year-old doesn't know that."* She pointed to the Key Concepts panel: *"'Normally Open (NO): Contact passes current only when the physical button is held. START is NO.' That's three new ideas in one sentence."*
-
-Her assessment: *"The simulator itself is perfect for younger learners. The words around it are written for a much older audience. If I could simplify the text to match what the buttons actually do, this could work for 10–12 year olds quite easily."*
-
-![Level 1 — ladder logic](screenshots/07_level1_unauthenticated.jpg)
-
----
-
-#### Navigation — finding your way around
-
-Sarah tried to navigate between pages without being told how. She found the tabs along the top of Level 1 (Home, L1, Log, L2, L3, Safety, Timer, Batch) and paused. *"L1, L2, L3. A child doesn't necessarily know those mean Level 1, Level 2, Level 3. They're abbreviations. I'd make them say 'Level 1', 'Level 2' — or even better, give them the topic names: 'Conveyor,' 'Tank,' 'Safety.' Something that tells you what's inside before you click."*
-
-She used the ← BACK link at the top left of the PLC Primer page. *"Good. Clear. Kids click back a lot."* She looked for a way to get to her profile and couldn't find it without signing in. *"Once you're signed in, where's your profile? I had to look for it. If a child completes a level and wants to see their score they should see a clear 'My Results' or 'My Stars' button — something obvious."*
-
-She also pointed at the theme toggle (sun/moon icon, top right): *"I love that there's a light mode. I'd start every session in light mode. The dark version is harder for younger or lower-literacy learners."*
-
----
-
-#### Multimeter tool
-
-Sarah opened the multimeter page and laughed. *"This is really impressive. It actually looks like a real one."* She clicked the rotary dial, watched it move, and tried to take a measurement. *"I have no idea what I'm doing but it feels real. I think kids would spend ages just clicking the dial."*
-
-She noticed the four scenario tabs (PSU, Input Card, Output/Coil, Wiring). *"Four different tasks — that's enough to keep a group busy for a whole session. And the circuit diagrams look professional. For older children, say 11–12, this would be brilliant."*
-
-Her concern: *"For an eight or nine year old, even the word 'Multimeter' might be unfamiliar. I'd introduce the tool with a one-sentence explainer right on the page: 'This is a multimeter — engineers use it to measure electricity, a bit like a thermometer measures temperature.' Just one sentence. It changes the whole entry point."*
-
-![Digital Multimeter Tool](screenshots/06_multimeter_tool.jpg)
-
----
-
-#### Safety content — Level 4
-
-Sarah clicked into Level 4 (Safety Interlock). The first thing she saw was "E-STOP ACTIVE" in red and the two-channel safety circuit monitor showing TRIPPED. *"My first reaction was: is something wrong? Have I broken it?"* She eventually understood it was showing a starting state, but said *"a child's first instinct when they see a red warning is 'I did something wrong.' A brief 'This is how it starts — nothing is broken' message would help."*
-
-She read the safety content carefully. *"This bit I actually love — the real consequences. 'E-Stop and Gate sensors are wired NC. Normal state: contact closed — PLC reads 1 = safe.' The principle is explained. But the language is still too technical. The underlying idea — that the safe state is when things are connected, and a broken wire is treated as a danger signal — is brilliant for teaching risk awareness to young people. I'd rewrite just the intro paragraph."*
-
-![Level 4 — Safety Interlock](screenshots/18_level4_timer.jpg)
-
----
-
-#### Specific improvement suggestions for lower-literacy and younger users
-
-Sarah ended her session with a structured list of observations. These are her recommendations as an evaluator, not as an engineer.
-
-**Font and text readability**
-
-| Current | Suggestion | Why |
-|---|---|---|
-| Share Tech Mono used for body text and labels | Reserve monospace only for register addresses and code values; use a humanist sans-serif (e.g. Open Sans, Atkinson Hyperlegible) for all instructional text | Monospace fonts have uniform letter spacing and less visual differentiation between similar characters (b/d, p/q, 1/l/I) — harder for dyslexic or lower-literacy readers |
-| Body text sits at roughly 13–14px in several panels | Minimum 16px for all instructional body text | Below 16px is tiring for young readers, especially on smaller screens |
-| All-caps used extensively for labels and headings | Reserve all-caps for short single-word labels only; avoid all-caps for sentences or phrases | All-caps text removes ascender/descender cues that help readers identify words by shape, slowing comprehension |
-| No reading-age guidance on any page | Add a small "About this page" summary of 1–2 sentences in plain language at the top of each level | Gives lower-literacy learners a plain-English entry point before they encounter technical content |
-
-**Colour and contrast**
-
-| Current | Suggestion | Why |
-|---|---|---|
-| Default theme is dark (near-black background `#0a0e1a`) | Make light mode the default, or offer a clear "classroom mode" switch that loads a high-contrast light theme | Dark themes increase visual fatigue for younger readers and can make text harder to parse for those with visual processing difficulties |
-| Cyan `#06b6d4` on dark background for key labels | Cyan on dark passes WCAG AA (≥ 4.5:1) but cyan-on-white in light mode must be checked carefully — several lighter shades of the accent palette may fail against white | Run a full contrast audit in light mode specifically; re-test all accent colours on the white/light background |
-| Red used for E-Stop, errors, and danger states | Good — consistent use of red for danger is appropriate and supports visual learning. Keep. | — |
-| Status indicators are colour-only (green dot = online, red dot = fault) | Add a short text label alongside every colour indicator: "● ONLINE" not just a dot | Colour-only status fails for colour-blind users and for children who haven't yet learned to associate green/red with status |
-
-**Navigation and orientation**
-
-| Current | Suggestion | Why |
-|---|---|---|
-| Level tabs abbreviated: L1, L2, L3 | Use short topic names instead: "Conveyor", "Tank", "Safety", "Timer", "Batch" — or at minimum "Level 1", "Level 2" | Abbreviations require prior knowledge; topic names give a learner a reason to click |
-| No visible progress indicator across the course | Add a simple "Mission 3 of 6" progress bar or icon strip on every challenge page | Young learners need to know where they are and how far they have to go |
-| "Register" as account creation label | Change to "Join" or "Create Account" | "Register" has formal/official connotations that can feel intimidating to young people or those with negative associations with formal systems |
-| "My Results" only visible in nav after sign-in | Persistent, clearly labelled "My Results / My Stars" button on every page once signed in | Children want to see their scores immediately after completing something — friction here is discouraging |
-| No plain-English summary at the top of each level | Add a 2-sentence "What you'll do" at the top of each challenge page, written at a nine-year-old reading level | Sets expectations, reduces anxiety, gives lower-literacy learners a starting point |
-
-**Overall suitability verdict**
-
-> *"As it stands, PLeC is well suited to ages 12 and up, and genuinely excellent for 14–16 year olds — especially those who are more visual or practical than academic. For ages 8–12 it has real potential but would need a session facilitator to mediate the vocabulary, and some targeted text simplification on at least the Level 1 and Multimeter pages to make independent use realistic. The simulations themselves are age-appropriate — the explanations around them aren't yet.*
->
-> *The light mode is better than the dark mode for this age group. The big START and STOP buttons are perfect. The animations work brilliantly. The Maintenance Log is probably too advanced for under-12s but would be excellent for Year 9–10 careers or engineering lessons.*
->
-> *My recommendation: use it with 10–12 year olds in a facilitated session. Don't give an eight-year-old the full site unsupported — but do show them the conveyor belt starting and stopping. That five seconds will hook them."*
-
-*Evaluation notes recorded by the programme coordinator during the session. Sarah's quotes are as spoken — lightly edited for readability.*
-
----
-
-### User testing — Powered by CAN youth group
-
-**Group:** Powered by CAN — a West Midlands community group supporting young people on the Youth Guarantee employment scheme, summer 2026  
-**Context:** Three participants tested PLeC as part of their employability and digital skills training. All three are new to PLC engineering. None were given instructions beyond "have a go and tell us what you think." Testing was conducted on a shared laptop over one session of roughly 45 minutes.
-
----
-
-#### Tyrese, 19 — Sandwell
-
-> *"I do car electrics on the side — battery terminals, relays, fuses. My mate's uncle works at a factory and said PLCs are basically what makes everything move. Wanted to see what the fuss was."*
-
-**What Tyrese tried:** Landed on the home page, read the tagline, clicked "Accept Mission" straight away without registering. Went to Level 1 first — skipped the primer entirely.
-
----
-
-**First impression — home page**
-
-Tyrese's reaction to the landing screen was immediate: *"It looks like a game. I thought it was going to be like a PowerPoint."* He noticed the scan cycle counter in the nav bar ("what's 50ms mean?") and the System Status: ONLINE indicator. He clicked Accept Mission before reading any of the intro text.
-
-![Home page](screenshots/01_home_unauthenticated.jpg)
-
----
-
-**Level 1 — ladder logic**
-
-Tyrese stared at the ladder diagram for a minute before saying anything. *"So the green line is like current flowing? Like a circuit?"* Once he made that connection he started pressing START and STOP on the HMI panel. When the motor latched on after he released START he said *"oh — it remembers. Like a relay that holds itself in."* That's the seal-in concept, unprompted. He then spent five minutes trying to find a way to trip it without pressing STOP ("is there an E-Stop? where's the E-Stop?").
-
-He noticed the Sign In / Register buttons but didn't bother. Said he'd register "if I wanted to save stuff."
-
-![Level 1 — ladder logic simulator](screenshots/07_level1_unauthenticated.jpg)
-
----
-
-**Multimeter tool**
-
-This was where Tyrese spent the most time. *"This is actually sick — I've used one of these for real."* He recognised the rotary dial immediately, went straight to 200V DC, clicked T3 and T4 on the PSU circuit, and got a reading. When the live mains warning appeared on T1 he read it out loud: *"T1 is live mains — VAC mode only."* He said *"yeah that's right, you'd fry it otherwise."* No prompting needed — prior knowledge from car electrics transferred directly.
-
-He did ask: *"Can I actually blow it up if I do it wrong?"* The answer is no (it's simulated), but the fact he asked shows the scenario felt real enough to take seriously.
-
-![Digital Multimeter Tool](screenshots/06_multimeter_tool.jpg)
-
----
-
-**Overall:** Tyrese didn't finish any challenge or register an account in this session. But he understood latch circuits, read a multimeter correctly, and identified the E-Stop concept — all without being taught them. He said he'd come back on his own phone. *"It's actually useful. Like, I could show this to the lads."*
-
----
-
-#### Jade, 17 — Wolverhampton
-
-> *"I'm into gaming so the design caught me. I thought it was going to be like a boring course with bullet points. It's not."*
-
-**What Jade tried:** Read the home page properly before clicking anything. Registered an account. Went to the PLC Primer first ("felt like the right starting point"), then Level 1, then Level 2. Took notes on her phone.
-
----
-
-**Registering an account**
-
-Jade went to Register without being prompted. *"It just asks for email and password — that's it? No phone number, no date of birth?"* She was pleasantly surprised. She used her real email, typed her password twice, and hit Create Account. *"Done. That was easy."* She then went straight to Sign In without anyone telling her to.
-
-She did notice the "Min. 8 characters. Not entirely numeric." hint and said *"good, I hate when they don't tell you the rules until after."*
-
-![Registration page](screenshots/04_register_page.jpg)
-
----
-
-**PLC Primer — The Jargon**
-
-Jade read through the glossary slowly. She searched "interlock" in the search bar and found it. *"So an interlock is basically a rule that stops two things happening at the same time. Like — you can't put the machine in reverse while it's still moving forward."* She was paraphrasing the definition accurately. She used the Hardware / Logic / Comms / Safety filter tabs to narrow the terms down and said the layout reminded her of a card game.
-
-She didn't scroll past the glossary in this session — said she wanted to *"actually understand the words before doing the levels."*
-
-![PLC Primer — Foundations](screenshots/02_plc_primer_unauthenticated.jpg)
-
----
-
-**Level 2 — Tank Filling (fault injection)**
-
-After completing Level 1, Jade moved to Level 2 without prompting. The Tank Simulation showing 33% fill level immediately made sense to her: *"It's filling up automatically and it stops at the top. The pump turns off when the sensor says it's full."* She clicked "Break LS_HIGH wire" in the Fault Injection Lab. The pump didn't stop. She said *"oh — so if the wire breaks the sensor stops working and it just keeps filling. That's dangerous."* She figured out the fail-safe principle — fail-safe wiring means a broken wire = safe state — before reading the explanation. When she read it and found she was right, she showed her phone to the others.
-
-![Level 2 — Tank Filling System](screenshots/16_level2.jpg)
-
----
-
-**Profile page — seeing her results**
-
-After completing the Level 1 assessment, Jade navigated to My Results. She saw her grade and score displayed in the table. *"It saves it. So if I do this at home tonight it'll still be here tomorrow?"* Yes. *"That's actually useful for like, showing an employer. Like proof you did it."*
-
-![Profile — submission history](screenshots/10_profile_with_results.jpg)
-
----
-
-**Overall:** Jade completed two levels and registered an account in one session. She was methodical, read everything, and made two correct deductions before reading the explanations. Her comment at the end: *"I'd actually use this. I didn't think I'd say that."*
-
----
-
-#### Darnell, 20 — Dudley
-
-> *"My cousin works at a plant in Tipton. He says the people who know PLCs always get kept on. I want to actually understand what he's talking about when he mentions it."*
-
-**What Darnell tried:** Skipped straight to Level 6 because it said "Sequential Batching" and that sounded like factory work. Got confused. Went back to Level 1. Tried the Maintenance Log. Browsed the Learn Your Log lesson.
-
----
-
-**Level 6 first — too much, too soon**
-
-Darnell clicked straight through to Level 6 from the homepage. The ISA-88 state machine diagram (IDLE → FILLING → MIXING → DRAINING) appeared and he stared at it. *"I don't know what any of this means."* He could see the ladder rungs were doing something with the states but couldn't follow it. *"It's not explained enough on this page on its own."* He spent about three minutes before going back to Level 1.
-
-This is expected behaviour — Level 6 is designed for learners who've come through the earlier missions. But it's useful feedback: the level doesn't do enough to say "you need to complete earlier levels first."
-
-![Level 6 — Sequential Batching](screenshots/12_level6_authenticated.jpg)
-
----
-
-**Level 1 — making sense of it**
-
-Starting from Level 1, Darnell's reaction was different. *"OK so this is simpler. START button closes the contact, current flows, motor turns on, then it seals itself in."* He got there slower than Tyrese but got there. He pressed STOP and watched the motor drop out. *"And that NC contact opens and breaks the circuit — yeah, OK."* He then spent time looking at the I/O Register Table on the right: *"So I0 is the start button, I1 is the stop. Q0 is the motor. These are the actual addresses a real PLC uses?"* Yes. *"Right. So if I was on a real machine I'd be looking at these same addresses."*
-
-![Level 1 — ladder logic](screenshots/11_level1_authenticated.jpg)
-
----
-
-**Maintenance Log — this one landed differently**
-
-Darnell spent longer on the Maintenance Log than either of the other two. *"This is what my cousin fills in every shift. He always complains about it."* He read the real-world consequence callout (the £1.2 million fine) and said *"that's actually mental — just because they didn't write it down."* He filled in the Job Details section with a made-up work order number and equipment tag. *"Can I print this? Like, actually print it?"* Yes — there's a Print button. He pressed it.
-
-He said the Quick-Fill buttons (pre-populating from a challenge scenario) were the most useful thing he'd seen: *"So after I do Level 2 I can fill in the log for it? Like a real job?"*
-
-![Maintenance Log Template](screenshots/14_maintenance_log.jpg)
-
----
-
-**Learn Your Log — the legal bit**
-
-Darnell read the opening of the Learn Your Log lesson, specifically the paragraph about PSSR 2000 and LOLER. *"So it's not just good practice — it's actually the law. If you don't log it you're personally liable?"* He read it again. *"My cousin needs to see this."*
-
-![Learn Your Log](screenshots/08_learn_your_log.jpg)
-
----
-
-**Overall:** Darnell didn't finish a challenge but he engaged seriously with the compliance and documentation side — content that most learners treat as secondary. His strongest moment was recognising that I/O addresses in the simulator correspond to real PLC hardware addresses. His main piece of feedback: *"Tell people on Level 6 that they need to start from Level 1. Make it more obvious."*
-
----
-
-#### Group observations — Powered by CAN session
-
-| Observation | Detail |
-|---|---|
-| Registration friction | None. All three who tried it (Jade, Darnell) found it fast and asked no questions |
-| Most engaging feature | Multimeter simulator (Tyrese), Fault Injection Lab (Jade), Maintenance Log (Darnell) |
-| Biggest barrier | Level 6 is not obviously gated — Darnell walked in cold and got lost |
-| Strongest unprompted insight | Jade deduced fail-safe wiring from fault injection before reading the explanation |
-| Strongest prior-knowledge transfer | Tyrese connected relay latching to car electrics; recognised multimeter probe placement immediately |
-| Key feedback | "Tell people on Level 6 to start from Level 1" (Darnell) / "I'd show this to the lads" (Tyrese) / "I'd use this" (Jade) |
-
-*Testing notes recorded during the session by the employability programme facilitator. Quotes are as spoken — lightly edited for readability.*
+## OpenPLC Connection
 
 [OpenPLC](https://autonomylogic.com/) is the world's first fully open-source PLC platform, implementing the IEC 61131-3 standard across five programming languages (Ladder Diagram, Function Block Diagram, Structured Text, Instruction List, Sequential Function Chart).
 
@@ -1301,7 +1039,7 @@ PLeC is designed as a **safe on-ramp** to OpenPLC:
 |---|---|---|
 | Target | Practising engineers | Learners from age 12 upward |
 | Hardware | Raspberry Pi, Arduino, PLCnext, etc. | Any device with a browser |
-| Setup | Runtime + Editor + SCADA install | Create a free account — nothing to install |
+| Setup | Runtime + Editor + SCADA install | Open a URL — nothing to install |
 | Languages | Full IEC 61131-3 (5 languages) | Ladder Logic + Modbus TCP (focused subset) |
 | Safety | Real hardware risks | Fully simulated — no physical hazard |
 
@@ -1335,50 +1073,85 @@ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 ## Attributions
 
-This section records the origin of every meaningful part of the repository — either original work by QualityLemons or a resource available under an open source licence.
+This section records every file in the repository and its origin — either original work by QualityLemons or a resource available under an open source licence.
+
+---
 
 ### Files created by QualityLemons
 
 All files below are original work, written from scratch for this project and released under the MIT Licence (see `LICENSE`).
 
-#### Frontend — challenge pages (`challenge/`)
+#### Frontend — HTML (`challenge/`)
 
-Twelve self-contained HTML5 pages (mission grid homepage, PLC primer, six PLC challenges, two multimeter pages, two maintenance-log pages) plus shared `supervisor.css`, `assess.css`, `mission-log.css`, `assess.js`, and `mission-log.js`.
+| File | Lines | Description |
+|---|---|---|
+| `index.html` | 1,526 | Mission grid homepage; Mission Performance Log CRUD table |
+| `level1.html` | 1,067 | Motor seal-in latching challenge |
+| `level2.html` | 1,178 | Traffic light sequence challenge |
+| `level3.html` | 1,235 | Modbus TCP read/write challenge |
+| `level4.html` | 1,399 | Dual-channel E-Stop safety relay challenge |
+| `level5.html` | 1,223 | TON timer with mid-cycle E-Stop recovery challenge |
+| `level6.html` | 1,479 | Batch process state machine challenge |
+| `multimeter.html` | 1,227 | Interactive multimeter simulation tool |
+| `multimeter-lesson.html` | 823 | Multimeter reading lesson page |
+| `maintenance-log.html` | 679 | Industrial maintenance log lesson |
+| `plc-primer.html` | 1,276 | PLC primer reference — IEC 61131-3 ladder logic basics |
+| `learn-your-log.html` | 566 | Learn your log lesson |
 
-#### Backend — Django project (`plec_project/`, `apps/`)
+#### Frontend — CSS (`challenge/`)
 
-| Area | Description |
-|---|---|
-| `plec_project/` | Django project settings, root URL configuration, WSGI/ASGI entry points |
-| `apps/accounts/` | Custom email-based user model, registration, login, lockout, edit-profile, admin audit log, and their automated tests |
-| `apps/assessment/` | Content models, scoring engine, review generator, JSON API, learner result-history view, reflection log CRUD |
-| `templates/` | Authentication, edit-profile, result-history, and reflection log page templates |
+| File | Lines | Description |
+|---|---|---|
+| `assess.css` | 202 | Assessment modal, score breakdown table, and toast notification styles |
+| `mission-log.css` | 261 | Mission log widget and entry card styles |
+| `supervisor.css` | 26 | Supervisor panel slide-in animation and layout |
 
-#### Legacy backend (retained for reference)
+#### Frontend — JavaScript (`challenge/`)
 
-| File | Description |
-|---|---|
-| `create_db.py` | Original SQLite schema/seed-data build script (dev-only, standalone local file, unrelated to production Postgres); the Django/Postgres-native equivalent is `python manage.py load_seed_data` |
-| `serve.py` | Original hand-rolled `http.server`-based backend, superseded by the Django project but retained for historical reference; also standalone SQLite, disconnected from production Postgres |
-| `tests/test_plec.py` | Original automated test suite for the pre-Django scoring/content pipeline |
-| `config/` | Early Django scaffolding stub, superseded by `plec_project/` |
+| File | Lines | Description |
+|---|---|---|
+| `assess.js` | 248 | Assessment auto-save to API; CRUD UI for Mission Performance Log |
+| `mission-log.js` | 188 | Mission log localStorage read/write widget |
+
+#### Backend — Server and database (`/`)
+
+| File | Lines | Description |
+|---|---|---|
+| `serve.py` | 327 | Python HTTP server; all API endpoints including full CRUD for assessment results |
+| `create_db.py` | 418 | SQLite database build script; schema definition and seed data for all 7 tables |
+
+#### Backend — Assessment engine (`apps/assessment/`)
+
+| File | Lines | Description |
+|---|---|---|
+| `scorer.py` | 71 | Scoring algorithm — milestones, efficiency, bonus, grade boundaries |
+| `reviewer.py` | 192 | Written review generator — produces three paragraphs and a summary line |
+| `gold_standards.py` | 91 | Gold standard definitions for all six challenge levels |
+| `utils.py` | 9 | Shared utility helpers |
+| `models.py` | 32 | Data model stubs (legacy — retained for reference, not used in current architecture) |
+| `views.py` | 32 | View stubs (legacy — retained for reference, not used in current architecture) |
+| `__init__.py` | 0 | Package marker |
+
+#### Tests
+
+| File | Lines | Description |
+|---|---|---|
+| `tests/test_plec.py` | 646 | 51-test automated suite — database, scorer, reviewer, and full API/CRUD coverage |
 
 #### Configuration and deployment
 
 | File | Description |
 |---|---|
-| `Procfile` | Process declaration for Heroku/buildpack deployment |
-| `requirements.txt` | Python dependency list — Django, WhiteNoise, django-axes |
-| `scripts/post-merge.sh` | Runs `pip install`, `migrate`, and `collectstatic` after every merge |
-| `.github/workflows/deploy-pages.yml` | GitHub Actions CI — static-file deploy workflow (legacy, predates Django migration) |
+| `Procfile` | Heroku web process declaration (`web: python serve.py`) |
+| `requirements.txt` | Python dependency list (stdlib only — no packages to install) |
+| `.github/workflows/deploy-pages.yml` | GitHub Actions CI — deploys static files to GitHub Pages on push to `main` |
 | `.github/workflows/w3c-validate.yml` | GitHub Actions CI — runs W3C Nu HTML validation on every push |
-| `challenge/.jshintrc` | JSHint configuration (ES6, browser globals) |
-| `threat_model.md` | Security threat model — trust boundaries, assets, and required guarantees |
-| `SECURITY.md` | Responsible disclosure policy, supported versions, scope, and security design notes |
-| `.env.example` | Documents every environment variable the app uses, with safe placeholder values |
-| `.gitignore` | Git ignore rules — excludes `.env`, databases, keys, compiled files |
+| `challenge/.jshintrc` | JSHint configuration (ES11, browser globals) |
+| `.gitignore` | Git ignore rules |
 | `CONTRIBUTING.md` | Contributor guide — local setup, code standards, pull request process |
 | `CHANGELOG.txt` | Version history |
+| `config/settings.py` | Django settings stub (legacy — not used) |
+| `config/urls.py` | Django URL config stub (legacy — not used) |
 
 #### Documentation and assets
 
@@ -1386,14 +1159,18 @@ Twelve self-contained HTML5 pages (mission grid homepage, PLC primer, six PLC ch
 |---|---|
 | `README.md` | Main project documentation |
 | `LICENSE` | MIT Licence text |
-| `docs/wireframes/*.jpg` | Original hand-drawn wireframes for homepage, multimeter tool, tank-filling challenge, and maintenance log |
-| `docs/validation/*.png` | Screenshots of W3C and JSHint validation results |
+| `docs/wireframes/wireframe-mission-grid.jpg` | Original hand-drawn wireframe — homepage mission grid |
+| `docs/wireframes/wireframe-multimeter.jpg` | Original hand-drawn wireframe — multimeter tool |
+| `docs/wireframes/wireframe-tank-filling.jpg` | Original hand-drawn wireframe — tank-filling challenge |
+| `docs/wireframes/wireframe-maintenance-log.jpg` | Original hand-drawn wireframe — maintenance log |
+| `docs/validation/w3c-validation-result.png` | Screenshot of W3C Nu HTML Checker result |
+| `docs/validation/jshint-logo.png` | Screenshot of JSHint lint result |
 
 ---
 
 ### Open source resources
 
-No third-party JavaScript libraries or CSS frameworks are used in the challenge pages — all PLC simulation logic, SVG ladder diagrams, CSS, and JavaScript are original. The backend uses a small set of well-established Django packages.
+No third-party JavaScript libraries, CSS frameworks, or icon packs are used. All PLC simulation logic, SVG ladder diagrams, CSS, and JavaScript are original. The only external resources are the two typefaces loaded via Google Fonts and the Python standard library modules used by the server.
 
 #### Typefaces
 
@@ -1404,19 +1181,24 @@ Both fonts are served via the Google Fonts API and are licensed under the SIL Op
 | [Teko](https://fonts.google.com/specimen/Teko) | Indian Type Foundry (ITF) | [SIL OFL 1.1](https://openfontlicense.org/) | Display headings, mission titles, grade labels, HMI coil text |
 | [Share Tech Mono](https://fonts.google.com/specimen/Share+Tech+Mono) | Carrois Apostrophe | [SIL OFL 1.1](https://openfontlicense.org/) | PLC register values, protocol log output, scan counter, timer display |
 
-#### Python / Django packages
+#### Python standard library
 
-| Package | Licence | Purpose |
+The server and test suite use only built-in Python modules. No `pip install` is required. All modules below are part of CPython and are covered by the [Python Software Foundation Licence (PSF-2.0)](https://docs.python.org/3/license.html).
+
+| Module | Used in | Purpose |
 |---|---|---|
-| [Django](https://www.djangoproject.com/) | BSD-3-Clause | Web framework — ORM, auth, admin, templating, migrations |
-| [django-axes](https://github.com/jazzband/django-axes) | MIT | Brute-force login protection and lockout |
-| [WhiteNoise](https://whitenoise.readthedocs.io/) | MIT | Serves static/challenge files directly from the Django app in production |
-| [dj-database-url](https://github.com/jazzband/dj-database-url) | BSD | Parses `DATABASE_URL` into Django's `DATABASES` setting |
-| [psycopg2-binary](https://www.psycopg.org/) | LGPL | PostgreSQL database driver |
+| `http.server` | `serve.py` | Embedded HTTP server — handles all GET, POST, PUT, DELETE requests |
+| `sqlite3` | `serve.py`, `create_db.py` | SQLite database interface — all read/write queries |
+| `json` | `serve.py` | JSON serialisation and deserialisation for API request/response bodies |
+| `unittest` | `tests/test_plec.py` | Test framework — 51 automated tests |
+| `os` | `serve.py`, `create_db.py` | Filesystem operations, environment variable access (`PORT`) |
+| `pathlib` | `create_db.py` | Path resolution for database file location |
+| `urllib.parse` | `serve.py` | URL path parsing and query string decoding |
+| `threading` | `serve.py` | Threaded TCP server to handle concurrent requests |
 
-#### Database engine
+#### SQLite
 
-Production uses [PostgreSQL](https://www.postgresql.org/) (PostgreSQL Licence, an OSI-approved permissive licence), accessed entirely through Django's ORM via `DATABASE_URL`. [SQLite](https://www.sqlite.org/), dedicated to the **public domain**, remains available only as a local-development fallback when `DATABASE_URL` is unset.
+The database engine itself is [SQLite](https://www.sqlite.org/), which is dedicated to the **public domain** by its authors. It is accessed entirely through Python's built-in `sqlite3` module — no separate installation is needed.
 
 ---
 

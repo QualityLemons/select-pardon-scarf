@@ -3,13 +3,6 @@ PLeC Automated Test Suite
 =========================
 Covers: database integrity, scoring logic, review generation, and HTTP API endpoints.
 
-LEGACY / DEV-ONLY: this suite predates the Django migration. `TestDatabase`
-below builds and inspects a throwaway local SQLite file (test_plec.db, via
-create_db.py) — it does not touch and is unrelated to the production
-database, which is PostgreSQL configured via DATABASE_URL. It does not
-exercise the Django views, auth, or /api/results endpoints; see
-apps/accounts/tests.py for those.
-
 Run from the project root:
     python -m pytest tests/ -v
     -- or --
@@ -66,10 +59,8 @@ class TestDatabase(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.con.close()
-        for suffix in ("", "-shm", "-wal", "-journal"):
-            path = TEST_DB + suffix
-            if os.path.exists(path):
-                os.remove(path)
+        if os.path.exists(TEST_DB):
+            os.remove(TEST_DB)
 
     def test_all_tables_exist(self):
         """All six schema tables must be present after create_db.build()."""

@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Safety Interlock — Drill Machine | PLeC</title>
+  <style>
+    :root {
+      --bg: #0b0c10;
+      --surface: #13151e;
+      --surface2: #1a1d2a;
+      --surface3: #1e2235;
+      --border: #252a3d;
+      --green: #22c55e;
+      --red: #ef4444;
+      --amber: #f59e0b;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+      --purple: #8b5cf6;
+      --text: #e2e8f0;
+      --muted: #4b5a72;
+      --dim: #252a3d;
+      --safe-green: #16a34a;
+      --danger-red: #b91c1c;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 2px solid #7f1d1d;
+      padding: 9px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .badge-safety {
+      background: linear-gradient(135deg, #991b1b, #7f1d1d);
+      color: #fecaca;
+      border: 1px solid #ef4444;
+      font-size: 11px; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; letter-spacing: .5px;
+    }
+    header h1 { font-size: 14px; font-weight: 600; }
+    .nav-links { margin-left: auto; display: flex; gap: 8px; }
+    .nav-link { font-size: 11px; color: var(--muted); text-decoration: none; padding: 3px 9px; border: 1px solid var(--border); border-radius: 5px; }
+    .nav-link.active { color: var(--red); border-color: var(--red); }
+    .scan-ctr { font-size: 11px; color: var(--muted); font-family: monospace; }
+    .scan-ctr span { color: var(--amber); font-weight: 700; }
+
+    /* ── Layout ── */
+    .main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px 300px;
+      grid-template-rows: auto auto;
+      gap: 0;
+    }
+    .panel { background: var(--surface); border: 1px solid var(--border); padding: 14px; }
+    .panel-title {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .panel-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .pdot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+    /* ── Top strip: concepts + milestones ── */
+    #top-strip {
+      grid-column: 1 / 4;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border);
+    }
+    #top-strip .bc { background: var(--surface); padding: 14px; }
+    #top-strip .bc h3 { font-size:12px; font-weight:700; margin-bottom:8px; }
+    #top-strip .bc p, #top-strip .bc li { font-size:11px; color:#64748b; line-height:1.65; }
+    #top-strip .bc ul { padding-left:14px; }
+
+    /* ── Ladder Panel ── */
+    #ladder-panel { grid-column:1; grid-row:2 / 4; overflow-y:auto; }
+    #ladder-svg { display:block; width:100%; min-width:480px; }
+
+    /* ── Machine Panel ── */
+    #machine-panel { grid-column:2; grid-row:2; display:flex; flex-direction:column; gap:12px; }
+
+    /* Stack light */
+    .stack-light {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .sl-lamp {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #1a1a1a; border: 2px solid #2a2a2a;
+      transition: background .15s, box-shadow .15s;
+    }
+    .sl-lamp.red-on    { background:#b91c1c; box-shadow:0 0 14px #ef4444; border-color:#ef4444; }
+    .sl-lamp.amber-on  { background:#b45309; box-shadow:0 0 14px #f59e0b; border-color:#f59e0b; }
+    .sl-lamp.green-on  { background:#15803d; box-shadow:0 0 14px #22c55e; border-color:#22c55e; }
+    .sl-status { font-size:13px; font-weight:700; }
+    .sl-substatus { font-size:11px; color:var(--muted); }
+
+    /* Machine SVG wrap */
+    .machine-wrap {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      flex: 1;
+    }
+    #machine-svg { display:block; width:100%; }
+
+    /* HMI buttons */
+    .hmi-row { display:flex; gap:10px; flex-wrap:wrap; }
+
+    .hmi-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 9px 6px;
+      border-radius: 8px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: #fff;
+      text-align: center;
+      user-select: none;
+      transition: transform .08s, box-shadow .1s;
+      outline: none;
+    }
+    .hmi-btn:active { transform: scale(.93); }
+
+    .btn-start  { background:radial-gradient(circle at 40% 35%,#4ade80,#15803d); box-shadow:0 3px 0 #14532d; }
+    .btn-stop   { background:radial-gradient(circle at 40% 35%,#f87171,#b91c1c); box-shadow:0 3px 0 #7f1d1d; }
+    .btn-estop  {
+      background:radial-gradient(circle at 40% 35%,#fbbf24,#d97706);
+      box-shadow:0 3px 0 #92400e;
+      border-color: #f59e0b;
+      position:relative;
+    }
+    .btn-estop.latched { background:radial-gradient(circle at 40% 35%,#f87171,#7f1d1d); border-color:#ef4444; }
+    .btn-reset  { background:radial-gradient(circle at 40% 35%,#a78bfa,#5b21b6); box-shadow:0 3px 0 #3b0764; }
+    .btn-gate   { background:radial-gradient(circle at 40% 35%,#60a5fa,#1d4ed8); box-shadow:0 3px 0 #1e3a8a; }
+    .btn-gate.open { background:radial-gradient(circle at 40% 35%,#f87171,#b91c1c); box-shadow:0 3px 0 #7f1d1d; }
+
+    .btn-label { font-size:9px; display:block; color:var(--muted); margin-top:3px; text-align:center; }
+
+    /* ── Safety Status Panel ── */
+    #safety-panel { grid-column:3; grid-row:2; display:flex; flex-direction:column; gap:12px; overflow-y:auto; }
+
+    /* Safety relay channels */
+    .safety-relay {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .sr-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin-bottom:10px; }
+    .sr-channel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--dim);
+      font-size: 11px;
+    }
+    .sr-channel:last-child { border-bottom: none; }
+    .sr-led {
+      width:10px; height:10px; border-radius:50%; flex-shrink:0;
+      background: #1a1a1a; transition: background .1s, box-shadow .1s;
+    }
+    .sr-led.ok   { background:var(--green); box-shadow:0 0 6px var(--green); }
+    .sr-led.trip { background:var(--red);   box-shadow:0 0 6px var(--red); animation: blink .4s step-start infinite; }
+    .sr-led.warn { background:var(--amber); box-shadow:0 0 6px var(--amber); }
+    @keyframes blink { 50%{ opacity:.2; } }
+    .sr-name  { flex:1; }
+    .sr-state { font-size:10px; font-weight:700; }
+    .sr-state.ok    { color:var(--green); }
+    .sr-state.trip  { color:var(--red); }
+    .sr-state.fault { color:var(--amber); }
+
+    /* Fault log */
+    .fault-log {
+      background: #060809;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      height: 130px;
+      overflow-y: auto;
+      line-height: 1.8;
+    }
+    .fl-entry { display:flex; gap:8px; }
+    .fl-time  { color:#1e3050; flex-shrink:0; }
+    .fl-event { }
+    .fl-safe  { color:#16a34a; }
+    .fl-warn  { color:#d97706; }
+    .fl-trip  { color:#dc2626; }
+    .fl-info  { color:#334155; }
+
+    /* Fault injection */
+    .fault-panel {
+      background: #0c0606;
+      border: 1px solid #7f1d1d;
+      border-radius: 8px;
+      padding: 10px;
+    }
+    .fault-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--red); margin-bottom:8px; }
+    .fault-btn {
+      display:flex; align-items:center; gap:8px; width:100%;
+      background:transparent; border:1px solid #7f1d1d; border-radius:5px;
+      color:#fca5a5; font-size:11px; font-weight:600; cursor:pointer;
+      padding:6px 9px; margin-bottom:5px; text-align:left;
+      transition: background .2s;
+    }
+    .fault-btn:hover  { background:#1a0808; }
+    .fault-btn.active { background:#1a0808; border-color:var(--red); color:var(--red); }
+    .fault-btn:last-child { margin-bottom:0; }
+    .fbi { width:7px; height:7px; border-radius:50%; background:#7f1d1d; flex-shrink:0; }
+    .fault-btn.active .fbi { background:var(--red); box-shadow:0 0 5px var(--red); }
+
+    /* I/O table */
+    .io-table { width:100%; border-collapse:collapse; font-family:'Courier New',monospace; font-size:11px; }
+    .io-table th { text-align:left; padding:3px 6px 6px; border-bottom:1px solid var(--border); font-size:9px; letter-spacing:1px; text-transform:uppercase; color:var(--muted); font-family:'Segoe UI',sans-serif; }
+    .io-table td { padding:5px 6px; border-bottom:1px solid #0a0c12; }
+    .io-table tr:last-child td { border-bottom:none; }
+    .ta { font-weight:700; color:#8b5cf6; }
+    .tt { font-size:10px; padding:1px 5px; border-radius:3px; font-weight:600; }
+    .tt-in  { background:#1e3a5f; color:#60a5fa; }
+    .tt-out { background:#1c3a26; color:#4ade80; }
+    .tt-mem { background:#3b1f5e; color:#c084fc; }
+    .io-bit {
+      display:inline-block; width:26px; height:26px; line-height:26px;
+      text-align:center; border-radius:4px; font-weight:700; font-size:13px;
+      background:#1a1d27; color:var(--muted);
+      transition: background .1s, color .1s;
+    }
+    .io-bit.one     { background:var(--green); color:#fff; }
+    .io-bit.nc-open { background:var(--red);   color:#fff; }
+    .io-bit.fault   { background:var(--red);   color:#fff; animation:blink .5s step-start infinite; }
+
+
+    .progress-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); margin-bottom:8px; }
+    .milestone { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:11px; color:var(--muted); }
+    .milestone.done { color:var(--green); }
+    .msdot { width:8px; height:8px; border-radius:50%; background:var(--border); flex-shrink:0; }
+    .milestone.done .msdot { background:var(--green); box-shadow:0 0 5px var(--green); }
+    .complete-banner { display:none; background:linear-gradient(135deg,#7f1d1d,#991b1b); border:1px solid #ef4444; border-radius:6px; padding:10px; margin-top:10px; font-size:12px; font-weight:700; color:#fecaca; text-align:center; }
+    .complete-banner.show { display:block; }
+
+    code { background:#0d1525; border:1px solid #1a2a44; border-radius:3px; padding:0 3px; color:#7dd3fc; font-size:10px; }
+    .hl-red { color:#f87171; }
+    .hl-grn { color:#4ade80; }
+    ::-webkit-scrollbar { width:4px; } ::-webkit-scrollbar-track { background:transparent; } ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+    /* Drill animation */
+    @keyframes drillSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .drill-spinning { animation: drillSpin .18s linear infinite; transform-origin: 50% 50%; }
+    @keyframes drillSlow  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .drill-slow { animation: drillSpin .6s linear infinite; transform-origin: 50% 50%; }
+
+    @keyframes gateSwing { from { transform: rotate(0deg); } to { transform: rotate(-75deg); } }
+
+    /* ── Accessibility ── */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    .skip-link{position:absolute;top:-50px;left:16px;z-index:9999;padding:10px 18px;background:#3b82f6;color:#fff;font-weight:700;font-size:14px;border-radius:0 0 6px 6px;transition:top .15s;text-decoration:none}
+    .skip-link:focus{top:0;outline:3px solid #fff;outline-offset:2px}
+    :focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    button:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    a:focus-visible{outline:2px solid #3b82f6;outline-offset:3px;border-radius:3px}
+    .hmi-btn{min-height:48px}
+    /* ── Theme toggle button ── */
+    #theme-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:16px;line-height:1;padding:4px 9px;border-radius:6px;cursor:pointer;flex-shrink:0;transition:background .15s,border-color .15s}
+    #theme-toggle:hover{background:rgba(255,255,255,.07)}
+    /* ── Light mode ── */
+    [data-theme="light"]{--bg:#f0f4f8;--surface:#ffffff;--surface2:#eef2f7;--border:#cbd5e1;--text:#0f172a;--muted:#64748b;--de-energized:#94a3b8}
+    [data-theme="light"] body{background:var(--bg);color:var(--text)}
+    [data-theme="light"] .tag-type.input{background:#dbeafe;color:#1d4ed8}
+    [data-theme="light"] .tag-type.output{background:#dcfce7;color:#15803d}
+    [data-theme="light"] .tag-type.memory{background:#ede9fe;color:#7c3aed}
+    [data-theme="light"] .learn-card p,[data-theme="light"] .learn-card li{color:#475569}
+    [data-theme="light"] code{background:#f1f5f9;border-color:#cbd5e1;color:#0369a1}
+  </style>
+  <script>!function(){var t=localStorage.getItem('plc-theme');if(t)document.documentElement.dataset.theme=t}();</script>
+  <link rel="stylesheet" href="assess.css">
+  <link rel="stylesheet" href="mission-log.css">
+  <link rel="stylesheet" href="supervisor.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="a11y-status" role="status" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+<div id="a11y-alert"  role="alert"  aria-live="assertive" aria-atomic="true" class="sr-only"></div>
+
+<header>
+  <span class="badge-safety">⚠ SAFETY</span>
+  <h1>Safety Interlock — High-Speed Drill with Guard Gate</h1>
+  <nav class="nav-links" aria-label="Challenge navigation">
+    <a href="index.html"  class="nav-link">⌂ Home</a>
+    <a href="level1.html" class="nav-link">L1</a>
+    <a href="learn-your-log.html" class="nav-link" style="color:#f59e0b;border-color:#d97706;">📋 Log</a>
+    <a href="level2.html" class="nav-link">Level 2</a>
+    <a href="level3.html" class="nav-link">Level 3</a>
+    <a href="level4.html" class="nav-link active">Safety</a>
+    <a href="level5.html" class="nav-link">Timer →</a>
+  </nav>
+  <div class="scan-ctr" aria-hidden="true">SCAN #<span id="scan-num">0</span> &nbsp;|&nbsp; Safety: <span id="safety-state-hdr">TRIPPED</span></div>
+  <button id="theme-toggle" aria-label="Switch to light mode" aria-pressed="false" title="Toggle light/dark mode">☀️</button>
+</header>
+
+<main id="main-content"><div class="main">
+
+  <!-- ══ TOP STRIP: concepts + milestones ══ -->
+  <div id="top-strip">
+    <div class="bc">
+      <h3>🔒 Why Manual Reset?</h3>
+      <p>After any safety event (gate open, E-Stop press), the machine must <strong>not auto-restart</strong> when the condition clears. IEC 62061 and ISO 13849 require a deliberate operator action — the <strong>manual reset</strong> — to re-arm the safety circuit. This prevents injuries from unexpected restart after maintenance.</p>
+    </div>
+    <div class="bc">
+      <h3>🔴 Fail-Safe NC Wiring</h3>
+      <ul>
+        <li><strong>E-Stop</strong> and <strong>Gate</strong> sensors are wired NC</li>
+        <li>Normal state: contact closed → PLC reads <code>1</code> → safe</li>
+        <li>Wire cut: PLC reads <code>0</code> → same as if pressed → <span class="hl-red">machine stops</span></li>
+        <li>This is "de-energise to trip" — the safe state requires power, not the absence of it</li>
+      </ul>
+    </div>
+    <div class="bc">
+      <h3>⚡ Safety vs. Operational Channels</h3>
+      <ul>
+        <li><strong>Safety rungs (1&amp;2):</strong> monitor NC sensors only</li>
+        <li><strong>Reset rung (3):</strong> gates entry to operational logic</li>
+        <li><strong>Operational rung (4):</strong> normal start/stop — cannot override safety</li>
+        <li>Real safety PLCs (Siemens S7-F, Allen-Bradley GuardLogix) enforce this separation in hardware</li>
+      </ul>
+    </div>
+    <div class="bc">
+      <div class="progress-title">Challenge Milestones</div>
+      <div class="milestone" id="m1"><div class="msdot"></div>Close gate &amp; press RESET to arm safety circuit</div>
+      <div class="milestone" id="m2"><div class="msdot"></div>Press START — drill enables with safety armed</div>
+      <div class="milestone" id="m3"><div class="msdot"></div>Open gate while running — observe immediate stop</div>
+      <div class="milestone" id="m4"><div class="msdot"></div>Re-arm (close gate + RESET) &amp; restart</div>
+      <div class="milestone" id="m5"><div class="msdot"></div>Trigger E-Stop while running — drill stops</div>
+      <div class="milestone" id="m6"><div class="msdot"></div>Recover: release E-Stop + RESET + START</div>
+      <div class="milestone" id="m7"><div class="msdot"></div>Wire break fault — observe fail-safe shutdown</div>
+      <div class="complete-banner" id="complete-banner">
+        🎉 Safety Challenge Complete! You understand fail-safe interlock design.
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LADDER LOGIC ══ -->
+  <div class="panel" id="ladder-panel">
+    <div class="panel-title"><div class="pdot" style="background:#ef4444"></div>Ladder Logic Program — Safety &amp; Operational Channels</div>
+    <svg id="ladder-svg" role="img" aria-label="Safety interlock ladder logic — dual-channel E-Stop and gate guard. Safety channel uses NC forced-guided contacts. Operational channel controls drill motor Q0 when all guards are satisfied." height="470" viewBox="0 0 580 470" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Power rails -->
+      <line id="rail-L" x1="36" y1="15" x2="36" y2="455" stroke="#3b82f6" stroke-width="4" stroke-linecap="round"/>
+      <line id="rail-N" x1="560" y1="15" x2="560" y2="455" stroke="#64748b" stroke-width="4" stroke-linecap="round"/>
+      <text x="36"  y="11" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="700" font-family="monospace">L+</text>
+      <text x="560" y="11" text-anchor="middle" fill="#64748b" font-size="11" font-weight="700" font-family="monospace">N−</text>
+
+      <!-- ═ SAFETY ZONE BACKGROUND ═ -->
+      <rect x="38" y="18" width="520" height="210" rx="4" fill="#0c0808" stroke="#7f1d1d" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="54" y="32" fill="#7f1d1d" font-size="9" font-weight="700" font-family="monospace" letter-spacing="1">SAFETY CHANNEL — IEC 62061</text>
+
+      <!-- ══ RUNG 1: E-Stop NC monitor ══ -->
+      <line id="r1-wa"   x1="36" y1="65"  x2="96"  y2="65"  stroke="#334155" stroke-width="3"/>
+      <g id="c-estop" transform="translate(96,45)">
+        <line id="es-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="es-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="es-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="es-sl" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <line id="es-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">E-STOP</text>
+        <text x="20" y="60" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700">[NC]</text>
+      </g>
+      <line id="r1-wb"   x1="136" y1="65" x2="510" y2="65"  stroke="#334155" stroke-width="3"/>
+      <g id="coil-estok" transform="translate(510,45)">
+        <line id="eo-l" x1="0" y1="20" x2="8"  y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="eo-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="eo-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">ES_OK</text>
+      </g>
+      <line id="r1-rail" x1="550" y1="65" x2="560" y2="65" stroke="#334155" stroke-width="3"/>
+      <text x="22" y="69" text-anchor="middle" fill="#7f1d1d" font-size="11" font-weight="700" font-family="monospace">1</text>
+
+      <!-- ══ RUNG 2: Gate NC monitor ══ -->
+      <line id="r2-wa"   x1="36"  y1="135" x2="96"  y2="135" stroke="#334155" stroke-width="3"/>
+      <g id="c-gate" transform="translate(96,115)">
+        <line id="gt-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="gt-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="gt-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="gt-sl" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <line id="gt-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">GATE</text>
+        <text x="20" y="60" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700">[NC]</text>
+      </g>
+      <line id="r2-wb"   x1="136" y1="135" x2="510" y2="135" stroke="#334155" stroke-width="3"/>
+      <g id="coil-gateok" transform="translate(510,115)">
+        <line id="go-l" x1="0" y1="20" x2="8"  y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="go-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="go-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">GATE_OK</text>
+      </g>
+      <line id="r2-rail" x1="550" y1="135" x2="560" y2="135" stroke="#334155" stroke-width="3"/>
+      <text x="22" y="139" text-anchor="middle" fill="#7f1d1d" font-size="11" font-weight="700" font-family="monospace">2</text>
+
+      <!-- ══ RUNG 3: Safety reset latch ══ -->
+      <!-- Operational zone background -->
+      <rect x="38" y="238" width="520" height="220" rx="4" fill="#050a08" stroke="#166534" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="54" y="252" fill="#166534" font-size="9" font-weight="700" font-family="monospace" letter-spacing="1">OPERATIONAL CHANNEL</text>
+
+      <!-- First: rung 3 lives in safety zone (y=200) -->
+      <line id="r3-wa"   x1="36"  y1="205" x2="96"  y2="205" stroke="#334155" stroke-width="3"/>
+      <!-- I2: RESET NO contact -->
+      <g id="c-reset" transform="translate(96,185)">
+        <line id="rs-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="rs-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="rs-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="rs-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I2</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">RESET</text>
+        <text x="20" y="60" text-anchor="middle" fill="#64748b" font-size="8">[NO]</text>
+      </g>
+      <!-- M0 ES_OK contact -->
+      <line id="r3-wb"  x1="136" y1="205" x2="196" y2="205" stroke="#334155" stroke-width="3"/>
+      <g id="c-esok-r3" transform="translate(196,185)">
+        <line id="eor3-l"  x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="eor3-b1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="eor3-b2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="eor3-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">ES_OK</text>
+      </g>
+      <!-- M1 GATE_OK contact -->
+      <line id="r3-wc"  x1="236" y1="205" x2="296" y2="205" stroke="#334155" stroke-width="3"/>
+      <g id="c-gateok-r3" transform="translate(296,185)">
+        <line id="gor3-l"  x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="gor3-b1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="gor3-b2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="gor3-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M1</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">GATE_OK</text>
+      </g>
+      <!-- Wire to junction for M2 seal-in -->
+      <line id="r3-wd"  x1="336" y1="205" x2="380" y2="205" stroke="#334155" stroke-width="3"/>
+      <circle id="r3-jdot" cx="380" cy="205" r="3.5" fill="#334155"/>
+      <line id="r3-we"  x1="380" y1="205" x2="510" y2="205" stroke="#334155" stroke-width="3"/>
+      <!-- M2 safety latch coil -->
+      <g id="coil-safelatch" transform="translate(510,185)">
+        <line id="sl-l" x1="0" y1="20" x2="8"  y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="sl-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="sl-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M2</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">SAFE_OK</text>
+      </g>
+      <line id="r3-rail" x1="550" y1="205" x2="560" y2="205" stroke="#334155" stroke-width="3"/>
+      <!-- Seal-in branch for M2 (parallel to RESET) -->
+      <line id="seal3-da" x1="380" y1="205" x2="380" y2="225" stroke="#334155" stroke-width="3"/>
+      <line id="seal3-l"  x1="96"  y1="225" x2="380" y2="225" stroke="#334155" stroke-width="3"/>
+      <g id="c-m2-seal" transform="translate(196,220)">
+        <line id="m2s-l"  x1="0" y1="15" x2="14" y2="15" stroke="#334155" stroke-width="3"/>
+        <line id="m2s-b1" x1="14" y1="4"  x2="14" y2="26" stroke="#334155" stroke-width="3"/>
+        <line id="m2s-b2" x1="26" y1="4"  x2="26" y2="26" stroke="#334155" stroke-width="3"/>
+        <line id="m2s-r"  x1="26" y1="15" x2="40" y2="15" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="-2" text-anchor="middle" fill="#c084fc" font-size="10" font-weight="700" font-family="monospace">M2</text>
+        <text x="20" y="40" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">SEAL</text>
+      </g>
+      <text x="22" y="209" text-anchor="middle" fill="#166534" font-size="11" font-weight="700" font-family="monospace">3</text>
+
+      <!-- ══ RUNG 4: Drill enable ══ -->
+      <line id="r4-wa"  x1="36"  y1="310" x2="96"  y2="310" stroke="#334155" stroke-width="3"/>
+      <!-- I3: START NO -->
+      <g id="c-start" transform="translate(96,290)">
+        <line id="st-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="st-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="st-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="st-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I3</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">START</text>
+        <text x="20" y="60" text-anchor="middle" fill="#64748b" font-size="8">[NO]</text>
+      </g>
+      <!-- junction for Q0 seal-in -->
+      <line id="r4-wb"  x1="136" y1="310" x2="196" y2="310" stroke="#334155" stroke-width="3"/>
+      <circle id="r4-jdot" cx="196" cy="310" r="3.5" fill="#334155"/>
+      <!-- M2 SAFE_OK contact -->
+      <line id="r4-wc"  x1="196" y1="310" x2="296" y2="310" stroke="#334155" stroke-width="3"/>
+      <g id="c-safeok-r4" transform="translate(296,290)">
+        <line id="sor4-l"  x1="0" y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="sor4-b1" x1="14" y1="8" x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="sor4-b2" x1="26" y1="8" x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="sor4-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="11" font-weight="700" font-family="monospace">M2</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">SAFE_OK</text>
+      </g>
+      <!-- Stop NC contact -->
+      <line id="r4-wd"  x1="336" y1="310" x2="396" y2="310" stroke="#334155" stroke-width="3"/>
+      <g id="c-stop" transform="translate(396,290)">
+        <line id="stp-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="stp-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="stp-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="stp-sl" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <line id="stp-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" font-family="monospace">I4</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">STOP</text>
+        <text x="20" y="60" text-anchor="middle" fill="#ef4444" font-size="8" font-weight="700">[NC]</text>
+      </g>
+      <!-- Wire to Q0 coil -->
+      <line id="r4-we"  x1="436" y1="310" x2="510" y2="310" stroke="#334155" stroke-width="3"/>
+      <!-- Q0 DRILL coil -->
+      <g id="coil-q0" transform="translate(510,290)">
+        <line id="q0-l" x1="0" y1="20" x2="8"  y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="q0-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="q0-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" font-family="monospace">Q0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">DRILL</text>
+      </g>
+      <line id="r4-rail" x1="550" y1="310" x2="560" y2="310" stroke="#334155" stroke-width="3"/>
+
+      <!-- Seal-in branch (Q0 parallel to START) -->
+      <line id="seal4-da" x1="196" y1="310" x2="196" y2="350" stroke="#334155" stroke-width="3"/>
+      <line id="seal4-l"  x1="96"  y1="350" x2="196" y2="350" stroke="#334155" stroke-width="3"/>
+      <g id="c-q0-seal" transform="translate(96,345)">
+        <line id="q0s-l"  x1="0" y1="15" x2="14" y2="15" stroke="#334155" stroke-width="3"/>
+        <line id="q0s-b1" x1="14" y1="4"  x2="14" y2="26" stroke="#334155" stroke-width="3"/>
+        <line id="q0s-b2" x1="26" y1="4"  x2="26" y2="26" stroke="#334155" stroke-width="3"/>
+        <line id="q0s-r"  x1="26" y1="15" x2="40" y2="15" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="-2" text-anchor="middle" fill="#4ade80" font-size="10" font-weight="700" font-family="monospace">Q0</text>
+        <text x="20" y="40" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">SEAL</text>
+      </g>
+
+      <text x="22" y="314" text-anchor="middle" fill="#166534" font-size="11" font-weight="700" font-family="monospace">4</text>
+
+      <!-- ══ RUNG 5: Alarm / trip indicator ══ -->
+      <line id="r5-wa"   x1="36"  y1="430" x2="96"  y2="430" stroke="#334155" stroke-width="3"/>
+      <!-- NOT M0: E-Stop tripped indicator -->
+      <g id="c-not-m0" transform="translate(96,410)">
+        <line id="nm0-l"  x1="0"  y1="20" x2="14" y2="20" stroke="#334155" stroke-width="3"/>
+        <line id="nm0-b1" x1="14" y1="8"  x2="14" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="nm0-b2" x1="26" y1="8"  x2="26" y2="32" stroke="#334155" stroke-width="3"/>
+        <line id="nm0-sl" x1="14" y1="10" x2="26" y2="30" stroke="#334155" stroke-width="2"/>
+        <line id="nm0-r"  x1="26" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#c084fc" font-size="10" font-weight="700" font-family="monospace">/M0</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">ES_TRIP</text>
+      </g>
+      <line id="r5-wb"  x1="136" y1="430" x2="510" y2="430" stroke="#334155" stroke-width="3"/>
+      <g id="coil-alarm" transform="translate(510,410)">
+        <line id="al-l" x1="0" y1="20" x2="8"  y2="20" stroke="#334155" stroke-width="3"/>
+        <ellipse id="al-body" cx="20" cy="20" rx="12" ry="12" fill="none" stroke="#334155" stroke-width="3"/>
+        <line id="al-r" x1="32" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="3"/>
+        <text x="20" y="3"  text-anchor="middle" fill="#f97316" font-size="11" font-weight="700" font-family="monospace">M3</text>
+        <text x="20" y="50" text-anchor="middle" fill="#64748b" font-size="9" font-family="sans-serif">ALARM</text>
+      </g>
+      <line id="r5-rail" x1="550" y1="430" x2="560" y2="430" stroke="#334155" stroke-width="3"/>
+      <text x="22" y="434" text-anchor="middle" fill="#166534" font-size="11" font-weight="700" font-family="monospace">5</text>
+
+    </svg>
+  </div>
+
+  <!-- ══ MACHINE HMI ══ -->
+  <div class="panel" id="machine-panel">
+    <div class="panel-title"><div class="pdot" style="background:#22c55e"></div>Machine HMI</div>
+
+    <!-- Stack light -->
+    <div class="stack-light">
+      <div class="sl-lamp red-on"   id="sl-red"></div>
+      <div class="sl-lamp"          id="sl-amber"></div>
+      <div class="sl-lamp"          id="sl-green"></div>
+      <div>
+        <div class="sl-status"    id="sl-status">SAFETY TRIPPED</div>
+        <div class="sl-substatus" id="sl-sub">Close gate → Release E-Stop → Press RESET</div>
+      </div>
+    </div>
+
+    <!-- Machine graphic -->
+    <div class="machine-wrap">
+      <svg id="machine-svg" role="img" aria-label="Drill press machine visualisation — shows drill spindle speed, guard gate position, and E-Stop state." height="240" viewBox="0 0 360 240" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Machine body frame -->
+        <rect x="60" y="20" width="240" height="200" rx="8" fill="#0a0c12" stroke="#1e2d4a" stroke-width="2"/>
+
+        <!-- Drill head housing -->
+        <rect x="130" y="20" width="100" height="50" rx="4" fill="#0d1525" stroke="#1e3a5f" stroke-width="1.5"/>
+        <rect x="150" y="60" width="60"  height="15"  rx="2" fill="#0a1320" stroke="#1e3a5f" stroke-width="1"/>
+
+        <!-- Drill chuck (spinning group) -->
+        <g id="drill-chuck-group" transform="translate(180,70)">
+          <circle r="18" fill="#0f1923" stroke="#263f60" stroke-width="2"/>
+          <line id="chuck-s1" x1="0" y1="-14" x2="0"   y2="-18" stroke="#334a6a" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="chuck-s2" x1="12" y1="7"  x2="16" y2="9"   stroke="#334a6a" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="chuck-s3" x1="-12" y1="7" x2="-16" y2="9"  stroke="#334a6a" stroke-width="2.5" stroke-linecap="round"/>
+          <circle r="6" fill="#1e3050" stroke="#3b5f90" stroke-width="1.5"/>
+        </g>
+
+        <!-- Drill bit -->
+        <g id="drill-bit-group">
+          <rect id="drill-bit" x="176" y="88" width="8" height="80" rx="2" fill="#1e3050" stroke="#334a6a" stroke-width="1"/>
+          <polygon id="drill-tip" points="180,168 173,180 187,180" fill="#263a5a" stroke="#334a6a" stroke-width="1"/>
+          <!-- Flutes (visible when running) -->
+          <line id="flute-l" x1="177" y1="100" x2="176" y2="165" stroke="#263a5a" stroke-width="1.5"/>
+          <line id="flute-r" x1="183" y1="100" x2="184" y2="165" stroke="#263a5a" stroke-width="1.5"/>
+        </g>
+
+        <!-- Chips / sparks effect (running) -->
+        <g id="sparks" opacity="0">
+          <circle id="sp1" cx="173" cy="183" r="2" fill="#fbbf24"/>
+          <circle id="sp2" cx="187" cy="185" r="1.5" fill="#f97316"/>
+          <circle id="sp3" cx="170" cy="188" r="1" fill="#fbbf24"/>
+          <circle id="sp4" cx="190" cy="186" r="1.5" fill="#ef4444"/>
+        </g>
+
+        <!-- Workpiece -->
+        <rect id="workpiece" x="155" y="178" width="50" height="22" rx="3" fill="#1a2535" stroke="#263a5a" stroke-width="1.5"/>
+        <text id="workpiece-label" x="180" y="193" text-anchor="middle" fill="#334a6a" font-size="9" font-family="monospace">WORKPIECE</text>
+
+        <!-- ── SAFETY GATE ── -->
+        <!-- Gate frame (fixed posts) -->
+        <rect x="62" y="25" width="8" height="195" rx="2" fill="#1a2030" stroke="#1e2d4a" stroke-width="1"/>
+        <rect x="290" y="25" width="8" height="195" rx="2" fill="#1a2030" stroke="#1e2d4a" stroke-width="1"/>
+
+        <!-- Gate panel (animated open/close) -->
+        <g id="gate-panel" transform-origin="66 25">
+          <rect id="gate-rect" x="66" y="30" width="220" height="180" rx="3"
+                fill="none" stroke="#1d4ed8" stroke-width="2" stroke-dasharray="8,5"
+                opacity="0.6"/>
+          <!-- Gate cross bars -->
+          <line id="gate-bar1" x1="66" y1="80"  x2="286" y2="80"  stroke="#1d4ed8" stroke-width="1.5" opacity="0.5"/>
+          <line id="gate-bar2" x1="66" y1="130" x2="286" y2="130" stroke="#1d4ed8" stroke-width="1.5" opacity="0.5"/>
+          <line id="gate-bar3" x1="66" y1="180" x2="286" y2="180" stroke="#1d4ed8" stroke-width="1.5" opacity="0.5"/>
+          <!-- Gate latch indicator -->
+          <circle id="gate-latch" cx="286" cy="125" r="6" fill="#1d4ed8" opacity="0.8"/>
+        </g>
+
+        <!-- Gate OPEN/CLOSED label -->
+        <text id="gate-label" x="180" y="230" text-anchor="middle" fill="#1d4ed8" font-size="10" font-weight="700" font-family="monospace">■ GATE CLOSED</text>
+
+        <!-- E-Stop indicator on machine -->
+        <circle id="estop-light" cx="305" cy="50" r="10" fill="#1a0808" stroke="#3b0b0b" stroke-width="2"/>
+        <text x="305" y="54" text-anchor="middle" fill="#3b0b0b" font-size="7" font-weight="700">E-STP</text>
+
+        <!-- Run indicator -->
+        <circle id="run-light" cx="305" cy="80" r="10" fill="#0a1a0a" stroke="#166534" stroke-width="2"/>
+        <text x="305" y="84" text-anchor="middle" fill="#166534" font-size="8" font-weight="700">RUN</text>
+
+        <!-- Speed readout -->
+        <rect x="62" y="200" width="100" height="18" rx="3" fill="#060a0e" stroke="#1e2d4a" stroke-width="1"/>
+        <text id="drill-rpm" x="112" y="212" text-anchor="middle" fill="#334a6a" font-size="9" font-family="monospace">0 RPM</text>
+
+      </svg>
+    </div>
+
+    <!-- Control buttons -->
+    <div class="hmi-row">
+      <div>
+        <button class="hmi-btn btn-start" id="btn-start"
+          onmousedown="pressStart()" onmouseup="releaseStart()"
+          ontouchstart="pressStart()" ontouchend="releaseStart()">▶ START</button>
+        <span class="btn-label">I3 — Momentary NO</span>
+      </div>
+      <div>
+        <button class="hmi-btn btn-stop" id="btn-stop"
+          onmousedown="pressStop()" onmouseup="releaseStop()"
+          ontouchstart="pressStop()" ontouchend="releaseStop()">■ STOP</button>
+        <span class="btn-label">I4 — Momentary NC</span>
+      </div>
+    </div>
+    <div class="hmi-row" style="margin-top:8px">
+      <div>
+        <button class="hmi-btn btn-estop" id="btn-estop" onclick="toggleEStop()" aria-pressed="false">⊗ E-STOP</button>
+        <span class="btn-label">I0 — Latching NC</span>
+      </div>
+      <div>
+        <button class="hmi-btn btn-reset" id="btn-reset"
+          onmousedown="pressReset()" onmouseup="releaseReset()"
+          ontouchstart="pressReset()" ontouchend="releaseReset()">↺ RESET</button>
+        <span class="btn-label">I2 — Momentary NO</span>
+      </div>
+      <div>
+        <button class="hmi-btn btn-gate" id="btn-gate" onclick="toggleGate()" aria-pressed="false">🚪 GATE</button>
+        <span class="btn-label">I1 — NC sensor</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ SAFETY STATUS PANEL ══ -->
+  <div class="panel" id="safety-panel">
+    <div class="panel-title"><div class="pdot" style="background:#ef4444"></div>Safety Relay Monitor</div>
+
+    <div class="safety-relay">
+      <div class="sr-title">⚡ Two-Channel Safety Circuit</div>
+      <div class="sr-channel">
+        <div class="sr-led trip" id="sr-estop"></div>
+        <span class="sr-name">CH-A: E-Stop (I0)</span>
+        <span class="sr-state trip" id="sr-estop-state">TRIPPED</span>
+      </div>
+      <div class="sr-channel">
+        <div class="sr-led ok" id="sr-gate"></div>
+        <span class="sr-name">CH-B: Gate (I1)</span>
+        <span class="sr-state ok" id="sr-gate-state">OK</span>
+      </div>
+      <div class="sr-channel">
+        <div class="sr-led" id="sr-reset"></div>
+        <span class="sr-name">Reset acknowledged</span>
+        <span class="sr-state" id="sr-reset-state">—</span>
+      </div>
+      <div class="sr-channel">
+        <div class="sr-led" id="sr-safeok"></div>
+        <span class="sr-name">SAFE_OK (M2)</span>
+        <span class="sr-state" id="sr-safeok-state">NOT ARMED</span>
+      </div>
+    </div>
+
+    <!-- Fault log -->
+    <div>
+      <div class="panel-title" style="margin-top:0"><div class="pdot" style="background:#f97316"></div>Safety Event Log</div>
+      <div class="fault-log" id="fault-log">
+        <div class="fl-entry"><span class="fl-time">00:00</span><span class="fl-info">System powered on — safety circuit NOT armed</span></div>
+        <div class="fl-entry"><span class="fl-time">00:00</span><span class="fl-trip">E-Stop circuit OPEN — close E-Stop then press RESET to arm</span></div>
+      </div>
+    </div>
+
+    <!-- Fault injection -->
+    <div class="fault-panel">
+      <div class="fault-title">⚡ Wire Break Simulation</div>
+      <button class="fault-btn" id="fault-estop-btn" onclick="toggleFault('estop')">
+        <span class="fbi" id="fi-estop"></span>
+        Break E-Stop wire (I0 stuck 0)
+      </button>
+      <button class="fault-btn" id="fault-gate-btn" onclick="toggleFault('gate')">
+        <span class="fbi" id="fi-gate"></span>
+        Break Gate wire (I1 stuck 0)
+      </button>
+    </div>
+
+    <!-- I/O table -->
+    <div>
+      <div class="panel-title" style="margin-top:0"><div class="pdot" style="background:#8b5cf6"></div>I/O Register Map</div>
+      <table class="io-table">
+        <thead><tr><th scope="col">Addr</th><th scope="col">Tag</th><th scope="col">Type</th><th scope="col">Val</th></tr></thead>
+        <tbody>
+          <tr><td class="ta">I0</td><td>E-STOP</td><td><span class="tt tt-in">IN</span></td><td><span class="io-bit nc-open" id="bi-I0">0</span></td></tr>
+          <tr><td class="ta">I1</td><td>GATE</td>  <td><span class="tt tt-in">IN</span></td><td><span class="io-bit one" id="bi-I1">1</span></td></tr>
+          <tr><td class="ta">I2</td><td>RESET</td> <td><span class="tt tt-in">IN</span></td><td><span class="io-bit" id="bi-I2">0</span></td></tr>
+          <tr><td class="ta">I3</td><td>START</td> <td><span class="tt tt-in">IN</span></td><td><span class="io-bit" id="bi-I3">0</span></td></tr>
+          <tr><td class="ta">I4</td><td>STOP</td>  <td><span class="tt tt-in">IN</span></td><td><span class="io-bit one" id="bi-I4">1</span></td></tr>
+          <tr><td class="ta">M0</td><td>ES_OK</td> <td><span class="tt tt-mem">MEM</span></td><td><span class="io-bit" id="bi-M0">0</span></td></tr>
+          <tr><td class="ta">M1</td><td>GATE_OK</td><td><span class="tt tt-mem">MEM</span></td><td><span class="io-bit one" id="bi-M1">1</span></td></tr>
+          <tr><td class="ta">M2</td><td>SAFE_OK</td><td><span class="tt tt-mem">MEM</span></td><td><span class="io-bit" id="bi-M2">0</span></td></tr>
+          <tr><td class="ta">M3</td><td>ALARM</td> <td><span class="tt tt-mem">MEM</span></td><td><span class="io-bit" id="bi-M3">0</span></td></tr>
+          <tr><td class="ta">Q0</td><td>DRILL</td> <td><span class="tt tt-out">OUT</span></td><td><span class="io-bit" id="bi-Q0">0</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+
+<!-- ── MISSION LOG ─────────────────────────────────────── -->
+<section class="ml-wrap" aria-label="Mission progress log">
+  <div class="ml-panel" id="ml-panel" data-level="l4"
+       data-hint="E-Stop NC wiring and safety interlock categories">
+    <button class="ml-toggle" id="ml-toggle" type="button"
+            aria-expanded="false" aria-controls="ml-body">
+      <span class="ml-toggle-icon" aria-hidden="true">📋</span>
+      <span class="ml-toggle-label">MISSION LOG</span>
+      <span class="ml-toggle-count" id="ml-count"></span>
+      <span class="ml-toggle-chevron" aria-hidden="true">▼</span>
+    </button>
+    <div class="ml-body" id="ml-body">
+      <div class="ml-form-area">
+        <div class="ml-form-row">
+          <div class="ml-field ml-field--grow">
+            <label class="ml-label" for="ml-skill">SKILL PRACTICED</label>
+            <input class="ml-input" id="ml-skill" type="text"
+                   placeholder="What skill did you work on?">
+          </div>
+          <div class="ml-field">
+            <div class="ml-label" id="ml-stars-lbl">DIFFICULTY</div>
+            <div class="ml-stars" id="ml-stars" role="group" aria-labelledby="ml-stars-lbl">
+              <button class="ml-star" data-v="1" type="button" aria-label="1 — Easy">★</button>
+              <button class="ml-star" data-v="2" type="button" aria-label="2">★</button>
+              <button class="ml-star" data-v="3" type="button" aria-label="3 — Medium">★</button>
+              <button class="ml-star" data-v="4" type="button" aria-label="4">★</button>
+              <button class="ml-star" data-v="5" type="button" aria-label="5 — Hard">★</button>
+            </div>
+          </div>
+        </div>
+        <div class="ml-field">
+          <label class="ml-label" for="ml-notes">NOTES</label>
+          <textarea class="ml-textarea" id="ml-notes" rows="3"
+                    placeholder="What clicked? What tripped you up? Any real-world connections?"></textarea>
+        </div>
+        <div class="ml-actions">
+          <button class="ml-btn ml-btn--save" id="ml-save" type="button">
+            <span aria-hidden="true">⬡</span> LOG ENTRY
+          </button>
+          <button class="ml-btn ml-btn--clear" id="ml-clear" type="button">CLEAR ALL</button>
+        </div>
+      </div>
+      <div class="ml-entries" id="ml-entries" aria-live="polite" aria-label="Previous log entries"></div>
+    </div>
+  </div>
+</section>
+
+</div></main><!-- /main-content -->
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  HARDWARE STATE
+// ══════════════════════════════════════════════════════════════
+const hw = {
+  estopLatched: true,   // E-Stop starts pressed (latched)
+  gateClosed:   true,   // gate starts closed
+  resetPressed: false,
+  startPressed: false,
+  stopPressed:  false,  // STOP is NC — stopPressed=false means passing
+};
+const faults = { estop: false, gate: false };
+
+// PLC memory
+const plc = {
+  I: { I0:false, I1:true, I2:false, I3:false, I4:true },
+  M: { M0:false, M1:true, M2:false, M3:false },
+  Q: { Q0:false },
+
+  readInputs() {
+    this.I.I0 = faults.estop ? false : !hw.estopLatched;  // NC: 1 when NOT latched
+    this.I.I1 = faults.gate  ? false : hw.gateClosed;     // NC: 1 when closed
+    this.I.I2 = hw.resetPressed;
+    this.I.I3 = hw.startPressed;
+    this.I.I4 = !hw.stopPressed;  // NC: 1 at rest
+  },
+
+  executeLogic() {
+    // Rung 1: ES_OK = I0 (NC e-stop clear)
+    this.M.M0 = this.I.I0;
+    // Rung 2: GATE_OK = I1 (NC gate closed)
+    this.M.M1 = this.I.I1;
+    // Rung 3: SAFE_OK latch = (RESET AND M0 AND M1) OR (M2 AND M0 AND M1)
+    const safeCondition = this.M.M0 && this.M.M1;
+    this.M.M2 = (this.I.I2 || this.M.M2) && safeCondition;
+    // Rung 4: DRILL = (START OR Q0) AND M2 AND STOP_NC
+    const runCmd = (this.I.I3 || this.Q.Q0) && this.M.M2 && this.I.I4;
+    this.Q.Q0 = runCmd;
+    // Rung 5: ALARM = NOT M0 (e-stop tripped)
+    this.M.M3 = !this.M.M0;
+  },
+
+  scan() {
+    this.readInputs();
+    this.executeLogic();
+  }
+};
+
+// ══════════════════════════════════════════════════════════════
+//  BUTTON HANDLERS
+// ══════════════════════════════════════════════════════════════
+function pressStart()   { hw.startPressed = true;  }
+function releaseStart() { hw.startPressed = false; }
+function pressStop()    { hw.stopPressed  = true;  }
+function releaseStop()  { hw.stopPressed  = false; }
+function pressReset()   { hw.resetPressed = true;  }
+function releaseReset() { hw.resetPressed = false; }
+
+function toggleEStop() {
+  hw.estopLatched = !hw.estopLatched;
+  const btn = document.getElementById('btn-estop');
+  btn.classList.toggle('latched', hw.estopLatched);
+  btn.setAttribute('aria-pressed', hw.estopLatched.toString());
+  btn.textContent = hw.estopLatched ? '⊗ E-STOP ●' : '⊗ E-STOP';
+  const msg = hw.estopLatched ? 'E-Stop PRESSED — safety channel A tripped' : 'E-Stop RELEASED — awaiting RESET';
+  logEvent(hw.estopLatched ? 'trip' : 'safe', msg);
+  announce(msg, hw.estopLatched);
+}
+
+function toggleGate() {
+  hw.gateClosed = !hw.gateClosed;
+  const btn = document.getElementById('btn-gate');
+  btn.classList.toggle('open', !hw.gateClosed);
+  btn.setAttribute('aria-pressed', (!hw.gateClosed).toString());
+  btn.textContent = hw.gateClosed ? '🚪 GATE' : '🔓 GATE OPEN';
+  const msg = hw.gateClosed ? 'Safety gate CLOSED — sensor CH-B OK' : 'Safety gate OPENED — drill must stop immediately!';
+  logEvent(hw.gateClosed ? 'safe' : 'trip', msg);
+  announce(msg, !hw.gateClosed);
+}
+
+function toggleFault(type) {
+  faults[type] = !faults[type];
+  const btn = document.getElementById(`fault-${type}-btn`);
+  btn.classList.toggle('active', faults[type]);
+  document.getElementById(`fi-${type}`).style.boxShadow = faults[type] ? '0 0 6px #ef4444' : 'none';
+  document.getElementById(`fi-${type}`).style.background = faults[type] ? '#ef4444' : '#7f1d1d';
+  if (faults[type]) {
+    logEvent('trip', `WIRE BREAK on ${type === 'estop' ? 'E-Stop (I0)' : 'Gate sensor (I1)'} — fail-safe shutdown`);
+    ms.fault = true;
+  } else {
+    logEvent('safe', `Wire fault cleared on ${type === 'estop' ? 'I0' : 'I1'}`);
+  }
+}
+
+// Prevent context menu on long-press
+['btn-start','btn-stop','btn-estop','btn-reset','btn-gate'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+// Keyboard accessibility for momentary buttons (Space/Enter = hold)
+[['btn-start', pressStart, releaseStart], ['btn-stop', pressStop, releaseStop],
+ ['btn-reset', pressReset, releaseReset]].forEach(([id, dn, up]) => {
+  const btn = document.getElementById(id);
+  if (!btn) return;
+  btn.addEventListener('keydown', e => { if (e.code==='Space'||e.code==='Enter') { e.preventDefault(); dn(); }});
+  btn.addEventListener('keyup',   e => { if (e.code==='Space'||e.code==='Enter') up(); });
+});
+
+// ── Screen-reader announcer ──────────────────────────────────
+function announce(msg, urgent) {
+  const el = document.getElementById(urgent ? 'a11y-alert' : 'a11y-status');
+  if (!el) return;
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = msg; });
+}
+document.addEventListener('mouseup',  () => { releaseStart(); releaseStop(); releaseReset(); });
+document.addEventListener('touchend', () => { releaseStart(); releaseStop(); releaseReset(); });
+
+// ══════════════════════════════════════════════════════════════
+//  LADDER COLOUR HELPERS
+// ══════════════════════════════════════════════════════════════
+const ON  = '#22c55e';
+const OFF = '#252a3d';
+const FAULT_COL = '#ef4444';
+const SAFETY_ON = '#22c55e';
+const SAFETY_ARM= '#f97316';  // amber when armed but waiting
+
+function ss(ids, col) {
+  ids.forEach(id => { const el=document.getElementById(id); if(el) el.setAttribute('stroke', col); });
+}
+function setCoil(bodyId, lId, rId, on, col) {
+  const body = document.getElementById(bodyId);
+  if (body) { body.setAttribute('stroke', on ? (col||ON) : OFF); body.setAttribute('fill', on ? '#051a0e' : 'none'); }
+  ss([lId, rId], on ? (col||ON) : OFF);
+}
+function setContact(prefix, on, faultCol) {
+  const col = faultCol && !on ? faultCol : (on ? ON : OFF);
+  ss([`${prefix}-l`,`${prefix}-b1`,`${prefix}-b2`,`${prefix}-r`], col);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  DRILL ANIMATION
+// ══════════════════════════════════════════════════════════════
+let chuckAngle = 0;
+let drillRpm   = 0;
+let sparkPhase = 0;
+
+function updateDrillVisual(Q0) {
+  const targetRpm = Q0 ? 2800 : 0;
+  drillRpm += (targetRpm - drillRpm) * 0.08;
+
+  const degPerTick = (drillRpm / 60) * (50 / 1000) * 360;
+  chuckAngle = (chuckAngle + degPerTick) % 360;
+
+  // Rotate chuck
+  const cx = 180, cy = 70;
+  const rad = chuckAngle * Math.PI / 180;
+  const r = 14;
+  const s1x = cx + r * Math.sin(rad);        const s1y = cy - r * Math.cos(rad);
+  const s2x = cx + r * Math.sin(rad + 2.094); const s2y = cy - r * Math.cos(rad + 2.094);
+  const s3x = cx + r * Math.sin(rad + 4.189); const s3y = cy - r * Math.cos(rad + 4.189);
+  const s1 = document.getElementById('chuck-s1');
+  const s2 = document.getElementById('chuck-s2');
+  const s3 = document.getElementById('chuck-s3');
+  if(s1){s1.setAttribute('x2', s1x.toFixed(1)); s1.setAttribute('y2', s1y.toFixed(1));}
+  if(s2){s2.setAttribute('x2', s2x.toFixed(1)); s2.setAttribute('y2', s2y.toFixed(1));}
+  if(s3){s3.setAttribute('x2', s3x.toFixed(1)); s3.setAttribute('y2', s3y.toFixed(1));}
+
+  // Chuck hub colour
+  const hub = document.querySelector('#drill-chuck-group circle:last-child');
+  if (hub) hub.setAttribute('fill', drillRpm > 100 ? '#0e4a6a' : '#1e3050');
+
+  // Drill bit colour
+  const bit = document.getElementById('drill-bit');
+  const tip = document.getElementById('drill-tip');
+  const bitCol   = drillRpm > 100 ? '#263f60' : '#1e3050';
+  const strokeCol = drillRpm > 100 ? '#3b82f6' : '#334a6a';
+  if(bit) { bit.setAttribute('fill', bitCol); bit.setAttribute('stroke', strokeCol); }
+  if(tip) { tip.setAttribute('fill', bitCol); tip.setAttribute('stroke', strokeCol); }
+
+  // Sparks
+  const sparks = document.getElementById('sparks');
+  if (drillRpm > 500) {
+    sparks.setAttribute('opacity', '1');
+    sparkPhase += 0.3;
+    const sps = ['sp1','sp2','sp3','sp4'];
+    const baseX = [173,187,170,190];
+    const baseY = [183,185,188,186];
+    sps.forEach((id,i) => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      el.setAttribute('cx', (baseX[i] + Math.sin(sparkPhase + i * 1.5) * 5).toFixed(1));
+      el.setAttribute('cy', (baseY[i] + Math.cos(sparkPhase * 0.7 + i) * 4).toFixed(1));
+      el.setAttribute('opacity', (0.4 + Math.random() * 0.6).toFixed(2));
+    });
+  } else { sparks.setAttribute('opacity', '0'); }
+
+  // RPM readout
+  const rpmEl = document.getElementById('drill-rpm');
+  if(rpmEl) {
+    rpmEl.textContent = Math.round(drillRpm) + ' RPM';
+    rpmEl.setAttribute('fill', drillRpm > 100 ? '#3b82f6' : '#334a6a');
+  }
+
+  // Run indicator
+  const runLight = document.getElementById('run-light');
+  if(runLight) {
+    runLight.setAttribute('fill',   drillRpm > 100 ? '#15803d' : '#0a1a0a');
+    runLight.setAttribute('stroke', drillRpm > 100 ? '#22c55e' : '#166534');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  GATE VISUAL
+// ══════════════════════════════════════════════════════════════
+function updateGateVisual(closed) {
+  const panel  = document.getElementById('gate-panel');
+  const latch  = document.getElementById('gate-latch');
+  const label  = document.getElementById('gate-label');
+  const rect   = document.getElementById('gate-rect');
+
+  if (closed) {
+    panel.setAttribute('transform', 'rotate(0,66,25)');
+    const col = faults.gate ? '#ef4444' : '#1d4ed8';
+    if(rect) rect.setAttribute('stroke', col);
+    if(latch) latch.setAttribute('fill', col);
+    if(label) { label.textContent = faults.gate ? '⚡ WIRE BREAK — GATE READS OPEN' : '■ GATE CLOSED'; label.setAttribute('fill', faults.gate ? '#ef4444' : '#1d4ed8'); }
+  } else {
+    panel.setAttribute('transform', 'rotate(-80,66,30)');
+    if(rect) rect.setAttribute('stroke', '#ef4444');
+    if(latch) latch.setAttribute('fill', '#ef4444');
+    if(label) { label.textContent = '⚠ GATE OPEN — DRILL LOCKED OUT'; label.setAttribute('fill', '#ef4444'); }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  STACK LIGHT
+// ══════════════════════════════════════════════════════════════
+let flashState = false;
+
+function updateStackLight(Q0, M2, esOk, gateOk) {
+  const slRed   = document.getElementById('sl-red');
+  const slAmber = document.getElementById('sl-amber');
+  const slGreen = document.getElementById('sl-green');
+  const status  = document.getElementById('sl-status');
+  const sub     = document.getElementById('sl-sub');
+  const hdrState = document.getElementById('safety-state-hdr');
+
+  slRed.className   = 'sl-lamp';
+  slAmber.className = 'sl-lamp';
+  slGreen.className = 'sl-lamp';
+
+  if (!esOk || !gateOk) {
+    // Safety tripped
+    slRed.className = 'sl-lamp red-on';
+    if (flashState) slAmber.className = 'sl-lamp amber-on';
+    status.textContent = !esOk ? 'E-STOP ACTIVE' : 'GATE OPEN — LOCKOUT';
+    sub.textContent    = 'Release fault → Press RESET to re-arm';
+    hdrState.textContent = 'TRIPPED';
+    hdrState.style.color = '#ef4444';
+  } else if (!M2) {
+    // Safe but not armed
+    slAmber.className = 'sl-lamp amber-on';
+    status.textContent = 'SAFETY ARMED — RESET REQUIRED';
+    sub.textContent    = 'Press RESET button to arm safety circuit';
+    hdrState.textContent = 'AWAITING RESET';
+    hdrState.style.color = '#f59e0b';
+  } else if (Q0) {
+    // Running
+    slGreen.className = 'sl-lamp green-on';
+    status.textContent = 'DRILL RUNNING';
+    sub.textContent    = Math.round(drillRpm) + ' RPM — All interlocks OK';
+    hdrState.textContent = 'RUNNING';
+    hdrState.style.color = '#22c55e';
+  } else {
+    // Armed, stopped
+    slGreen.className = 'sl-lamp green-on';
+    slAmber.className = 'sl-lamp amber-on';
+    status.textContent = 'ARMED — READY';
+    sub.textContent    = 'Press START to enable drill';
+    hdrState.textContent = 'READY';
+    hdrState.style.color = '#22c55e';
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+//  SAFETY RELAY PANEL
+// ══════════════════════════════════════════════════════════════
+function updateSafetyRelay(I0,I1,M2,M3) {
+  const srEs    = document.getElementById('sr-estop');
+  const srEsS   = document.getElementById('sr-estop-state');
+  const srGt    = document.getElementById('sr-gate');
+  const srGtS   = document.getElementById('sr-gate-state');
+  const srRs    = document.getElementById('sr-reset');
+  const srRsS   = document.getElementById('sr-reset-state');
+  const srSo    = document.getElementById('sr-safeok');
+  const srSoS   = document.getElementById('sr-safeok-state');
+
+  const esOk  = I0;
+  const gtOk  = I1;
+
+  // E-Stop channel
+  srEs.className  = 'sr-led ' + (esOk ? 'ok' : (faults.estop ? 'warn' : 'trip'));
+  srEsS.textContent = esOk ? 'OK' : (faults.estop ? 'WIRE FAULT' : 'TRIPPED');
+  srEsS.className   = 'sr-state ' + (esOk ? 'ok' : 'trip');
+
+  // Gate channel
+  srGt.className  = 'sr-led ' + (gtOk ? 'ok' : (faults.gate ? 'warn' : 'trip'));
+  srGtS.textContent = gtOk ? 'OK' : (faults.gate ? 'WIRE FAULT' : 'OPEN');
+  srGtS.className   = 'sr-state ' + (gtOk ? 'ok' : 'trip');
+
+  // Reset
+  srRs.className  = 'sr-led ' + (M2 ? 'ok' : (esOk && gtOk ? 'warn' : ''));
+  srRsS.textContent = M2 ? 'CONFIRMED' : (esOk && gtOk ? 'REQUIRED' : '—');
+  srRsS.className   = 'sr-state ' + (M2 ? 'ok' : 'fault');
+
+  // SAFE_OK
+  srSo.className  = 'sr-led ' + (M2 ? 'ok' : '');
+  srSoS.textContent = M2 ? 'ARMED ✓' : 'NOT ARMED';
+  srSoS.className   = 'sr-state ' + (M2 ? 'ok' : '');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FAULT LOG
+// ══════════════════════════════════════════════════════════════
+let logStart = Date.now();
+function logEvent(type, msg) {
+  const t   = new Date(Date.now() - logStart);
+  const ts  = `${String(Math.floor(t/60000)).padStart(2,'0')}:${String(Math.floor((t%60000)/1000)).padStart(2,'0')}`;
+  const log = document.getElementById('fault-log');
+  const div = document.createElement('div');
+  div.className = 'fl-entry';
+  div.innerHTML = `<span class="fl-time">${ts}</span><span class="fl-${type}">${msg}</span>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  I/O BIT DISPLAY
+// ══════════════════════════════════════════════════════════════
+function setBit(id, val, opts = {}) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val ? '1' : '0';
+  el.className = 'io-bit';
+  if (opts.fault) { el.classList.add('fault'); return; }
+  if (val) el.classList.add('one');
+  if (opts.nc && !val) el.classList.add('nc-open');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MILESTONES
+// ══════════════════════════════════════════════════════════════
+const ms = {};
+let prevQ0 = false;
+let wasRunning = false;
+let sawGateTrip = false;
+let sawEstopTrip = false;
+let sawRecover = false;
+
+function setMilestone(id, done) {
+  if (ms[id]) return;
+  ms[id] = done;
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('done', done);
+  if (ms.m1 && ms.m2 && ms.m3 && ms.m4 && ms.m5 && ms.m6 && ms.m7) {
+    document.getElementById('complete-banner').classList.add('show');
+  }
+}
+
+function checkMilestones(Q0, M2, esOk, gateOk) {
+  // M1: safety circuit armed
+  if (M2) setMilestone('m1', true);
+  // M2: drill running with safety armed
+  if (Q0 && M2) setMilestone('m2', true);
+  // M3: gate opened while running
+  if (!gateOk && wasRunning) { sawGateTrip = true; setMilestone('m3', true); }
+  // M4: re-armed after gate trip
+  if (sawGateTrip && M2 && Q0) setMilestone('m4', true);
+  // M5: E-Stop while running
+  if (!esOk && wasRunning) { sawEstopTrip = true; setMilestone('m5', true); }
+  // M6: recovered from E-Stop
+  if (sawEstopTrip && Q0) setMilestone('m6', true);
+  // M7: wire break fault
+  if (ms.fault) setMilestone('m7', true);
+
+  wasRunning = Q0;
+  prevQ0 = Q0;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  LADDER PAINT
+// ══════════════════════════════════════════════════════════════
+function paintLadder(I0,I1,I2,I3,I4,M0,M1,M2,M3,Q0) {
+  ss(['rail-L'], '#3b82f6');
+
+  // Rung 1 (E-stop NC)
+  const esCol = faults.estop ? FAULT_COL : (I0 ? ON : OFF);
+  ss(['r1-wa'], ON);
+  ss(['es-l','es-b1','es-b2','es-r'], esCol);
+  document.getElementById('es-sl').setAttribute('stroke', I0 ? '#64748b' : (faults.estop ? FAULT_COL : ON));
+  ss(['r1-wb'], M0 ? ON : OFF);
+  setCoil('eo-body','eo-l','eo-r', M0);
+
+  // Rung 2 (Gate NC)
+  const gtCol = faults.gate ? FAULT_COL : (I1 ? ON : OFF);
+  ss(['r2-wa'], ON);
+  ss(['gt-l','gt-b1','gt-b2','gt-r'], gtCol);
+  document.getElementById('gt-sl').setAttribute('stroke', I1 ? '#64748b' : (faults.gate ? FAULT_COL : ON));
+  ss(['r2-wb'], M1 ? ON : OFF);
+  setCoil('go-body','go-l','go-r', M1);
+
+  // Rung 3 (Safety reset latch)
+  ss(['r3-wa'], ON);
+  setContact('rs', I2);
+  const r3afterReset = I2 || M2;
+  ss(['r3-wb'], r3afterReset ? ON : OFF);
+  setContact('eor3', r3afterReset && M0);
+  ss(['r3-wc'], r3afterReset && M0 ? ON : OFF);
+  setContact('gor3', r3afterReset && M0 && M1);
+  ss(['r3-wd'], r3afterReset && M0 && M1 ? ON : OFF);
+  document.getElementById('r3-jdot').setAttribute('fill', r3afterReset && M0 && M1 ? ON : OFF);
+  ss(['r3-we'], r3afterReset && M0 && M1 ? ON : OFF);
+  setCoil('sl-body','sl-l','sl-r', M2, '#f97316');
+  ss(['r3-rail'], M2 ? ON : OFF);
+  // Seal branch
+  ss(['seal3-da','seal3-l'], M2 ? ON : OFF);
+  setContact('m2s', M2);
+
+  // Rung 4 (Drill)
+  ss(['r4-wa'], ON);
+  setContact('st', I3);
+  const r4afterStart = I3 || Q0;
+  ss(['r4-wb'], r4afterStart ? ON : OFF);
+  document.getElementById('r4-jdot').setAttribute('fill', r4afterStart ? ON : OFF);
+  ss(['r4-wc'], r4afterStart ? ON : OFF);
+  setContact('sor4', r4afterStart && M2);
+  ss(['r4-wd'], r4afterStart && M2 ? ON : OFF);
+  const stopCol = I4 ? ON : OFF;
+  ss(['stp-l','stp-b1','stp-b2','stp-r'], r4afterStart && M2 ? stopCol : OFF);
+  document.getElementById('stp-sl').setAttribute('stroke', I4 ? '#64748b' : ON);
+  ss(['r4-we'], r4afterStart && M2 && I4 ? ON : OFF);
+  setCoil('q0-body','q0-l','q0-r', Q0);
+  ss(['r4-rail'], Q0 ? ON : OFF);
+  // Seal branch
+  ss(['seal4-da','seal4-l'], Q0 ? ON : OFF);
+  setContact('q0s', Q0);
+
+  // Rung 5 (Alarm)
+  ss(['r5-wa'], ON);
+  const alarmOn = M3;
+  ss(['nm0-l','nm0-b1','nm0-b2','nm0-r'], alarmOn ? ON : OFF);
+  document.getElementById('nm0-sl').setAttribute('stroke', alarmOn ? ON : OFF);
+  ss(['r5-wb'], alarmOn ? ON : OFF);
+  setCoil('al-body','al-l','al-r', alarmOn, '#f97316');
+  ss(['r5-rail'], alarmOn ? ON : OFF);
+
+  // Rail connections
+  ss(['r1-rail','r2-rail','r3-rail','r4-rail'], '#252a3d');
+}
+
+// ══════════════════════════════════════════════════════════════
+//  MAIN SCAN — 50 ms
+// ══════════════════════════════════════════════════════════════
+let scanCount = 0;
+let prevEstop = true;
+let prevGate  = true;
+let prevM2    = false;
+let prevQ0Main = false;
+
+setInterval(() => {
+  scanCount++;
+  document.getElementById('scan-num').textContent = scanCount;
+  flashState = !flashState;
+
+  // PLC scan
+  plc.scan();
+  const {I0,I1,I2,I3,I4} = plc.I;
+  const {M0,M1,M2,M3}    = plc.M;
+  const Q0 = plc.Q.Q0;
+
+  // Event logging on transitions
+  if (M2 && !prevM2) logEvent('safe', 'Safety circuit ARMED — drill ready to start');
+  if (!M2 && prevM2 && (I0 && I1)) logEvent('warn', 'Safety latch dropped — RESET required to re-arm');
+  if (Q0 && !prevQ0Main) logEvent('info', 'Drill STARTED — ' + Math.round(drillRpm) + ' RPM');
+  if (!Q0 && prevQ0Main) logEvent('warn', 'Drill STOPPED');
+  if (!I0 && prevEstop)  logEvent('trip', 'E-Stop circuit OPEN — Category 0 stop initiated');
+  if (!I1 && prevGate)   logEvent('trip', 'Safety gate OPENED — Category 0 stop initiated');
+  prevEstop = I0; prevGate = I1; prevM2 = M2; prevQ0Main = Q0;
+
+  // I/O table
+  setBit('bi-I0', I0, { nc:true, fault: faults.estop });
+  setBit('bi-I1', I1, { nc:true, fault: faults.gate  });
+  setBit('bi-I2', I2);
+  setBit('bi-I3', I3);
+  setBit('bi-I4', I4, { nc:true });
+  setBit('bi-M0', M0);
+  setBit('bi-M1', M1);
+  setBit('bi-M2', M2);
+  setBit('bi-M3', M3);
+  setBit('bi-Q0', Q0);
+
+  // Ladder diagram
+  paintLadder(I0,I1,I2,I3,I4,M0,M1,M2,M3,Q0);
+
+  // E-stop indicator on machine frame
+  const esLight = document.getElementById('estop-light');
+  esLight.setAttribute('fill',   !I0 ? '#7f1d1d' : '#1a0808');
+  esLight.setAttribute('stroke', !I0 ? '#ef4444' : '#3b0b0b');
+
+  // Gate visual
+  updateGateVisual(hw.gateClosed);
+
+  // Stack light
+  updateStackLight(Q0, M2, I0, I1);
+
+  // Safety relay panel
+  updateSafetyRelay(I0,I1,M2,M3);
+
+  // Drill animation
+  updateDrillVisual(Q0);
+
+  // Milestones
+  checkMilestones(Q0, M2, I0, I1);
+
+}, 50);
+
+// ── Theme toggle ──
+(function(){var KEY='plc-theme',btn=document.getElementById('theme-toggle');function apply(t){document.documentElement.dataset.theme=t;if(btn){btn.textContent=t==='light'?'🌙':'☀️';btn.setAttribute('aria-label',t==='light'?'Switch to dark mode':'Switch to light mode');btn.setAttribute('aria-pressed',String(t==='light'));}}apply(localStorage.getItem(KEY)||'dark');if(btn)btn.addEventListener('click',function(){var n=document.documentElement.dataset.theme==='light'?'dark':'light';localStorage.setItem(KEY,n);apply(n);});})();
+</script>
+<script>window.PLC_LEVEL='level4';</script>
+<script src="assess.js"></script>
+<script src="mission-log.js"></script>
+
+<!-- ── SUPERVISOR WIDGET ── -->
+<div id="sv-bd" class="sv-bd" onclick="svClose()"></div>
+<div id="sv-panel" class="sv-panel" role="dialog" aria-modal="true" aria-labelledby="sv-nm">
+  <div class="sv-hdr">
+    <div class="sv-ava" aria-hidden="true">👷</div>
+    <div class="sv-id">
+      <div class="sv-id-name" id="sv-nm">THE SUPERVISOR</div>
+      <div class="sv-id-rank">SENIOR CONTROL ENGINEER // 22 YRS EXP.</div>
+    </div>
+    <button class="sv-x" onclick="svClose()" aria-label="Close supervisor panel">✕</button>
+  </div>
+  <div class="sv-body-p"><div class="sv-intro">// NEED A HAND? HERE'S WHAT USUALLY TRIPS PEOPLE UP:</div><div id="sv-tc"></div></div>
+  <div class="sv-ftr">// ASK. LEARN. STAY SAFE. //</div>
+</div>
+<button class="sv-fab" id="sv-fab" onclick="svOpen()" aria-expanded="false" aria-controls="sv-panel" aria-haspopup="dialog">👷 ASK SUPERVISOR</button>
+<script>
+(function(){
+  var T=[
+    {ic:'⛔',v:'danger',tx:'<strong>Both the E-Stop AND gate guard must be closed</strong> before the reset button has any effect. Either contact open = no machine movement, full stop.'},
+    {ic:'🔄',v:'danger',tx:'<strong>Manual reset prevents automatic restart.</strong> After any safety event, the operator must physically press RESET with all guards satisfied. This is a legal requirement under PSSR 2000 — not optional.'},
+    {ic:'📋',v:'',tx:'<strong>NC contact symbol:</strong> the diagonal slash through the contact means Normally Closed — closed at rest, opens when actuated. E-Stop pressed = contact open = rung false.'},
+    {ic:'🧪',v:'warn',tx:'<strong>Test the fail-safe:</strong> toggle the gate sensor to OPEN while the machine is running. It must stop within one scan cycle. If it doesn\'t, your NC contact logic is wrong.'},
+    {ic:'🔒',v:'danger',tx:'<strong>Two-channel safety (IEC 62061):</strong> if either channel fails, the machine stops. Never short out or bypass a safety channel — that\'s a criminal offence on a real machine.'},
+    {ic:'💡',v:'warn',tx:'<strong>Reset does nothing with guards open.</strong> The safety memory bit stays latched. Test this specifically: press RESET with the gate open and confirm the drill stays off.'},
+  ];
+  function render(){var c=document.getElementById('sv-tc');c.innerHTML='';T.forEach(function(t,i){var d=document.createElement('div');d.className='sv-tip'+(t.v?' tv-'+t.v:'');d.style.animationDelay=(i*.07)+'s';d.innerHTML='<div class="sv-tip-ic" aria-hidden="true">'+t.ic+'</div><div class="sv-tip-tx">'+t.tx+'</div>';c.appendChild(d);});}
+  window.svOpen=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');render();p.classList.add('sv-open');b.classList.add('sv-open');f.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';setTimeout(function(){p.querySelector('.sv-x').focus();},320);};
+  window.svClose=function(){var p=document.getElementById('sv-panel'),b=document.getElementById('sv-bd'),f=document.getElementById('sv-fab');p.classList.remove('sv-open');b.classList.remove('sv-open');f.setAttribute('aria-expanded','false');document.body.style.overflow='';f.focus();};
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')svClose();});
+})();
+</script>
+</body>
+</html>

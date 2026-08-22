@@ -1,4 +1,4 @@
-═══════════════════════════════════════════════════════════════
+=ff════════════════════════════════════════════════════════════
   PLeC — CHANGELOG
   All changes since zip import, oldest → newest
   Format: [HASH] COMMIT MESSAGE

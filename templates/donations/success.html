@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Thank you — PLeC{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px;margin:60px auto;text-align:center">
+  <h1>Thank you!</h1>
+  <p class="subtitle">Your donation helps keep PLeC free for learners everywhere.</p>
+  <a href="{% url 'accounts:profile' %}" class="btn">Back to profile</a>
+  <a href="/" class="btn" style="margin-left:8px">Continue training</a>
+</div>
+{% endblock %}

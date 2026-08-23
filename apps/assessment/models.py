@@ -1,33 +1,45 @@
+from django.contrib.auth.models import User
 from django.db import models
 
-class WorkOrder(models.Model):
-    title = models.CharField(max_length=200)
-    description = models.TextField()
-    # Storing the logic as JSON makes it easy to parse in JS
-    broken_logic = models.JSONField(help_text="The initial faulty logic state")
-    target_logic = models.JSONField(help_text="The correct logic state")
-    difficulty = models.IntegerField(default=1)
+
+class AssessmentResult(models.Model):
+    """A saved Manager's Review attempt, linked to a registered user when logged in."""
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="assessment_results",
+        null=True,
+        blank=True,
+    )
+    level_key = models.CharField(max_length=50)
+    score = models.IntegerField()
+    grade = models.CharField(max_length=2)
+    tier_label = models.CharField(max_length=50)
+    milestones_done = models.IntegerField()
+    milestones_total = models.IntegerField()
+    efficiency_label = models.CharField(max_length=50)
+    bonus_earned = models.IntegerField(default=0)
+    note = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-id"]
 
     def __str__(self):
-        return self.title
-    
-    class ElectricalFault(models.Model):
-    # e.g., 'BROKEN_WIRE', 'SHORT_CIRCUIT', 'FAULTY_RELAY'
-    fault_type = models.CharField(max_length=50)
-    target_component = models.CharField(max_length=50) # e.g., 'I0'
-    description = models.TextField()
-    
-    def __str__(self):
-        return self.fault_type
-    
-    from django.db import models
-from django.contrib.auth.models import User
-from .models import WorkOrder # Assuming this exists
+        return f"{self.level_key} — {self.score}/100 ({self.grade})"
 
-class Assessment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    work_order = models.ForeignKey(WorkOrder, on_delete=models.CASCADE)
-    submitted_logic = models.JSONField()
-    is_correct = models.BooleanField(default=False)
-    manager_feedback = models.TextField()
-    timestamp = models.DateTimeField(auto_now_add=True)
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "level_key": self.level_key,
+            "score": self.score,
+            "grade": self.grade,
+            "tier_label": self.tier_label,
+            "milestones_done": self.milestones_done,
+            "milestones_total": self.milestones_total,
+            "efficiency_label": self.efficiency_label,
+            "bonus_earned": self.bonus_earned,
+            "note": self.note,
+            "created_at": self.created_at.isoformat(),
+        }

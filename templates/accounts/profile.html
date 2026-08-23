@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% block title %}My Profile — PLeC{% endblock %}
+{% block extra_css %}
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .stat { padding: 16px; border: 1px solid var(--border); text-align: center; }
+  .stat-val { font-family: var(--font-d); font-size: 32px; color: var(--cyan); }
+  .stat-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .results-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .results-table th, .results-table td { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+  .results-table th { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); }
+  .grade { font-family: var(--font-d); font-size: 18px; font-weight: 600; }
+  .grade-A { color: #22c55e; } .grade-B { color: #06b6d4; }
+  .grade-C { color: #f59e0b; } .grade-D, .grade-F { color: #ef4444; }
+  .donate-grid { display: flex; flex-wrap: wrap; gap: 10px; margin: 16px 0; }
+  .donate-amt { min-width: 72px; }
+  .donate-amt.selected { background: rgba(239,68,68,.25); border-color: #ef4444; color: #fca5a5; }
+  .note-input { width: 100%; min-height: 60px; padding: 8px; background: rgba(0,0,0,.2);
+                border: 1px solid var(--border); color: var(--text); font-family: var(--font-m); font-size: 12px; }
+  .empty-state { text-align: center; padding: 32px; color: var(--muted); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+{% endblock %}
+{% block content %}
+<h1>My Profile</h1>
+<p class="subtitle">Welcome back, {{ user.first_name|default:user.username }}. Edit your details and review your mission performance.</p>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-val">{{ total_attempts }}</div>
+    <div class="stat-label">Reviews saved</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">{% if best_score %}{{ best_score.score }}{% else %}—{% endif %}</div>
+    <div class="stat-label">Best score</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">{% if best_score %}<span class="grade grade-{{ best_score.grade }}">{{ best_score.grade }}</span>{% else %}—{% endif %}</div>
+    <div class="stat-label">Top grade</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Edit your information</h2>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="profile">
+    <div class="grid-2">
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        {{ form.username }}
+        {{ form.username.errors }}
+      </div>
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        {{ form.email }}
+        {{ form.email.errors }}
+      </div>
+      <div class="form-group">
+        <label for="id_first_name">First name</label>
+        {{ form.first_name }}
+      </div>
+      <div class="form-group">
+        <label for="id_last_name">Last name</label>
+        {{ form.last_name }}
+      </div>
+      <div class="form-group">
+        <label for="organisation">Organisation</label>
+        <input type="text" id="organisation" name="organisation" class="form-input"
+               value="{{ profile.organisation }}" placeholder="College, employer, etc.">
+      </div>
+      <div class="form-group">
+        <label for="job_title">Job title</label>
+        <input type="text" id="job_title" name="job_title" class="form-input"
+               value="{{ profile.job_title }}" placeholder="Apprentice, trainee, etc.">
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="bio">About you</label>
+      <textarea id="bio" name="bio" class="note-input" rows="3"
+                placeholder="Optional — your learning goals or background">{{ profile.bio }}</textarea>
+    </div>
+    <button type="submit" class="btn">Save profile</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Mission progress &amp; grades</h2>
+  {% if results %}
+  <div style="overflow-x:auto">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>Mission</th>
+          <th>Score</th>
+          <th>Grade</th>
+          <th>Milestones</th>
+          <th>Efficiency</th>
+          <th>Date</th>
+          <th>Reflection note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in results %}
+        <tr>
+          <td>
+            {% with label=r.level_key %}
+              {% if r.level_key == "level1" %}Start/Stop Latching
+              {% elif r.level_key == "level2" %}Tank Filling System
+              {% elif r.level_key == "level3" %}Modbus TCP
+              {% elif r.level_key == "level4" %}Safety Interlock
+              {% elif r.level_key == "level5" %}Timed Conveyor (TON)
+              {% elif r.level_key == "level6" %}Sequential Batching
+              {% else %}{{ r.level_key }}{% endif %}
+            {% endwith %}
+          </td>
+          <td>{{ r.score }}/100</td>
+          <td><span class="grade grade-{{ r.grade }}">{{ r.grade }}</span></td>
+          <td>{{ r.milestones_done }}/{{ r.milestones_total }}</td>
+          <td>{{ r.efficiency_label }}</td>
+          <td>{{ r.created_at|date:"d M Y H:i" }}</td>
+          <td>
+            <form method="post" action="{% url 'api_result_note' r.id %}">
+              {% csrf_token %}
+              <textarea name="note" class="note-input" rows="2"
+                        placeholder="Add a reflection…">{{ r.note }}</textarea>
+              <button type="submit" class="btn" style="margin-top:6px;font-size:10px">Save note</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No assessment results yet.</p>
+    <p style="margin-top:8px"><a href="/">Start a mission</a> and click <strong>Get Manager's Review</strong> when you complete it.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card" id="donate">
+  <h2>♡ Support PLeC</h2>
+  <p class="subtitle">PLeC is free for learners. If this platform helped you, consider a donation to keep it running and growing.</p>
+  {% if stripe_publishable_key %}
+  <p style="font-size:12px;margin-bottom:12px">Choose an amount (GBP) and pay securely via Stripe Checkout.</p>
+  <div class="donate-grid" id="donate-amounts">
+    <button type="button" class="btn donate donate-amt selected" data-amount="5">£5</button>
+    <button type="button" class="btn donate donate-amt" data-amount="10">£10</button>
+    <button type="button" class="btn donate donate-amt" data-amount="25">£25</button>
+    <button type="button" class="btn donate donate-amt" data-amount="50">£50</button>
+  </div>
+  <button type="button" id="donate-btn" class="btn donate">Donate with Stripe</button>
+  <p id="donate-error" style="color:var(--red);font-size:12px;margin-top:10px;display:none"></p>
+  {% else %}
+  <p style="font-size:12px;color:var(--muted)">
+    Stripe is not configured on this server. Set <code>STRIPE_SECRET_KEY</code> and
+    <code>STRIPE_PUBLISHABLE_KEY</code> in your environment to enable donations.
+  </p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if stripe_publishable_key %}
+<script>
+(function(){
+  var selected = 5;
+  var amounts = document.querySelectorAll('.donate-amt');
+  amounts.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      amounts.forEach(function(b){ b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      selected = parseInt(btn.dataset.amount, 10);
+    });
+  });
+  document.getElementById('donate-btn').addEventListener('click', function(){
+    var errEl = document.getElementById('donate-error');
+    errEl.style.display = 'none';
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+    var fd = new FormData();
+    fd.append('amount_gbp', selected);
+    if (csrf) fd.append('csrfmiddlewaretoken', csrf.value);
+    fetch('{% url "donations:create_checkout" %}', { method: 'POST', body: fd, credentials: 'same-origin' })
+      .then(function(r){ return r.json().then(function(d){ return { ok: r.ok, data: d }; }); })
+      .then(function(res){
+        if (res.ok && res.data.checkout_url) {
+          window.location.href = res.data.checkout_url;
+        } else {
+          errEl.textContent = res.data.error || 'Could not start checkout.';
+          errEl.style.display = 'block';
+        }
+      })
+      .catch(function(){
+        errEl.textContent = 'Network error — please try again.';
+        errEl.style.display = 'block';
+      });
+  });
+})();
+</script>
+{% endif %}
+{% endblock %}

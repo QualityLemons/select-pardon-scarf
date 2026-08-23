@@ -168,6 +168,7 @@
     fetch('/api/results', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'same-origin',
       body: JSON.stringify({
         level_key:        LEVEL,
         score:            data.score,
@@ -195,6 +196,7 @@
       fetch('/api/assess/', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
         body:    JSON.stringify(getPayload())
       })
         .then(function (r) {

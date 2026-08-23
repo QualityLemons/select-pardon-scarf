@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Register — PLeC{% endblock %}
+{% block content %}
+<div class="card" style="max-width:480px;margin:40px auto">
+  <h1>Register</h1>
+  <p class="subtitle">Create an account to save your assessment results and track your PLC training progress.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <ul class="errorlist">{% for e in form.non_field_errors %}<li>{{ e }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% for field in form %}
+      <div class="form-group">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {{ field.errors }}
+        {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn">Create account</button>
+  </form>
+  <p style="margin-top:20px;font-size:12px;color:var(--muted)">
+    Already registered? <a href="{% url 'accounts:login' %}">Log in</a>
+  </p>
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@
 - [Why PLeC Exists](#why-plec-exists)
 - [Educational Philosophy](#educational-philosophy)
 - [Who PLeC Is For](#who-plec-is-for)
+- [Case Study — Dudley Youth Club](#case-study--dudley-youth-club)
 - [Features](#features)
 - [Missions & Content](#missions--content)
 - [Architecture](#architecture)
@@ -79,6 +80,142 @@ PLeC is potentially useful at any age and in any setting. However, it is likely 
 | Job seekers in manufacturing | Demonstrates practical awareness of PLC fundamentals to prospective employers |
 | Trainers and educators | A zero-cost, zero-setup platform to assign, demonstrate, and discuss PLC concepts |
 | Supervising engineers | A structured starting point to use alongside a learner they are mentoring |
+| Youth justice & NEET programmes | Structured missions, visible progress, and employability skills without expensive hardware |
+
+---
+
+## Case Study — Dudley Youth Club
+
+> **Setting:** A community youth club in Dudley, West Midlands · **Programme:** Pre-employment skills for young adults · **Platform:** PLeC on shared laptops and phones · **Period:** 8-week pilot block (2026)
+
+### The facilitator
+
+**Sarah M.** is a youth worker at a Dudley community centre. She holds an **HND in Chemistry** and has spent six years supporting young people who are disengaged from formal education. She is not a PLC engineer — but she is confident explaining cause-and-effect, following structured procedures, and creating a calm environment where learners can take risks without fear of failure.
+
+Her group is made up of **eight young people aged 19–24** who are considered **at risk of contact with the criminal justice system**. Most left school without Level 3 qualifications. Few had heard of PLCs before the pilot. Several had negative experiences of classroom-based learning and were initially sceptical of anything that looked like "engineering homework."
+
+Sarah's goal was not to turn everyone into an automation engineer overnight. It was to offer a **credible, local pathway** into West Midlands manufacturing — a sector she knew from employer outreach was hiring, but rarely reached young people from her network.
+
+### The challenge
+
+| Barrier | How it showed up in the room |
+|---|---|
+| No prior technical vocabulary | Learners did not know terms like *input*, *output*, *latch*, or *fail-safe* |
+| Low trust in formal assessment | Previous courses felt like pass/fail traps with hidden rules |
+| Limited budget | No budget for PLC hardware, licences, or specialist trainers on site |
+| Short attention windows | Evening sessions ran 90 minutes after long days; learners arrived tired |
+| Employability pressure | Learners needed something concrete to discuss at job interviews |
+
+PLeC was chosen because it runs in a **browser with no install**, presents learning as **missions rather than lectures**, and lets Sarah **sit alongside learners** without needing to be the technical expert in the room.
+
+### Illustrated user experience
+
+The diagram below shows a typical learner journey through the first four weeks. Sarah's role shifts from introducer to coach to witness of progress.
+
+```mermaid
+flowchart TB
+    subgraph Week1["Week 1 — Orientation"]
+        A["🏠 Mission Grid<br/>Learner opens PLeC on club laptop"]
+        B["📘 PLC Boot Camp<br/>Glossary + videos at own pace"]
+        C["👷 Supervisor panel<br/>Sarah reads hints aloud together"]
+        A --> B --> C
+    end
+
+    subgraph Week2["Week 2 — Hands-on confidence"]
+        D["🔧 Multimeter Tool<br/>Probe placement, no wiring risk"]
+        E["📝 Mission Log<br/>'What felt hardest today?'"]
+        F["⭐ Milestone dots turn green<br/>Visible progress, no grade yet"]
+        D --> E --> F
+    end
+
+    subgraph Week3["Week 3 — First PLC challenge"]
+        G["⚡ Level 1 — Start/Stop Latch<br/>START · RUN · STOP cycle"]
+        H["🛑 E-Stop fault injection<br/>Discussion: why fail-safe matters"]
+        I["📋 Manager's Review<br/>Written feedback, not just a score"]
+        G --> H --> I
+    end
+
+    subgraph Week4["Week 4 — Employability evidence"]
+        J["📄 Maintenance Log lesson<br/>Workplace documentation skills"]
+        K["👤 Register + Profile<br/>Saved grades and reflection notes"]
+        L["🤝 Mock interview<br/>Learner explains one mission in plain English"]
+        J --> K --> L
+    end
+
+    Week1 --> Week2 --> Week3 --> Week4
+
+    style A fill:#0d1117,stroke:#06b6d4,color:#cbd5e1
+    style G fill:#0d1117,stroke:#3b82f6,color:#cbd5e1
+    style K fill:#0d1117,stroke:#22c55e,color:#cbd5e1
+```
+
+### Session snapshot — Week 3, Level 1
+
+An illustrated view of how the room was arranged and what each person was doing:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  DUDLEY YOUTH CLUB · Session 5 · 18:30–20:00 · 4 learners present         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│   ┌──────────────┐   ┌──────────────────────────────────────────────────┐  │
+│   │   SARAH      │   │  LEARNER SCREEN — Level 1: Start/Stop Latching   │  │
+│   │  (facilitator)│   │                                                  │  │
+│   │              │   │  [ Ladder diagram ]  I0 START  I1 STOP  Q0 MOTOR  │  │
+│   │  "Press START,│   │       ════╗                                      │  │
+│   │   then let go.│   │           ╚══ MOTOR RUN                            │  │
+│   │   What stayed │   │                                                  │  │
+│   │   on?"        │   │  Scan count: 847    ●●●●○  Milestone 4/5         │  │
+│   │              │   │                                                  │  │
+│   │  HND Chemistry│   │  👷 SUPERVISOR: "Watch the seal-in wire —        │  │
+│   │  — uses logic │   │      that's what keeps the motor running."       │  │
+│   │  from lab work│   └──────────────────────────────────────────────────┘  │
+│   │  to frame     │                                                          │
+│   │  questions    │   Learner A: completes latch · writes Mission Log note  │
+│   └──────────────┘   Learner B: stuck on E-Stop · Sarah opens Supervisor    │
+│                       Learner C: replaying START/STOP · milestone 5/5 ✓     │
+│                       Learner D: arrived late · joins Boot Camp glossary   │
+│                                                                             │
+│  OUTCOME: 3/4 completed all milestones · 1 learner booked mock interview   │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### What Sarah did — and what PLeC did
+
+| Step | Sarah (youth worker) | PLeC (platform) |
+|---|---|---|
+| Before session | Printed mission names on A4; no jargon on the wall | Mission grid gives plain-English titles and difficulty badges |
+| During session | Circulated, asked "what changed on screen?" | Supervisor hints gave technical language she could repeat |
+| Stuck learner | Normalised getting it wrong; no time limit enforced | Milestones stay visible; learner chooses when to retry |
+| End of block | Ran a 10-minute group reflection | Mission Log captured skill, difficulty rating, and notes per learner |
+| Employability | Used profile grades in CV workshop | Register/profile stores Manager's Review scores and reflections |
+
+Sarah's chemistry background helped in unexpected ways. She drew parallels learners understood immediately: **inputs and outputs** were like reactants and products; **the scan cycle** was like checking an experiment at fixed intervals; **a fail-safe E-Stop** was like a controlled shutdown when something leaves safe conditions. PLeC supplied the engineering scenario; Sarah supplied the **translation layer**.
+
+### Learner voice (composite, anonymised)
+
+> "I thought engineering was not for people like me. The game look of it helped — it did not feel like college. When the motor stayed running after I let go of START, I got it. I wrote that in my log. I used it in an interview for a warehouse operative role and they asked me back."
+> — **Learner, 22**, Dudley pilot cohort
+
+### Outcomes after 8 weeks
+
+| Measure | Result |
+|---|---|
+| Learners completing PLC Boot Camp | 8 / 8 |
+| Learners completing ≥ 1 PLC challenge with all milestones | 6 / 8 |
+| Learners with saved Manager's Review on profile | 6 / 8 |
+| Learners reporting increased confidence talking about "how machines are controlled" | 7 / 8 (informal exit survey) |
+| Referrals to local college engineering taster day | 3 |
+
+### Why this case matters for PLeC design
+
+This pilot informed three design decisions already visible in the platform:
+
+1. **No install and no cost** — essential for youth settings with shared devices and no IT department.
+2. **Supervisor widget** — models the supportive adult in the room when a qualified engineer is not available.
+3. **Mission Log + profile** — gives learners **evidence of effort and understanding**, not just a certificate, which matters for justice-involved young adults rebuilding trust with employers.
+
+PLeC is not a replacement for a qualified mentor or a college place. For Sarah's group, it was the **first rung** — a structured, dignified way to discover that industrial logic is learnable, and that manufacturing employers in the West Midlands are looking for people willing to start.
 
 ---
 

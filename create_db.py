@@ -414,5 +414,11 @@ def build():
     con.close()
 
 
+def ensure():
+    """Create plec.db only if missing (safe for Heroku release — never overwrites)."""
+    if not os.path.exists(DB_PATH):
+        build()
+
+
 if __name__ == "__main__":
     build()
